@@ -8,19 +8,34 @@ namespace GitterKid.Service
 {
     public abstract class GitEntity
     {
+        protected string _entityFilePath;
+        protected string _repositoryPath;
+
         public string Signture { get; private set; }
         public int Size { get; private set; }
         public string ContentType { get; private set; }
-
         protected byte[] Body { get; private set; }
+        public bool IsExist => File.Exists(this._entityFilePath);
 
-        protected string Path { get; private set; }
-        public bool IsExist => File.Exists(this.Path);
+        internal GitEntity() { }
 
-        protected GitEntity(string repositoryPath, string signture)
+        internal abstract void Initialize();
+
+        internal static T Load<T>(string repositoryPath, string signture) where T : GitEntity, new()
+        {
+            T result = new T();
+
+            result.SetPath(repositoryPath, signture);
+            result.Initialize();
+
+            return result;
+        }
+
+        private void SetPath(string repositoryPath, string signture)
         {
             this.Signture = signture;
-            this.Path = $"{repositoryPath}/objects/{signture.Substring(0, 2)}/{signture.Substring(2)}";
+            this._repositoryPath = repositoryPath;
+            this._entityFilePath = $"{repositoryPath}/objects/{signture.Substring(0, 2)}/{signture.Substring(2)}";
 
             (byte[] Header, byte[] Body) result = this.GetFileContent();
 
@@ -90,7 +105,7 @@ namespace GitterKid.Service
         private byte[] GetDeflateContent()
         {
             byte[] result;
-            using (FileStream inFile = new FileStream(this.Path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (FileStream inFile = new FileStream(this._entityFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 using (MemoryStream fileStream = new MemoryStream())
                 {        

@@ -18,9 +18,9 @@ namespace GitterKid.Service
             this.Configure = new RepositoryConfig(path);
         }
 
-        public T Entity<T>(string signture) where T : GitEntity
+        public T Entity<T>(string signture) where T : GitEntity, new()
         {
-            return Activator.CreateInstance(typeof(T), new object[] { this.Path, signture }) as T;
+            return GitEntity.Load<T>(this.Path, signture);
         }
     }
 }

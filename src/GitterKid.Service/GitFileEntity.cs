@@ -3,10 +3,13 @@ using System.Text;
 
 namespace GitterKid.Service
 {
-    public class GitFileEntity : GitEntity
+    public class GitTextEntity : GitEntity
     {
-        public GitFileEntity(string repositoryPath, string signture) : base(repositoryPath, signture) { }
+        public string TextContent { get; private set; }
 
-        public string TextContent() => Encoding.UTF8.GetString(this.Body);
+        internal override void Initialize()
+        {
+            this.TextContent = Encoding.UTF8.GetString(this.Body);
+        }
     }
 }

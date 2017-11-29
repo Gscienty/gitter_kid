@@ -7,11 +7,17 @@ namespace GitterKid.Service.Test
     public class FileEntityTest
     {
         [Theory]
-        [InlineData("56a6051ca2b02b04ef92d5150c9ef600403cb1de", "1")]
-        public void FileContentTest(string signture, string value)
+        [InlineData("bf3f8339277ac8e1996c14c89012afae40bfa9b9")]
+        public void TreeEntityTest(string signture)
         {
-            Repository repository = new Repository(@"F:\auto\a\repository\");
-            Assert.Equal(repository.Entity<GitFileEntity>(signture).TextContent(), value);
+            Repository repository = new Repository(@"../../../../../.git/");
+            Assert.True(repository.Entity<GitTreeEntity>(signture).Exist(".gitignore"));
+            Assert.True(repository.Entity<GitTreeEntity>(signture).Exist("src"));
+            Assert.True(repository.Entity<GitTreeEntity>(signture).Exist("test"));
+
+            Assert.False(repository.Entity<GitTreeEntity>(signture).Exist("is not exist"));
+
+            Assert.True(repository.Entity<GitTreeEntity>(signture).Open<GitTreeEntity>("test").Exist("GitterKid.Service.Test"));
         }
     }
 }

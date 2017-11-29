@@ -25,7 +25,7 @@ namespace GitterKid.Service
             this.WriteBack();
         }
 
-        public void AddRange(List<(string Segment, string Key, string Value)> configs)
+        public void UpgradeRange(List<(string Segment, string Key, string Value)> configs)
         {
             configs.ForEach(tuple => this.AddConfig(tuple.Segment, tuple.Key, tuple.Value));
 

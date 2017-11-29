@@ -16,7 +16,7 @@ namespace GitterKid.Service.Test
         {
             Repository repository = new Repository(@"F:\auto\a\repository\");
 
-            Assert.Equal(repository.Config.Segments[segment][key], value);
+            Assert.Equal(repository.Configure.Segments[segment][key], value);
         }
 
         [Theory]
@@ -25,7 +25,7 @@ namespace GitterKid.Service.Test
         {
             Repository repository = new Repository(@"F:\auto\a\repository\");
 
-            Assert.False(repository.Config.Segments.ContainsKey(segment));
+            Assert.False(repository.Configure.Segments.ContainsKey(segment));
         }
 
         [Theory]
@@ -34,7 +34,7 @@ namespace GitterKid.Service.Test
         {
             Repository repository = new Repository(@"F:\auto\a\repository\");
 
-            Assert.True(repository.Config.Segments.ContainsKey(segment));
+            Assert.True(repository.Configure.Segments.ContainsKey(segment));
         }
 
         [Theory]
@@ -46,9 +46,8 @@ namespace GitterKid.Service.Test
         public void AddConfig(string segment, string key, string value)
         {
             Repository repository = new Repository(@"F:\auto\a\repository\");
-
-            repository.Config.Add(segment, key, value);
-            Assert.Equal(repository.Config.Segments[segment][key], value);
+            repository.Configure.Upgrade(segment, key, value);
+            Assert.Equal(repository.Configure.Segments[segment][key], value);
         }
     }
 }

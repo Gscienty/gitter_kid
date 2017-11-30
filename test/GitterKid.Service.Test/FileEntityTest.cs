@@ -19,5 +19,14 @@ namespace GitterKid.Service.Test
 
             Assert.True(repository.Entity<GitTree>(signture).Open<GitTree>("test").Exist("GitterKid.Service.Test"));
         }
+
+        [Theory]
+        [InlineData("1bf4df06e529c3174f45f8a405d1b4aaeb5f1e14")]
+        public void CommitEntityTest(string signture)
+        {
+            Repository repository = new Repository(@"../../../../../.git/");
+            Assert.Equal(repository.Entity<GitCommit>(signture).TreeSignture, "b3b66397ffe49feca3920a8918f99849741d415d");
+            Assert.Equal(repository.Entity<GitCommit>(signture).Author.Mail, "gaoxiaochuan@hotmail.com");
+        }
     }
 }

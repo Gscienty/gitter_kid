@@ -12,7 +12,6 @@ namespace GitterKid.Service.Test
         [InlineData("core", "bare", "false")]
         [InlineData("core", "symlinks", "false")]
         [InlineData("core", "ignorecase", "true")]
-        [InlineData("remote \"origin\"", "url", "git@github.com:Gscienty/GitterKid.git")]
         [InlineData("remote \"origin\"", "fetch", "+refs/heads/*:refs/remotes/origin/*")]
         [InlineData("branch \"master\"", "remote", "origin")]
         [InlineData("branch \"master\"", "merge", "refs/heads/master")]

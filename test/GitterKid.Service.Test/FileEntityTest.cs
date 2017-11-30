@@ -34,7 +34,6 @@ namespace GitterKid.Service.Test
         {
             Repository repository = new Repository(@"../../../../../.git/");
             Assert.True(repository.ExistBranch("master"));
-            Assert.Equal(repository.Branches["master"].NewestCommitSignture, "952c4d3687b5570588c3c5d06f84746d59612298");
             Assert.Equal(repository.Branches["master"].BranchLogs[0].Signture, "38305922037678e0b79ff4dd4ff81b09a408065a");
         }
     }

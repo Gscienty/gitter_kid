@@ -11,13 +11,13 @@ namespace GitterKid.Service.Test
         public void TreeEntityTest(string signture)
         {
             Repository repository = new Repository(@"../../../../../.git/");
-            Assert.True(repository.Entity<GitTreeEntity>(signture).Exist(".gitignore"));
-            Assert.True(repository.Entity<GitTreeEntity>(signture).Exist("src"));
-            Assert.True(repository.Entity<GitTreeEntity>(signture).Exist("test"));
+            Assert.True(repository.Entity<GitTree>(signture).Exist(".gitignore"));
+            Assert.True(repository.Entity<GitTree>(signture).Exist("src"));
+            Assert.True(repository.Entity<GitTree>(signture).Exist("test"));
 
-            Assert.False(repository.Entity<GitTreeEntity>(signture).Exist("is not exist"));
+            Assert.False(repository.Entity<GitTree>(signture).Exist("is not exist"));
 
-            Assert.True(repository.Entity<GitTreeEntity>(signture).Open<GitTreeEntity>("test").Exist("GitterKid.Service.Test"));
+            Assert.True(repository.Entity<GitTree>(signture).Open<GitTree>("test").Exist("GitterKid.Service.Test"));
         }
     }
 }

@@ -13,13 +13,26 @@ namespace GitterKid.Service
 
         public string Signture { get; private set; }
         public int Size { get; private set; }
-        public string ContentType { get; private set; }
+        public string EntityType { get; private set; }
         protected byte[] Body { get; private set; }
         public bool IsExist => File.Exists(this._entityFilePath);
 
         internal GitEntity() { }
 
-        internal abstract void Initialize();
+        internal void Initialize()
+        {
+            (byte[] Header, byte[] Body) fileContent = this.GetFileContent();
+
+            this.Body = fileContent.Body;
+            string[] baseHeader = Encoding.UTF8.GetString(fileContent.Header).Split(' ');
+
+            this.EntityType = baseHeader[0];
+            this.Size = int.Parse(baseHeader[1]);
+            
+            this.PackageBody();
+        }
+
+        internal abstract void PackageBody();
 
         internal static T Load<T>(string repositoryPath, string signture) where T : GitEntity, new()
         {

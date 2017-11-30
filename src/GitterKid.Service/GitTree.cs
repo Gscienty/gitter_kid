@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace GitterKid.Service
 {
-    public class GitTreeEntity : GitEntity
+    public class GitTree : GitEntity
     {
         private Dictionary<string, (string Signture, int Type)> _treeContent;
 
@@ -25,15 +25,13 @@ namespace GitterKid.Service
             return GitEntity.Load<T>(this._repositoryPath, this._treeContent[name].Signture);
         }
 
-        public GitTreeEntity()
+        public GitTree()
         {
             this._treeContent = new Dictionary<string, (string Signture, int Type)>();
         }
 
-        internal override void Initialize()
+        internal override void PackageBody()
         {
-            byte[] fileContent =  this.GetFileContent().Body;
-
             AnalysisStep analysisStep = AnalysisStep.WantType;
 
             int currentType = 0;
@@ -41,12 +39,12 @@ namespace GitterKid.Service
             string currentSignture = string.Empty;
 
             MemoryStream currentSegmentBuilder = new MemoryStream();
-            for (int i = 0; i < fileContent.Length; i++)
+            for (int i = 0; i < this.Body.Length; i++)
             {
                 switch (analysisStep)
                 {
                     case AnalysisStep.WantName:
-                        if (fileContent[i] == 0)
+                        if (this.Body[i] == 0)
                         {
                             // 注：当MemoryStream使用.GetBuffer获得的byte[]，使之GetString之后得到的string
                             // 在MemoryStream flush之后，该字符串会为空。
@@ -57,11 +55,11 @@ namespace GitterKid.Service
                         }
                         else
                         {
-                            currentSegmentBuilder.WriteByte(fileContent[i]);
+                            currentSegmentBuilder.WriteByte(this.Body[i]);
                         }
                         break;
                     case AnalysisStep.WantSignture:
-                        currentSegmentBuilder.WriteByte(fileContent[i]);
+                        currentSegmentBuilder.WriteByte(this.Body[i]);
 
                         if (currentSegmentBuilder.Length == 20)
                         {
@@ -83,14 +81,14 @@ namespace GitterKid.Service
                         }
                     break;
                     case AnalysisStep.WantType:
-                        if (fileContent[i] == ' ')
+                        if (this.Body[i] == ' ')
                         {
                             analysisStep = AnalysisStep.WantName;
                         }
                         else
                         {
                             currentType *= 10;
-                            currentType += fileContent[i] - 48;
+                            currentType += this.Body[i] - 48;
                         }
                     break;
                 }

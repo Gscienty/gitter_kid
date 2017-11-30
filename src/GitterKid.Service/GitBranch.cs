@@ -74,7 +74,7 @@ namespace GitterKid.Service
                 {
                     Signture = firstPair[1],
                     Active = active,
-                    Committer = new GitCommit.CommitEventLog
+                    CommitEvent = new GitCommit.CommitEventLog
                     {
                         Name = firstPair[2],
                         Mail = firstPair[3].Substring(1, firstPair[3].Length - 2),
@@ -90,7 +90,7 @@ namespace GitterKid.Service
         {
             public string Signture { get; internal set; }
             public BranchLogActive Active { get; internal set; }
-            public GitCommit.CommitEventLog Committer { get; internal set; }
+            public GitCommit.CommitEventLog CommitEvent { get; internal set; }
             public string Message { get; internal set; }
 
             internal BranchLog() { }

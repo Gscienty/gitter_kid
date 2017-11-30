@@ -9,14 +9,19 @@ namespace GitterKid.Service
         private Dictionary<string, GitBranch> _branches;
         public RepositoryConfig Configure { get; private set; }
         public string Path { get; private set; }
-        public bool ExistRepository => Directory.Exists(this.Path);
         public IReadOnlyDictionary<string, GitBranch> Branches => this._branches;
 
         public Repository(string path)
         {
             this.Path = path;
-
-            this.Initialize();
+            if (Repository.ExistRepository(path))
+            {
+                this.Initialize();
+            }
+            else
+            {
+                this.CreateRepository();
+            }
         }
 
         public T Entity<T>(string signture) where T : GitEntity, new()
@@ -24,7 +29,14 @@ namespace GitterKid.Service
             return GitEntity.Load<T>(this.Path, signture);
         }
 
+        public static bool ExistRepository(string path) => Directory.Exists(this.Path);
+
         public bool ExistBranch(string name) => this._branches.ContainsKey(name);
+
+        private void CreateRepository()
+        {
+            throw new NotImplementedException();
+        }
 
         private void Initialize()
         {
@@ -32,7 +44,8 @@ namespace GitterKid.Service
             this.InitializeBranch();
         }
 
-        private void InitializeConfigure() => this.Configure = new RepositoryConfig(this.Path);
+        private void InitializeConfigure()
+            => this.Configure = new RepositoryConfig(this.Path);
         private void InitializeBranch()
         {
             this._branches = new Dictionary<string, GitBranch>();

@@ -75,6 +75,8 @@ namespace GitterKid.Service
             public string Mail { get; internal set; }
             public long Timestamp { get; internal set; }
             public string TimeZone { get; internal set; }
+
+            internal CommitEventLog() { }
         }
     }
 }

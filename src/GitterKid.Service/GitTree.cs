@@ -11,6 +11,7 @@ namespace GitterKid.Service
         private Dictionary<string, (string Signture, int Type)> _treeContent;
 
         public int Count => this._treeContent.Count;
+        public IReadOnlyDictionary<string, (string Signture, int Type)> TreeContent => this._treeContent;
 
         public bool Exist(string name) => this._treeContent.ContainsKey(name);
         public int GetFileType(string name) => this._treeContent[name].Type;

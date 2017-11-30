@@ -10,7 +10,7 @@ namespace GitterKid.Service
 
         public string TreeSignture { get; private set; }
         public string Message { get; private set; }
-        public IEnumerable<string> ParentSignture => this._parentSignture;
+        public IReadOnlyList<string> ParentSignture => this._parentSignture;
         public CommitEventLog Author { get; private set; }
         public CommitEventLog Committer { get; private set; }
 

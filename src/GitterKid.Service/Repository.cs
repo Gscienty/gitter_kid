@@ -29,7 +29,7 @@ namespace GitterKid.Service
             return GitEntity.Load<T>(this.Path, signture);
         }
 
-        public static bool ExistRepository(string path) => Directory.Exists(this.Path);
+        public static bool ExistRepository(string path) => Directory.Exists(path);
 
         public bool ExistBranch(string name) => this._branches.ContainsKey(name);
 

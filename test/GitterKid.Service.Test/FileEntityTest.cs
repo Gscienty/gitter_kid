@@ -1,6 +1,7 @@
 using System;
 using Xunit;
 using GitterKid.Service;
+using GitterKid.Service.Extension;
 
 namespace GitterKid.Service.Test
 {
@@ -35,6 +36,20 @@ namespace GitterKid.Service.Test
             Repository repository = new Repository(@"../../../../../.git/");
             Assert.True(repository.ExistBranch("master"));
             Assert.Equal(repository.Branches["master"].BranchLogs[0].Signture, "38305922037678e0b79ff4dd4ff81b09a408065a");
+        }
+
+        [Fact]
+        public void CompareBlob()
+        {
+            Repository repository = new Repository(@"../../../../../.git/");
+
+            GitBlob currentBlob = repository.Entity<GitBlob>("f21cf96546031d9cacbce76bffef705d5d6928b3");
+            GitBlob originBlob = repository.Entity<GitBlob>("411421fe177c328b971a27cf25a377e12c90f10e");
+
+            (int AddedCount, int DeletedCount) compareResult = currentBlob.Compare(originBlob);
+
+            Assert.Equal(compareResult.AddedCount, 18);
+            Assert.Equal(compareResult.DeletedCount, 1);
         }
     }
 }

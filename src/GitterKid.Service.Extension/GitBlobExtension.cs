@@ -47,7 +47,7 @@ namespace GitterKid.Service.Extension
                 else
                 {
                     addedCount += findLineOffset - 1 - currentLineFindStartOffset;
-                    currentLineFindStartOffset = findLineOffset + 1;
+                    currentLineFindStartOffset = findLineOffset;
                 }
             }
 
@@ -55,7 +55,6 @@ namespace GitterKid.Service.Extension
             {
                 addedCount += currentLines.Count - currentLineFindStartOffset;
             }
-
             return (addedCount, deletedCount);
         }
         public static IReadOnlyList<string> GetLines(this GitBlob gitBlob)

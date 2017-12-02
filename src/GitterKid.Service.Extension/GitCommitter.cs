@@ -7,5 +7,7 @@ namespace GitterKid.Service.Extension
         public string Name { get; internal set; }
 
         internal GitCommitter() { }
+
+        
     }
 }

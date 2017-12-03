@@ -27,7 +27,7 @@ namespace GitterKid.WebApi
                 .Select(repository => new
                 {
                     Name = repository.Name,
-                    Timestamp = repository.GetDefaultBranch().BranchLogs
+                    LastestCommit = repository.GetDefaultBranch().GetLastestCommit()
                 })
             );
         }

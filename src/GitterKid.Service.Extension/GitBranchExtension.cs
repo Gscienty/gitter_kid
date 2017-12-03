@@ -5,6 +5,18 @@ namespace GitterKid.Service.Extension
 {
     public static class GitBranchExtension
     {
+        public static GitBranch.BranchLog GetLastestCommit(this GitBranch branch)
+        {
+            if (branch.BranchLogs.Count() == 0)
+            {
+                return null;
+            }
+            else
+            {
+                return branch.BranchLogs.Last();
+            }
+        }
+
         public static IEnumerable<GitCommitter> GetAllCommitters(this GitBranch branch)
         {
             Dictionary<string, string> committerSet = new Dictionary<string, string>();

@@ -34,6 +34,9 @@ namespace GitterKid.Service
 
         internal abstract void PackageBody();
 
+        internal static bool StaticExistEntity(string repositoryPath, string signture)
+            => File.Exists($"{repositoryPath}/objects/{signture.Substring(0, 2)}/{signture.Substring(2)}");
+
         internal static T Load<T>(string repositoryPath, string signture) where T : GitEntity, new()
         {
             T result = new T();

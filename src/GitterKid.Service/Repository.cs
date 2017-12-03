@@ -24,6 +24,9 @@ namespace GitterKid.Service
             }
         }
 
+        public bool ExistEntity(string signture)
+            => GitEntity.StaticExistEntity(this.Path, signture);
+
         public T Entity<T>(string signture) where T : GitEntity, new()
         {
             return GitEntity.Load<T>(this.Path, signture);

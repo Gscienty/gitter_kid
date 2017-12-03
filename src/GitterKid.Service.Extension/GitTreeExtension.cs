@@ -21,7 +21,7 @@ namespace GitterKid.Service.Extension
                 return false;
             }
 
-            return tree.GetFileType(name) == 10064;
+            return tree.GetFileType(name) == 100644;
         }
     }
 }

@@ -20,6 +20,7 @@ function __build_submit_body(submitMime, entity) {
                 body += `${encodeURI(property)}=${encodeURI(entity[property])}&`;
             }
             return body.substring(0, body.length - 1);
+        default: return entity;
     }
 }
 

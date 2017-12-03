@@ -25,7 +25,7 @@ namespace GitterKid.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddGitterKidService("../../../GitterKidRepository/");
+            services.AddGitterKidService("../../../GitterKidRepository");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

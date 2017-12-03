@@ -11,8 +11,8 @@ namespace GitterKid.Service
         public string TreeSignture { get; private set; }
         public string Message { get; private set; }
         public IReadOnlyList<string> ParentSignture => this._parentSignture;
-        public CommitEventLog Author { get; private set; }
-        public CommitEventLog Committer { get; private set; }
+        public CommitEventLog AuthorEventLog { get; private set; }
+        public CommitEventLog CommitterEventLog { get; private set; }
 
         public GitTree GetTree() => GitEntity.Load<GitTree>(this._repositoryPath, this.TreeSignture);
 
@@ -47,7 +47,7 @@ namespace GitterKid.Service
                 else if (line.StartsWith("author"))
                 {
                     string[] units = line.Split(' ');
-                    this.Author = new CommitEventLog
+                    this.AuthorEventLog = new CommitEventLog
                     {
                         Name = units[1],
                         Mail = units[2].Substring(1, units[2].Length - 2),
@@ -55,10 +55,10 @@ namespace GitterKid.Service
                         TimeZone = units[4]
                     };
                 }
-                else if (line.StartsWith("commiter"))
+                else if (line.StartsWith("committer"))
                 {
                     string[] units = line.Split(' ');
-                    this.Committer = new CommitEventLog
+                    this.CommitterEventLog = new CommitEventLog
                     {
                         Name = units[1],
                         Mail = units[2].Substring(1, units[2].Length - 2),

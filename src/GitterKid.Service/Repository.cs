@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GitterKid.Service
 {
@@ -9,18 +10,29 @@ namespace GitterKid.Service
         private Dictionary<string, GitBranch> _branches;
         public RepositoryConfig Configure { get; private set; }
         public string Path { get; private set; }
+        public bool IsRepository { get; private set; }
+        public string Name { get; private set; }
         public IReadOnlyDictionary<string, GitBranch> Branches => this._branches;
 
         public Repository(string path)
         {
-            this.Path = path;
-            if (Repository.ExistRepository(path))
+            this.Path = path.Replace('\\', '/');
+            this.Name = this.Path.Substring(this.Path.LastIndexOf('/') + 1);
+            if (Repository.ExistRepository(this.Path))
             {
-                this.Initialize();
+                try
+                {
+                    this.Initialize();
+                    this.IsRepository = true;
+                }
+                catch
+                {
+                    this.IsRepository = false;
+                }
             }
             else
             {
-                this.CreateRepository();
+                this.IsRepository = false;
             }
         }
 

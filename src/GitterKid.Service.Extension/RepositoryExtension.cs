@@ -46,9 +46,9 @@ namespace GitterKid.Service.Extension
             Dictionary<string, string> committerSet = new Dictionary<string, string>();
 
 
-            foreach (var pair in repository.GetAllCommitLogs())
+            foreach (var branch in repository.Branches)
             {
-                foreach(var log in pair.Value)
+                foreach(var log in branch.Value.BranchLogs)
                 {
                     if (committerSet.ContainsKey(log.CommitEvent.Mail) == false)
                     {

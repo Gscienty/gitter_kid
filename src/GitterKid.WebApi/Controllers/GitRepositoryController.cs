@@ -40,8 +40,7 @@ namespace GitterKid.WebApi
 
             return Json(repositories.Select(repository => new
             {
-                Name = repository.Name,
-                LastestCommit = repository.GetDefaultBranch().GetLastestCommit()
+                Name = repository.Name
             }));
         }
     }

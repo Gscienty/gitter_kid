@@ -22,6 +22,9 @@ export default class BasePage extends Component {
                         placeholder="Search Gitter Kid"
                         onSearch={
                             keyword => {
+                                if (this.props.history.location.pathname !== '/query') {
+                                    this.props.history.push(`/query/${keyword}`);
+                                }
                                 this.props.dispatch({
                                     type: 'repository/get',
                                     payload: { keyword }

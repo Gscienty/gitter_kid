@@ -22,7 +22,10 @@ namespace GitterKid.WebApi
         public IActionResult Query([FromQuery(Name = "keyword")] string keyword = "")
         {
             return Json(this._repositoryFactory
-                .GetRepositories()
+                .GetRepositories(
+                    this._repositoryFactory.GetRepositoriesName()
+                        .Where(name => name.Contains(keyword))
+                )
                 .Where(repository => repository.IsRepository)
                 .Select(repository => new
                 {

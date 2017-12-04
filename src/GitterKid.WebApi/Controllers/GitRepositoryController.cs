@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -19,20 +20,29 @@ namespace GitterKid.WebApi
         }
 
         [HttpGet("query")]
-        public IActionResult Query([FromQuery(Name = "keyword")] string keyword = "")
+        public IActionResult Query([FromQuery(Name = "keyword")] string keyword)
         {
-            return Json(this._repositoryFactory
-                .GetRepositories(
-                    this._repositoryFactory.GetRepositoriesName()
-                        .Where(name => name.Contains(keyword))
-                )
-                .Where(repository => repository.IsRepository)
-                .Select(repository => new
-                {
-                    Name = repository.Name,
-                    LastestCommit = repository.GetDefaultBranch().GetLastestCommit()
-                })
-            );
+
+            IEnumerable<Repository> repositories;
+            if (string.IsNullOrEmpty(keyword))
+            {
+                repositories = this._repositoryFactory.GetRepositories();
+            }
+            else
+            {
+                repositories = this._repositoryFactory
+                    .GetRepositories(
+                        this._repositoryFactory.GetRepositoriesName()
+                            .Where(name => name.Contains(keyword))
+                    )
+                    .Where(repository => repository.IsRepository);
+            }
+
+            return Json(repositories.Select(repository => new
+            {
+                Name = repository.Name,
+                LastestCommit = repository.GetDefaultBranch().GetLastestCommit()
+            }));
         }
     }
 }

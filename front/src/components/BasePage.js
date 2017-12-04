@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Input } from 'antd';
+import { Layout, Input } from 'antd';
 
 export default class BasePage extends Component {
     page() { return <div></div> }
@@ -16,22 +16,23 @@ export default class BasePage extends Component {
                 <div
                     style={{ float: 'left', marginRight: '28px' }}
                 >
-                    <Input
+                    <Input.Search
                         size="large"
-                        style={{
-                            height: '42px',
-                            width: '360px',
-                            background: '#777777',
-                            color: '#ffffff',
-                            borderColor: '#777777',
-                            fontSize: '15px'
-                        }}
+                        style={{ width: '360px' }}
                         placeholder="Search Gitter Kid"
+                        onSearch={
+                            keyword => {
+                                this.props.dispatch({
+                                    type: 'repository/get',
+                                    payload: { keyword }
+                                });
+                            }
+                        }
                     />
                 </div>
             </Layout.Header>
             <Layout.Content style={{ padding: '20px 50px' }}>
-                <div style={{ padding: 24, minHeight: window.innerHeight - 64, background: '#ffffff' }}>
+                <div style={{ padding: 24, background: '#ffffff' }}>
                     { this.page() }
                 </div>
             </Layout.Content>

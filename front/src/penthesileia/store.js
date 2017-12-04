@@ -1,14 +1,15 @@
 import { createStore } from 'redux';
 
 function __common_transfer_result(response) {
-    let contentLengthString = response.headers.get('content-length');
-    if (contentLengthString === null || parseInt(contentLengthString, 10) === 0) {
-        return { status: response.status };
-    }
-    else {
-        return response.json()
-            .then(payload => ({ status: response.status, payload }));
-    }
+    return response.text()
+        .then(jsonString => {
+            if (jsonString.length === 0) {
+                return { status: response.status };
+            }
+            else {
+                return ({ status: response.status, payload: JSON.parse(jsonString) });
+            }
+        });
 }
 
 function __build_submit_body(submitMime, entity) {

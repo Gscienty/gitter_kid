@@ -7,26 +7,42 @@ import CodeComponent from './_code';
 class Page extends BasePage {
     componentDidMount() {
         this.props.dispatch({
-            type: 'repository/getFolder',
+            type: 'repository/tree',
             payload: {
-                repositoryName: this.props.match.params.repository,
+                repository: this.props.match.params.repository,
                 flag: 'master',
-                path: '/'
+                path: ''
+            }
+        });
+
+        this.props.dispatch({
+            type: 'repository/branch',
+            payload: {
+                repository: this.props.match.params.repository
             }
         });
     }
+
     page() {
-        return <Tabs>
-            <Tabs.TabPane tab="Code" key="Code">
-                <CodeComponent { ...this.props } />
-            </Tabs.TabPane>
-        </Tabs>
+        return <div>
+            <h2>{ this.props.match.params.repository }</h2>
+            <Tabs defaultActiveKey={ this.props.match.params.tag }>
+                <Tabs.TabPane tab={ <span>Code</span> } key="code">
+                    <CodeComponent { ...this.props } />
+                </Tabs.TabPane>
+                <Tabs.TabPane tab={ <span>Issue</span> } key="issue">
+                    <span>TODO</span>
+                </Tabs.TabPane>
+            </Tabs>
+        </div>
     }
 }
 
 export default connect(
     ({ repository }) => ({
-        repositoryName: repository.focusName,
-        files: repository.focusFolder
+        fs: repository.fs,
+        file: repository.file,
+        singleDisplayType: repository.singleDisplayType,
+        branches: repository.branch
     })
 )(Page);

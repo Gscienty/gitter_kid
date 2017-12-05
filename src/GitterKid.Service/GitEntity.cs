@@ -99,7 +99,7 @@ namespace GitterKid.Service
             inflateStream.avail_in = fileBuffer.Length;
             inflateStream.next_in = fileBuffer;
 
-            int inflateMiddleBufferSize = fileBuffer.Length * 2 + 1024;
+            int inflateMiddleBufferSize = fileBuffer.Length * 3 + 1024;
             byte[] inflateMiddleBuffer = new byte[inflateMiddleBufferSize];
 
             MemoryStream result = new MemoryStream();

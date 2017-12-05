@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Input } from 'antd';
+import { Layout, Input, Menu } from 'antd';
 
 export default class BasePage extends Component {
     page() { return <div></div> }
@@ -7,11 +7,12 @@ export default class BasePage extends Component {
     render() {
         return <Layout>
             <Layout.Header>
-                <div
+                <a
                     style={{ color: '#ffffff', fontSize: '27px', float: 'left', marginRight: '28px' }}
+                    onClick={ e => this.props.history.push('/') }
                 >
                     Gitter Kid
-                </div>
+                </a>
 
                 <div
                     style={{ float: 'left', marginRight: '28px' }}
@@ -33,13 +34,35 @@ export default class BasePage extends Component {
                         }
                     />
                 </div>
+
+                <div
+                    style={{ float: 'left', marginRight: '28px' }}
+                >
+                    <Menu
+                        theme="dark"
+                        mode="horizontal"
+                        style={{ lineHeight: '64px' }}
+                        onClick={
+                            e => {
+                                switch (e.key) {
+                                    case 'repositories':
+                                        this.props.history.push('/query');
+                                        break;
+                                    default: break;
+                                }
+                            }
+                        }
+                    >
+                        <Menu.Item key="repositories">Repositories</Menu.Item>
+                    </Menu>
+                </div>
             </Layout.Header>
-            <Layout.Content style={{ padding: '20px 50px' }}>
-                <div style={{ padding: 24, background: '#ffffff' }}>
+            <Layout.Content style={{ padding: '20px 50px', background: '#ffffff' }}>
+                <div>
                     { this.page() }
                 </div>
             </Layout.Content>
-            <Layout.Footer style={{ textAlign: 'center' }}>
+            <Layout.Footer style={{ textAlign: 'center', background: '#ffffff' }}>
             </Layout.Footer>
         </Layout>
     }

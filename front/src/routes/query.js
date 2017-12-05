@@ -23,7 +23,7 @@ class Page extends BasePage {
                                         shape="circle"
                                         icon="right"
                                         size="large"
-                                        onClick={ e => this.props.history.push(`/repository/${repository.name}`) }
+                                        onClick={ e => this.props.history.push(`/repository/${repository.name}/code`) }
                                     />
                                 }
                             >

@@ -2,10 +2,20 @@ export default {
     namespace: 'repository',
     state: {
         queryResult: [],
-
-        focusName: 'unknow',
-        focusFlag: 'unknow',
-        focusFolder: []
+        singleDisplayType: '',
+        branch: [],
+        fs: {
+            repository: '',
+            flag: '',
+            path: '',
+            content: []
+        },
+        file: {
+            repository: '',
+            flag: '',
+            path: '',
+            content: ''
+        }
     },
     effects: {
         async query({ get }, { payload: { keyword } }) {
@@ -19,22 +29,60 @@ export default {
             }
         },
 
-        async getFolder({ get }, { payload: { repositoryName, flag, path } }) {
-            let result = await get(`/api/${repositoryName}/fs-${flag}/tree${path}`);
-
+        async tree({ get }, { payload: { repository, flag, path } }) {
+            let result = await get(`/api/repository/${repository}/fs-${flag}/tree${path}`);
+            this.dispatch({ type: 'repository/singleDisplayType', payload: 'tree' });
             if (result.status === 200) {
-                this.dispatch({ type: 'repository/focusFolder', payload: result.payload });
+                this.dispatch({
+                    type: 'repository/fs',
+                    payload: {
+                        repository,
+                        flag,
+                        path,
+                        content: result.payload
+                    }
+                });
             }
             else {
-                this.dispatch({ type: 'repository/focusFolder', payload: null });
+                this.dispatch({ type: 'repository/fs', payload: null });
+            }
+        },
+
+        async blob({ get }, { payload: { repository, flag, path } }) {
+            let result = await get(`/api/repository/${repository}/fs-${flag}/blob${path}`);
+            this.dispatch({ type: 'repository/singleDisplayType', payload: 'blob' });
+            if (result.status === 200) {
+                this.dispatch({
+                    type: 'repository/file',
+                    payload: {
+                        repository,
+                        flag,
+                        path,
+                        content: result.payload
+                    }
+                });
+            }
+            else {
+                this.dispatch({ type: 'repository/file', payload: null });
+            }
+        },
+
+        async branch({ get }, { payload: { repository }}) {
+            let result = await get(`/api/repository/${repository}/branch`);
+
+            if (result.status === 200) {
+                this.dispatch({ type: 'repository/branch', payload: result.payload });
+            }
+            else {
+                this.dispatch({ type: 'repository/branch', payload: [] });
             }
         }
     },
     reduces: {
         queryResult: (state, payload) => ({ ...state, queryResult: payload }),
-        focusName: (state, payload) => ({ ...state, focusName: payload }),
-        focusFlag: (state, payload) => ({ ...state, focusFlag: payload }),
-        folder: (state, payload) => ({ ...state, folder: payload }),
-        focusFolder: (state, payload) => ({ ...state, focusFolder: payload })
+        fs: (state, payload) => ({ ...state, fs: payload }),
+        file: (state, payload) => ({ ...state, file: payload }),
+        singleDisplayType: (state, payload) => ({ ...state, singleDisplayType: payload }),
+        branch: (state, payload) => ({ ...state, branch: payload })
     }
 }

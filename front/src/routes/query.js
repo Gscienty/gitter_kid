@@ -1,12 +1,12 @@
 import React from 'react';
 import BasePage from '../components/BasePage'
 import { connect } from 'react-redux';
-import { Row, Col, Card, Icon, Button, Tag } from 'antd';
+import { Row, Col, Card, Icon, Button } from 'antd';
 
 class Page extends BasePage {
     componentDidMount() {
         this.props.dispatch({
-            type: 'repository/get',
+            type: 'repository/query',
             payload: { keyword: this.props.match.params.keyword }
         });
     }
@@ -47,5 +47,5 @@ class Page extends BasePage {
 }
 
 export default connect(
-    ({ repository }) => ({ repositories: repository.list })
+    ({ repository }) => ({ repositories: repository.queryResult })
 )(Page);

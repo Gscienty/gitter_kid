@@ -26,7 +26,7 @@ export default class BasePage extends Component {
                                     this.props.history.push(`/query/${keyword}`);
                                 }
                                 this.props.dispatch({
-                                    type: 'repository/get',
+                                    type: 'repository/query',
                                     payload: { keyword }
                                 });
                             }

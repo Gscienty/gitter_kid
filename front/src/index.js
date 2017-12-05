@@ -8,5 +8,6 @@ app.addModel(require('./models/repository').default);
 
 app.addPage({ path: '/', exact: true, component: require('./routes/index').default })
 app.addPage({ path: '/query/:keyword?', exact: true, component: require('./routes/query').default })
+app.addPage({ path: '/repository/:repository', exact: true, component: require('./routes/repository/index').default })
 
 app.run(document.getElementById('root'), HashRouter)

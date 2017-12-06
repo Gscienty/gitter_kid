@@ -53,7 +53,7 @@ class PathComponent extends Component {
                         </Menu.Item>)
                     }
                 </Menu>}>
-                    <Icon type="down" />
+                    <a><Icon type="down" /></a>
                 </Dropdown>
             </Breadcrumb.Item>
 

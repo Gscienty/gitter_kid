@@ -30,7 +30,7 @@ export default {
         },
 
         async tree({ get }, { payload: { repository, flag, path } }) {
-            let result = await get(`/api/repository/${repository}/fs-${flag}/tree${path}`);
+            let result = await get(`/api/repository-fs/${repository}/${flag}/tree${path}`);
             this.dispatch({ type: 'repository/singleDisplayType', payload: 'tree' });
             if (result.status === 200) {
                 this.dispatch({
@@ -49,7 +49,7 @@ export default {
         },
 
         async blob({ get }, { payload: { repository, flag, path } }) {
-            let result = await get(`/api/repository/${repository}/fs-${flag}/blob${path}`);
+            let result = await get(`/api/repository-fs/${repository}/${flag}/blob${path}`);
             this.dispatch({ type: 'repository/singleDisplayType', payload: 'blob' });
             if (result.status === 200) {
                 this.dispatch({
@@ -67,7 +67,7 @@ export default {
             }
         },
 
-        async branch({ get }, { payload: { repository }}) {
+        async repositoryBranch({ get }, { payload: { repository }}) {
             let result = await get(`/api/repository/${repository}/branch`);
 
             if (result.status === 200) {

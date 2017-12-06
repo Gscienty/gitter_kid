@@ -8,7 +8,7 @@ using GitterKid.Service.Extension;
 
 namespace GitterKid.WebApi.Controllers
 {
-    [Route("api/repository/{repository}/fs-{flag}")]
+    [Route("api/repository-fs/{repository}/{flag}")]
     public class GitFileSystemController : Controller
     {
         private readonly RepositoryFactory _repositoryFactory;

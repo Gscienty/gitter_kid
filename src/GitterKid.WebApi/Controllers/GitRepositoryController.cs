@@ -19,6 +19,19 @@ namespace GitterKid.WebApi
             this._repositoryFactory = repositoryFactory;
         }
 
+        [HttpGet("{repositoryName}/branch")]
+        public IActionResult Branch([FromRoute(Name = "repositoryName")] string repositoryName)
+        {
+            if (this._repositoryFactory.Exist(repositoryName) == false)
+            {
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            Repository repository = this._repositoryFactory.Get(repositoryName);
+
+            return Json(repository.Branches.Select(branch => branch.Key));
+        }
+
         [HttpGet("query")]
         public IActionResult Query([FromQuery(Name = "keyword")] string keyword)
         {

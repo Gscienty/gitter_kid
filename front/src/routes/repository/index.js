@@ -14,9 +14,8 @@ class Page extends BasePage {
                 path: ''
             }
         });
-
         this.props.dispatch({
-            type: 'repository/branch',
+            type: 'repository/repositoryBranch',
             payload: {
                 repository: this.props.match.params.repository
             }

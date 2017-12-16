@@ -17,5 +17,32 @@ namespace GitterKid.LinuxApi
                 Directory.CreateDirectory(path);
             }
         }
+
+        public static int Readable(string filepath)
+            => NativeMethod.Readable(filepath);
+
+        internal static class NativeMethod
+        {
+            [DllImport(
+                "libgkid.so",
+                CallingConvention = CallingConvention.Cdecl,
+                EntryPoint = "access_file_readable"
+            )]
+            internal extern static int Readable(string filepath);
+
+            [DllImport(
+                "libgkid.so",
+                CallingConvention = CallingConvention.Cdecl,
+                EntryPoint = "access_file_writable"
+            )]
+            internal extern static int Writable(string filepath);
+
+            [DllImport(
+                "libgkid.so",
+                CallingConvention = CallingConvention.Cdecl,
+                EntryPoint = "access_file_executable"
+            )]
+            internal extern static int Executable(string filepath);
+        }
     }
 }

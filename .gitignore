@@ -1,4 +1,6 @@
 bin/
 obj/
+objs/
 node_modules/
 .vscode/
+*.so

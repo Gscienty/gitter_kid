@@ -6,12 +6,13 @@
 #include "repository.h"
 
 char* __path_join(const char* basepath, size_t basepath_length, const char* subpath) {
-    size_t subpath_length = strlen(subpath);
+    size_t response_path_length = sizeof(char) * (basepath_length + strlen(subpath) + 1);
 
-    char* response_path = (char*)malloc(sizeof(char) * (basepath_length + subpath_length + 1));
+    char* response_path = (char*)malloc(response_path_length);
+    memset(response_path, 0, sizeof(response_path));
 
-    memccpy(response_path, basepath, 0, basepath_length);
-    memccpy(response_path + basepath_length, subpath, 0, subpath_length);
+    strcat(response_path, basepath);
+    strcat(response_path, subpath);
 
     return response_path;
 }
@@ -50,13 +51,15 @@ int __create_file(
         return 0;
 }
 
-int __create_sub_directory(const char* path, const size_t path_length, const char* ) {
-    char* branches_path = ___path_join(path, path_length, subpath);
+int __create_sub_directory(const char* path, const size_t path_length, const char* subpath) {
+    char* branches_path = __path_join(path, path_length, subpath);
     if ( __create_directory(branches_path) != 0 ) {
         free(branches_path);
         return -1;
     }
+
     free(branches_path);
+    return 0;
 }
 
 #define CREATE_SUB_DIRECTORY(subpath) \

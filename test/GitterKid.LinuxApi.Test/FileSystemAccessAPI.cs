@@ -10,7 +10,9 @@ namespace GitterKid.LinuxApi.Test
         [Fact]
         public void Test1()
         {
-            Assert.Equal(Folder.Readable("/home/ant"), 0);
+            Folder folder = new Folder("./test");
+
+            Assert.True(folder.RepositoryInit(""));
         }
     }
 }

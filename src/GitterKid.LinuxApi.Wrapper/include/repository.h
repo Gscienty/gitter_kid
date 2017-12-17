@@ -1,8 +1,8 @@
 #include "define.h"
 
-#define ALLUSER_READABLE    0400
-#define ALLUSER_WRITABLE    0200
-#define ALLUSER_EXECUTABLE  0100
+#define USER_READABLE    0400
+#define USER_WRITABLE    0200
+#define USER_EXECUTABLE  0100
 
 #define GROUP_READABLE      0040
 #define GROUP_WRITABLE      0020

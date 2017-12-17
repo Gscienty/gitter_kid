@@ -1,6 +1,6 @@
 #ifndef _GITTER_KID_DEFINE_
 
-#ifdef __GNUC__ >= 4
+#if __GNUC__ >= 4
 #define G_KID_EXTERN __attribute__((visibility("default")))
 #else
 #define G_KID_EXTERN

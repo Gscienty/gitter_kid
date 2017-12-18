@@ -45,6 +45,7 @@ int __create_file(
         }
 
         fputs(content, file);
+        chmod(path, USER_READABLE | USER_WRITABLE | USER_EXECUTABLE | GROUP_WRITABLE | GROUP_READABLE)
 
         free(path);
         fclose(file);
@@ -113,5 +114,10 @@ int repository_init(const char* path, const char* description) {
 
 int repository_remove(const char* path) {
 
-    return 0;
+    if ( access(path, F_OK) != 0 ) {
+        // directory not exist
+        return -1;
+    }
+
+    return rmdir(path);
 }

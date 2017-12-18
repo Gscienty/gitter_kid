@@ -1,4 +1,4 @@
-#ifndef _GITTER_KID_DEFINE_
+#ifndef _G_KID_DEFINE_
 
 #if __GNUC__ >= 4
 #define G_KID_EXTERN __attribute__((visibility("default")))
@@ -6,4 +6,4 @@
 #define G_KID_EXTERN
 #endif // __GNUC__
 
-#endif //_GITTER_KID_DEFINE_
+#endif //_G_KID_DEFINE_

@@ -17,6 +17,12 @@ char* __path_join(const char* basepath, size_t basepath_length, const char* subp
     return response_path;
 }
 
+/*
+** create directory
+** if success then return 0
+** if directory exist then return -1
+** if make directory error then return -2
+*/
 int __create_directory(const char* path) {
     if ( access(path, F_OK) == 0 ) {
         // directory exist
@@ -25,12 +31,16 @@ int __create_directory(const char* path) {
 
     if ( mkdir(path, USER_READABLE | USER_WRITABLE | USER_EXECUTABLE | GROUP_WRITABLE | GROUP_READABLE) == -1 ) {
         // make directory error
-        return -1;
+        return -2;
     }
     
     return 0;
 }
 
+/*
+** if could not open this file then return -3
+** if success then return 0
+*/
 int __create_file(
     const char* directory_path,
     const size_t path_length,
@@ -41,73 +51,93 @@ int __create_file(
         FILE* file = fopen(path, "w+");
         if ( file == NULL ) {
             // could not open this file
-            return -1;
+            return -3;
         }
 
         fputs(content, file);
-        chmod(path, USER_READABLE | USER_WRITABLE | USER_EXECUTABLE | GROUP_WRITABLE | GROUP_READABLE)
+        chmod(path, USER_READABLE | USER_WRITABLE | USER_EXECUTABLE | GROUP_WRITABLE | GROUP_READABLE);
 
         free(path);
         fclose(file);
         return 0;
 }
 
+/*
+** create sub directory
+** if success then return 0
+** if directory exist then return -1
+** if make directory error then return -2
+*/
 int __create_sub_directory(const char* path, const size_t path_length, const char* subpath) {
     char* branches_path = __path_join(path, path_length, subpath);
-    if ( __create_directory(branches_path) != 0 ) {
+
+    int retval = __create_directory(branches_path);
+    if ( retval != 0 ) {
         free(branches_path);
-        return -1;
+        return retval;
     }
 
     free(branches_path);
     return 0;
 }
 
-#define CREATE_SUB_DIRECTORY(subpath) \
-    if ( __create_sub_directory(path, path_length, subpath) != 0 ) { \
-        return -1; \
+#define CREATE_SUB_DIRECTORY(retval, subpath) \
+    retval = __create_sub_directory(path, path_length, subpath); \
+    if ( retval != 0 ) { \
+        return retval; \
     }
 
-#define CREATE_ROOT_FILE(filename, content) \
-    if ( __create_file(path, path_length, filename, content) != 0 ) { \
-        return -1; \
+#define CREATE_ROOT_FILE(retval, filename, content) \
+    retval = __create_file(path, path_length, filename, content); \
+    if ( retval != 0 ) { \
+        return retval; \
     }
 
+
+/*
+** create sub directory
+** if success then return 0
+** if directory exist then return -1
+** if make directory error then return -2
+** if could not open this file then return -3
+*/
 int repository_init(const char* path, const char* description) {
+    int retval = 0;
     // create repository directory
-    if ( __create_directory(path) != 0 ) {
-        return -1;
+    retval = __create_directory(path);
+    if ( retval != 0 ) {
+        return retval;
     }
 
     size_t path_length = strlen(path);
 
     // create repository's branches sub directory
-    CREATE_SUB_DIRECTORY("/branches")
+    CREATE_SUB_DIRECTORY(retval, "/branches")
 
     // create repository's hooks sub directory
-    CREATE_SUB_DIRECTORY("/hooks")
+    CREATE_SUB_DIRECTORY(retval, "/hooks")
 
     // create repository's info sub directory
-    CREATE_SUB_DIRECTORY("/info")
+    CREATE_SUB_DIRECTORY(retval, "/info")
 
     // create repository's objects sub directory
-    CREATE_SUB_DIRECTORY("/objects")
-    CREATE_SUB_DIRECTORY("/objects/info")
-    CREATE_SUB_DIRECTORY("/objects/pack")
+    CREATE_SUB_DIRECTORY(retval, "/objects")
+    CREATE_SUB_DIRECTORY(retval, "/objects/info")
+    CREATE_SUB_DIRECTORY(retval, "/objects/pack")
 
     // create repository's refs sub directory
-    CREATE_SUB_DIRECTORY("/refs")
-    CREATE_SUB_DIRECTORY("/refs/heads")
-    CREATE_SUB_DIRECTORY("/refs/tags")
+    CREATE_SUB_DIRECTORY(retval, "/refs")
+    CREATE_SUB_DIRECTORY(retval, "/refs/heads")
+    CREATE_SUB_DIRECTORY(retval, "/refs/tags")
 
     // create config file
-    CREATE_ROOT_FILE("/config", "[core]\trepositoryformatversion = 0\n\tfilemode = false\n\tbare = true\n")
+    CREATE_ROOT_FILE(retval, "/config", "[core]\trepositoryformatversion = 0\n\tfilemode = false\n\tbare = true\n")
 
     // create description file
-    CREATE_ROOT_FILE("/description", description)
+    CREATE_ROOT_FILE(retval, "/description", description)
 
     // create HEAD file
-    CREATE_ROOT_FILE("/HEAD", "ref: refs/heads/master\n")
+    CREATE_ROOT_FILE(retval, "/HEAD", "ref: refs/heads/master\n")
 
     return 0;
 }

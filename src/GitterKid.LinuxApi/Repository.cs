@@ -3,12 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace GitterKid.LinuxApi
 {
-    public class Folder
+    public class Repository
     {
-        private DirectoryInfo _directoryInformation;
         public string Path { get; private set; }
 
-        public Folder(string path)
+        public Repository(string path)
         {
             path = path.Replace('\\', '/').TrimEnd('/');
             this.Path = path;
@@ -41,32 +40,16 @@ namespace GitterKid.LinuxApi
 
         internal static class NativeMethod
         {
-            [DllImport(
-                "libgkid.so",
-                CallingConvention = CallingConvention.Cdecl,
-                EntryPoint = "access_file_readable"
-            )]
+            [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "access_file_readable")]
             internal extern static int Readable(string filepath);
 
-            [DllImport(
-                "libgkid.so",
-                CallingConvention = CallingConvention.Cdecl,
-                EntryPoint = "access_file_writable"
-            )]
+            [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "access_file_writable")]
             internal extern static int Writable(string filepath);
 
-            [DllImport(
-                "libgkid.so",
-                CallingConvention = CallingConvention.Cdecl,
-                EntryPoint = "access_file_executable"
-            )]
+            [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "access_file_executable")]
             internal extern static int Executable(string filepath);
 
-            [DllImport(
-                "libgkid.so",
-                CallingConvention = CallingConvention.Cdecl,
-                EntryPoint = "repository_init"
-            )]
+            [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "repository_init")]
             internal extern static int ReopsitoryInit(string path, string descrption);
         }
     }

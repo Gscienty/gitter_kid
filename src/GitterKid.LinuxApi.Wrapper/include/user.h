@@ -4,4 +4,4 @@
 
 #include "define.h"
 
-G_KID_EXTERN int user_create(const char* username);
+G_KID_EXTERN int user_create (const char* username);

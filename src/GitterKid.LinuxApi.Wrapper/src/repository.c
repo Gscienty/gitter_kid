@@ -5,14 +5,14 @@
 #include <stdio.h>
 #include "repository.h"
 
-char* __path_join(const char* basepath, size_t basepath_length, const char* subpath) {
-    size_t response_path_length = sizeof(char) * (basepath_length + strlen(subpath) + 1);
+char* __path_join (const char* basepath, size_t basepath_length, const char* subpath) {
+    size_t response_path_length = sizeof (char) * (basepath_length + strlen (subpath) + 1);
 
-    char* response_path = (char*)malloc(response_path_length);
-    memset(response_path, 0, sizeof(response_path));
+    char* response_path = (char*) malloc (response_path_length);
+    memset (response_path, 0, sizeof (response_path));
 
-    strcat(response_path, basepath);
-    strcat(response_path, subpath);
+    strcat (response_path, basepath);
+    strcat (response_path, subpath);
 
     return response_path;
 }
@@ -23,13 +23,13 @@ char* __path_join(const char* basepath, size_t basepath_length, const char* subp
 ** if directory exist then return -1
 ** if make directory error then return -2
 */
-int __create_directory(const char* path) {
-    if ( access(path, F_OK) == 0 ) {
+int __create_directory (const char* path) {
+    if ( access (path, F_OK) == 0 ) {
         // directory exist
         return -1;
     }
 
-    if ( mkdir(path, USER_READABLE | USER_WRITABLE | USER_EXECUTABLE | GROUP_WRITABLE | GROUP_READABLE) == -1 ) {
+    if ( mkdir (path, USER_READABLE | USER_WRITABLE | USER_EXECUTABLE | GROUP_WRITABLE | GROUP_READABLE) == -1 ) {
         // make directory error
         return -2;
     }
@@ -41,24 +41,24 @@ int __create_directory(const char* path) {
 ** if could not open this file then return -3
 ** if success then return 0
 */
-int __create_file(
+int __create_file (
     const char* directory_path,
     const size_t path_length,
     const char* filename,
     const char* content) {
-        char* path = __path_join(directory_path, path_length, filename);
+        char* path = __path_join (directory_path, path_length, filename);
 
-        FILE* file = fopen(path, "w+");
+        FILE* file = fopen (path, "w+");
         if ( file == NULL ) {
             // could not open this file
             return -3;
         }
 
-        fputs(content, file);
-        chmod(path, USER_READABLE | USER_WRITABLE | USER_EXECUTABLE | GROUP_WRITABLE | GROUP_READABLE);
+        fputs (content, file);
+        chmod (path, USER_READABLE | USER_WRITABLE | USER_EXECUTABLE | GROUP_WRITABLE | GROUP_READABLE);
 
-        free(path);
-        fclose(file);
+        free (path);
+        fclose (file);
         return 0;
 }
 
@@ -68,16 +68,16 @@ int __create_file(
 ** if directory exist then return -1
 ** if make directory error then return -2
 */
-int __create_sub_directory(const char* path, const size_t path_length, const char* subpath) {
-    char* branches_path = __path_join(path, path_length, subpath);
+int __create_sub_directory (const char* path, const size_t path_length, const char* subpath) {
+    char* branches_path = __path_join (path, path_length, subpath);
 
-    int retval = __create_directory(branches_path);
+    int retval = __create_directory (branches_path);
     if ( retval != 0 ) {
-        free(branches_path);
+        free (branches_path);
         return retval;
     }
 
-    free(branches_path);
+    free (branches_path);
     return 0;
 }
 
@@ -101,15 +101,15 @@ int __create_sub_directory(const char* path, const size_t path_length, const cha
 ** if make directory error then return -2
 ** if could not open this file then return -3
 */
-int repository_init(const char* path, const char* description) {
+int repository_init (const char* path, const char* description) {
     int retval = 0;
     // create repository directory
-    retval = __create_directory(path);
+    retval = __create_directory (path);
     if ( retval != 0 ) {
         return retval;
     }
 
-    size_t path_length = strlen(path);
+    size_t path_length = strlen (path);
 
     // create repository's branches sub directory
     CREATE_SUB_DIRECTORY(retval, "/branches")
@@ -142,12 +142,12 @@ int repository_init(const char* path, const char* description) {
     return 0;
 }
 
-int repository_remove(const char* path) {
+int repository_remove (const char* path) {
 
-    if ( access(path, F_OK) != 0 ) {
+    if ( access (path, F_OK) != 0 ) {
         // directory not exist
         return -1;
     }
 
-    return rmdir(path);
+    return rmdir (path);
 }

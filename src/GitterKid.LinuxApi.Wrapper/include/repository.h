@@ -12,6 +12,6 @@
 #define OTHER_WRITABLE      0002
 #define OTHER_EXECUTABLE    0001
 
-G_KID_EXTERN int repository_init(const char* path, const char* description);
+G_KID_EXTERN int repository_init (const char* path, const char* description);
 
-G_KID_EXTERN int repository_remove(const char* path);
+G_KID_EXTERN int repository_remove (const char* path);

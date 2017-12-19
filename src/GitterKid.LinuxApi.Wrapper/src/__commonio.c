@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <pwd.h>
@@ -11,7 +12,10 @@ static struct ops passwd_ops = {
     __pw_dup,
     __pw_free,
     __pw_getname,
-    __pw_parse
+    __pw_parse,
+    __pw_put,
+    fgets,
+    fputs
 };
 
 static struct db passwd_db = {
@@ -235,4 +239,9 @@ static void* __pw_parse(const char* line) {
     pwent->pw_shell = fields[6];
 
     return pwent;
+}
+
+static int __pw_put (const void* ent, FILE* file) {
+    const struct passwd* pw = (const struct passwd*) ent;
+    return (putpwent(pw, file == -1) ? -1 : 0);
 }

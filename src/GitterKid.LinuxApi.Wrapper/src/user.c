@@ -123,6 +123,9 @@ int user_users_cursor_move_next (struct db *db) {
         return -2;
     }
     db->cursor = db->cursor->next;
+    if ( db->cursor == NULL ) {
+        return -3;
+    }
     return 0;
 }
 
@@ -145,31 +148,39 @@ char * get_cursor_line (struct db *db) {
     return entry_instance->line;
 }
 
-char * get_cursor_loginname (struct db *db) {
+char* get_cursor_loginname (struct db *db) {
     struct entry *entry_instance = user_users_get_cursor (db);
     if ( entry_instance == NULL ) {
         return NULL;
     }
 
-    return ((char *) entry_instance->ptr)[0];
+    return ((char **) entry_instance->ptr)[0];
 }
 
-int get_cursor_userid (struct db *) {
+int get_cursor_userid (struct db *db) {
     struct entry *entry_instance = user_users_get_cursor (db);
     if ( entry_instance == NULL ) {
         return -1;
     }
 
-    return strtol (((char*) entry_instance->ptr)[2], (char **) 0, 10);
+    return strtol (
+        (const char *) ((char **) entry_instance->ptr)[2],
+        (char **) 0,
+        10
+    );
 }
 
-int get_cursor_groupid (struct db *) {
+int get_cursor_groupid (struct db *db) {
     struct entry *entry_instance = user_users_get_cursor (db);
     if ( entry_instance == NULL ) {
         return -1;
     }
 
-    return strtol (((char*) entry_instance->ptr)[3], (char **) 0, 10);
+    return strtol (
+        (const char *) ((char **) entry_instance->ptr)[3],
+        (char **) 0,
+        10
+    );
 }
 
 char * get_cursor_username (struct db *db) {
@@ -178,7 +189,7 @@ char * get_cursor_username (struct db *db) {
         return NULL;
     }
 
-    return ((char *) entry_instance->ptr)[4];
+    return ((char **) entry_instance->ptr)[4];
 }
 
 char * get_cursor_dir (struct db *db) {
@@ -187,7 +198,7 @@ char * get_cursor_dir (struct db *db) {
         return NULL;
     }
 
-    return ((char *) entry_instance->ptr)[5];
+    return ((char **) entry_instance->ptr)[5];
 }
 
 char * get_cursor_shell (struct db *db) {
@@ -196,6 +207,6 @@ char * get_cursor_shell (struct db *db) {
         return NULL;
     }
 
-    return ((char *) entry_instance->ptr)[6];
+    return ((char **) entry_instance->ptr)[6];
 }
 

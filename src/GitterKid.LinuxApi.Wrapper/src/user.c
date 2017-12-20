@@ -92,6 +92,11 @@ struct db * user_get_users () {
     return db_instance;
 }
 
+
+void user_dispose_users (struct db *db) {
+    free (db);
+}
+
 int user_users_initialize_cursor (struct db *db) {
     if ( db == NULL ) {
         return -1;
@@ -133,9 +138,64 @@ int user_users_cursor_move_prev (struct db *db) {
 }
 
 char * get_cursor_line (struct db *db) {
-    struct entry *entry_instance = user_users_get_cursor(db);
-    if (entry_instance == NULL) {
+    struct entry *entry_instance = user_users_get_cursor (db);
+    if ( entry_instance == NULL ) {
         return NULL;
     }
     return entry_instance->line;
 }
+
+char * get_cursor_loginname (struct db *db) {
+    struct entry *entry_instance = user_users_get_cursor (db);
+    if ( entry_instance == NULL ) {
+        return NULL;
+    }
+
+    return ((char *) entry_instance->ptr)[0];
+}
+
+int get_cursor_userid (struct db *) {
+    struct entry *entry_instance = user_users_get_cursor (db);
+    if ( entry_instance == NULL ) {
+        return -1;
+    }
+
+    return strtol (((char*) entry_instance->ptr)[2], (char **) 0, 10);
+}
+
+int get_cursor_groupid (struct db *) {
+    struct entry *entry_instance = user_users_get_cursor (db);
+    if ( entry_instance == NULL ) {
+        return -1;
+    }
+
+    return strtol (((char*) entry_instance->ptr)[3], (char **) 0, 10);
+}
+
+char * get_cursor_username (struct db *db) {
+    struct entry *entry_instance = user_users_get_cursor (db);
+    if ( entry_instance == NULL ) {
+        return NULL;
+    }
+
+    return ((char *) entry_instance->ptr)[4];
+}
+
+char * get_cursor_dir (struct db *db) {
+    struct entry *entry_instance = user_users_get_cursor (db);
+    if ( entry_instance == NULL ) {
+        return NULL;
+    }
+
+    return ((char *) entry_instance->ptr)[5];
+}
+
+char * get_cursor_shell (struct db *db) {
+    struct entry *entry_instance = user_users_get_cursor (db);
+    if ( entry_instance == NULL ) {
+        return NULL;
+    }
+
+    return ((char *) entry_instance->ptr)[6];
+}
+

@@ -15,13 +15,19 @@ LOG_FLAG = -D LOG_FLAG=1
 $(shell mkdir -p ${BIN_DIR})
 $(shell mkdir -p ${OBJS_DIR})
 
-SOURCES = fs_access repository __pwio user
+SOURCES = __pwio fs_access repository user
+LINKS = pam pam_misc
 LIBRARY = libgkid.so
 
 all: $(LIBRARY)
 
+test: $(SOURCES)
+	$(CC) -c test/tester.c -I $(INCLUDE_DIR) -o $(OBJS_DIR)tester.o
+	$(CC) $(SOURCES:%=$(OBJS_DIR)%.o) $(OBJS_DIR)tester.o -o test/tester $(LINKS:%=-l%)
+	test/tester
+
 $(LIBRARY): $(SOURCES)
-	$(CC) $(SOURCES:%=$(OBJS_DIR)%.o) $(SHARED) $(FPIC) -o $(BIN_DIR)$(LIBRARY)
+	$(CC) $(SOURCES:%=$(OBJS_DIR)%.o) $(SHARED) $(FPIC) -o $(BIN_DIR)$(LIBRARY) $(LINKS:%=-l%)
 
 $(SOURCES):
 	$(CC) $(LOG_FLAG) $(FPIC) -c $(SOURCE_DIR)$@.c -I $(INCLUDE_DIR) -o $(OBJS_DIR)$@.o

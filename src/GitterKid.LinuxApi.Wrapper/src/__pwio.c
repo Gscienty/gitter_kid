@@ -12,16 +12,6 @@
 
 static int lock_count = 0;
 
-static struct ops passwd_ops = {
-    __pw_dup,
-    __pw_free,
-    __pw_getname,
-    __pw_parse,
-    __pw_put,
-    fgets,
-    fputs
-};
-
 int __check_link_count (const char* file) {
     struct stat st;
 
@@ -134,7 +124,7 @@ int pw_lock (struct db* db) {
     return 0;
 }
 
-static void* __pw_dup (const void* pwent) {
+void* __pw_dup (const void* pwent) {
     const struct passwd* pw = (const struct passwd*) pwent;
 
     struct passwd* retpw = (struct passwd*) malloc (sizeof (*retpw));
@@ -168,7 +158,7 @@ static void* __pw_dup (const void* pwent) {
     return (void*) retpw;
 }
 
-static void __pw_free (void* ent) {
+void __pw_free (void* ent) {
     struct passwd* pw = (struct passwd*) ent;
 
     free (pw->pw_name);
@@ -179,13 +169,13 @@ static void __pw_free (void* ent) {
     free (pw);
 }
 
-static const char* __pw_getname (const void* ent) {
+const char* __pw_getname (const void* ent) {
     const struct passwd* pw = (struct passwd*) ent;
 
     return pw->pw_name;
 }
 
-static void* __pw_parse (const char* line) {
+void* __pw_parse (const char* line) {
     struct passwd* pwent = (struct passwd*) malloc (sizeof (*pwent));
     static char pwdbuf[1024];
     register int i;
@@ -235,7 +225,7 @@ static void* __pw_parse (const char* line) {
     return pwent;
 }
 
-static int __pw_put (const void* ent, FILE* file) {
+int __pw_put (const void* ent, FILE* file) {
     const struct passwd *pw = (const struct passwd*) ent;
     return (putpwent(pw, file)  == -1 ? -1 : 0);
 }
@@ -250,14 +240,18 @@ int pw_name (struct db *db, const char *filename) {
 /*
 * open file /etc/passwd
 */
-int pw_open (struct db* db, int mode) {
+int pw_open (struct db* db, int mode, int* last_error) {
     // initialize passwd db
     mode &= ~O_CREAT;
     if ( db->isopen || (mode != O_RDONLY && mode != O_RDWR) ) {
+        // db is open
+        *last_error = -1;
         return 0;
     }
     db->readonly = (mode == O_RDONLY);
     if ( !db->readonly && !db->locked ) {
+        // could not read
+        *last_error = -2;
         return 0;
     }
     db->head = db->tail = db->cursor = NULL;
@@ -268,6 +262,8 @@ int pw_open (struct db* db, int mode) {
             db->isopen = 1;
             return 1;
         }
+        // not exist
+        *last_error = -3;
         return 0;
     }
 
@@ -277,6 +273,8 @@ int pw_open (struct db* db, int mode) {
     if ( !buf ) {
         fclose (db->fp);
         db->fp = NULL;
+        // could not alloc enough memory
+        *last_error = -4;
         return 0;
     }
 
@@ -292,6 +290,8 @@ int pw_open (struct db* db, int mode) {
                 fclose (db->fp);
                 db->fp = NULL;
 
+                // could not alloc enough memory
+                *last_error = -4;
                 return 0;
             }
             buf = cp;
@@ -308,7 +308,8 @@ int pw_open (struct db* db, int mode) {
             free (buf);
             fclose (db->fp);
             db->fp = NULL;
-
+            // could not alloc enough memory
+            *last_error = -4;
             return 0;
         }
         void *eptr;
@@ -323,7 +324,8 @@ int pw_open (struct db* db, int mode) {
                 free (buf);
                 fclose (db->fp);
                 db->fp = NULL;
-
+                // could not alloc enough memory
+                *last_error = -4;
                 return 0;
             }
         }
@@ -338,7 +340,8 @@ int pw_open (struct db* db, int mode) {
             free (buf);
             fclose (db->fp);
             db->fp = NULL;
-
+            // could not alloc enough memory
+            *last_error = -4;
             return 0;
         }
 
@@ -351,7 +354,7 @@ int pw_open (struct db* db, int mode) {
         if ( !db->head ) {
             db->head = p;
         }
-        if ( !db->tail ) {
+        if ( db->tail ) {
             db->tail->next = p;
         }
         db->tail = p;

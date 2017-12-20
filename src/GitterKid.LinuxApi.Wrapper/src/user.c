@@ -7,12 +7,21 @@
 #include <sys/stat.h>
 #include "user.h"
 
+static struct ops passwd_ops = {
+    __pw_dup,
+    __pw_free,
+    __pw_getname,
+    __pw_parse,
+    __pw_put,
+    fgets,
+    fputs
+};
+
+
 int __find_new_uid() {
     const struct passwd* pwd;
 
     uid_t user_id = 1000;
-
-    
 }
 
 /*
@@ -70,7 +79,16 @@ int user_create (const char* username) {
 
 struct db * user_get_users () {
     struct db *db_instance = (struct db *) malloc (sizeof (*db_instance));
-    pw_open(db_instance, O_RDONLY);
+    int last_error = 0;
+
+    // initialize db fields
+    strcpy(db_instance->filename, "/etc/passwd");
+    db_instance->ops = &passwd_ops;
+    db_instance->head = db_instance->tail = db_instance->cursor = NULL;
+    db_instance->changed = db_instance->isopen = db_instance->locked = db_instance->readonly = 0;
+    if ( !pw_open(db_instance, O_RDONLY, &last_error) ) {
+        return NULL;
+    };
     return db_instance;
 }
 

@@ -7,9 +7,10 @@ namespace GitterKid.LinuxApi.Test
     public class UserManagerTest
     {
         [Fact]
-        public void CreateUserTest()
+        public void TestPasswdRead()
         {
-            Assert.Equal(GitUser.Create("test"), 0);
+            GitUsers users = new GitUsers();
+            Assert.Equal(users.FirstLine(), "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         }
     }
 }

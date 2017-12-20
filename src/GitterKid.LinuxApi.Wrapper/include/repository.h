@@ -1,5 +1,8 @@
 #include "define.h"
 
+#ifndef _G_KID_REPOSITORY_
+#define _G_KID_REPOSITORY_
+
 #define USER_READABLE    0400
 #define USER_WRITABLE    0200
 #define USER_EXECUTABLE  0100
@@ -13,5 +16,6 @@
 #define OTHER_EXECUTABLE    0001
 
 G_KID_EXTERN int repository_init (const char* path, const char* description);
-
 G_KID_EXTERN int repository_remove (const char* path);
+
+#endif

@@ -5,6 +5,7 @@
 #include <pwd.h>
 #include <string.h>
 #include <shadow.h>
+#include "__pwio.h"
 
 static int lock_count = 0;
 
@@ -16,16 +17,6 @@ static struct ops passwd_ops = {
     __pw_put,
     fgets,
     fputs
-};
-
-static struct db passwd_db = {
-    "/etc/passwd",
-    &passwd_ops,
-    NULL,
-    0,
-    0,
-    0,
-    0
 };
 
 int __check_link_count (const char* file) {
@@ -106,7 +97,7 @@ int __lock_file (const char* file, const char* lock) {
     return retval;
 }
 
-int lock_nowait (struct db* db) {
+int pw_lock_nowait (struct db* db) {
     char file[1024];
     char lock[1024];
 
@@ -125,7 +116,7 @@ int lock_nowait (struct db* db) {
     return 0;
 }
 
-int lock (struct db* db) {
+int pw_lock (struct db* db) {
     if ( lock_count == 0 ) {
         if ( lckpwdf () == -1 ) {
             return 0;
@@ -140,7 +131,7 @@ int lock (struct db* db) {
     return 0;
 }
 
-static void* __pw_dup(const void* pwent) {
+static void* __pw_dup (const void* pwent) {
     const struct passwd* pw = (const struct passwd*) pwent;
 
     struct passwd* retpw = (struct passwd*) malloc (sizeof (*retpw));
@@ -191,7 +182,7 @@ static const char* __pw_getname (const void* ent) {
     return pw->pw_name;
 }
 
-static void* __pw_parse(const char* line) {
+static void* __pw_parse (const char* line) {
     struct passwd* pwent = (struct passwd*) malloc (sizeof (*pwent));
     static char pwdbuf[1024];
     register int i;
@@ -220,18 +211,18 @@ static void* __pw_parse(const char* line) {
         }
     }
 
-    if (i != 7 || *fields[2] == 0 || *fields[3] == 0) {
+    if ( i != 7 || *fields[2] == 0 || *fields[3] == 0 ) {
         return NULL;
     }
 
     pwent->pw_name = fields[0];
     pwent->pw_passwd = fields[1];
-    if (fields[2][0] == 0
-        || ((pwent->pw_uid = strtol (fields[2], &ep, 10)) == 0) && *ep) {
+    if ( fields[2][0] == 0
+        || ((pwent->pw_uid = strtol (fields[2], &ep, 10)) == 0) && *ep ) {
         return NULL;
     }
-    if (fields[3][0] == 0
-        || ((pwent->pw_gid = strtol (fields[3], &ep, 10)) == 0) && *ep) {
+    if ( fields[3][0] == 0
+        || ((pwent->pw_gid = strtol (fields[3], &ep, 10)) == 0) && *ep ) {
         return NULL;
     }
     pwent->pw_gecos = fields[4];
@@ -242,6 +233,128 @@ static void* __pw_parse(const char* line) {
 }
 
 static int __pw_put (const void* ent, FILE* file) {
-    const struct passwd* pw = (const struct passwd*) ent;
+    const struct passwd *pw = (const struct passwd*) ent;
     return (putpwent(pw, file == -1) ? -1 : 0);
+}
+
+int pw_name (struct db *db, const char *filename) {
+    snprintf (db->filename, sizeof (db->filename), "%s", filename);
+    return 1;
+}
+
+#define BUFLEN 4096
+
+/*
+* open file /etc/passwd
+*/
+int pw_open (struct db* db, int mode) {
+    // initialize passwd db
+    mode &= ~O_CREAT;
+    if ( db->isopen || (mode != O_RDONLY && mode != O_RDWR) ) {
+        return 0;
+    }
+    db->readonly = (mode == O_RDONLY);
+    if ( !db->readonly && !db->locked ) {
+        return 0;
+    }
+    db->head = db->tail = db->cursor = NULL;
+    db->changed = 0;
+    db->fp = fopen (db->filename, db->readonly ? "r" : "r+");
+    if ( !dp->fp ) {
+        if (mode & O_CREAT) {
+            db->isopen = 1;
+            return 1;
+        }
+        return 0;
+    }
+
+    // read file fill to db object
+    int buflen = BUFLEN;
+    char *buf = (char *) malloc (buflen);
+    if ( !buf ) {
+        fclose (db->fp);
+        db->fp = NULL;
+        return 0;
+    }
+
+    // get /etc/passwd line
+    while ( db->ops->fgets (buf, buflen, db->fp) ) {
+        char *cp;
+        // if not contain \n and file content not end (have not read entired line) then extend buffer
+        while ( !(cp = strrchr(buf, '\n')) && !feof (db->fp) ) {
+            buflen += BUFLEN;
+            cp = (char *) realloc (buf, buflen);
+            if ( !cp ) {
+                free (buf);
+                fclose (db->fp);
+                db->fp = NULL;
+
+                return 0;
+            }
+            buf = cp;
+            int len = strlen (buf);
+            db->ops->fgets (buf + len, buflen - len, db->fp);
+        }
+        if ( (cp = strrchr (buf, '\n')) ) {
+            *cp = 0;
+        }
+
+        // copy buf to line (string)
+        char *line = strdup (buf);
+        if ( !line ) {
+            free (buf);
+            fclose (db->fp);
+            db->fp = NULL;
+
+            return 0;
+        }
+        void *eptr;
+        if ( line[0] == '+' || line[0] == '-' ) {
+            eptr = NULL;
+        }
+        else if ( (eptr = db->ops->parse (line)) ) {
+            // transfer string line to passwd entry
+            eptr = db->ops->dup (eptr);
+            if ( !eptr ) {
+                free (line);
+                free (buf);
+                fclose (db->fp);
+                db->fp = NULL;
+
+                return 0;
+            }
+        }
+
+        // create db entry
+        struct entry *p = (struct entry *) malloc (sizeof (*p));
+        if ( !p ) {
+            if ( eptr ) {
+                db->ops->free (eptr);
+            }
+            free (line);
+            free (buf);
+            fclose (db->fp);
+            db->fp = NULL;
+
+            return 0;
+        }
+
+        p->ptr = eptr;
+        p->line = line;
+        p->changed = 0;
+
+        p->next = NULL;
+        p->prev = db->tail;
+        if ( !db->head ) {
+            db->head = p;
+        }
+        if ( !db->tail ) {
+            db->tail->next = p;
+        }
+        db->tail = p;
+    }
+
+    free (buf);
+    db->isopen = 1;
+    return 1;
 }

@@ -6,6 +6,10 @@
 #include "user.h"
 
 int __find_new_uid() {
+    const struct passwd* pwd;
+
+    uid_t user_id = 1000;
+
     
 }
 
@@ -60,4 +64,58 @@ int user_create (const char* username) {
     }
 
     int uid = __find_new_uid();
+}
+
+struct db * user_get_users () {
+    struct db *db_instance = (struct db *) malloc (sizeof (*db_instance));
+    pw_open(db_instance, O_REONLY);
+    return db_instance;
+}
+
+void user_users_initialize_cursor (struct db *db) {
+    if ( db == NULL ) {
+        return -1;
+    }
+    db->cursor = db->head;
+    return 0;
+}
+
+struct entry * user_users_get_cursor (struct db *db) {
+    if ( db == NULL ) {
+        return NULL;
+    }
+    if ( db->cursor == NULL ) {
+        return NULL;
+    }
+    return db->cursor;
+}
+
+int user_users_cursor_move_next (struct db *db) {
+    if ( db == NULL ) {
+        return -1;
+    }
+    if ( db->cursor == NULL ) {
+        return -2;
+    }
+    db->cursor = db->cursor->next;
+    return 0;
+}
+
+int user_users_cursor_move_prev (struct db *db) {
+    if ( db == NULL ) {
+        return -1;
+    }
+    if ( db->cursor == NULL ) {
+        return -2;
+    }
+    db->cursor = db->cursor->prev;
+    return 0;
+}
+
+char * get_cursor_line (struct db *db) {
+    struct entry *entry_instance = get_cursor(db);
+    if (entry == NULL) {
+        return NULL;
+    }
+    return entry_instance->line;
 }

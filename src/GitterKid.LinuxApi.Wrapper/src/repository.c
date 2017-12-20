@@ -18,10 +18,10 @@ char* __path_join (const char* basepath, size_t basepath_length, const char* sub
 }
 
 /*
-** create directory
-** if success then return 0
-** if directory exist then return -1
-** if make directory error then return -2
+* create directory
+* if success then return 0
+* if directory exist then return -1
+* if make directory error then return -2
 */
 int __create_directory (const char* path) {
     if ( access (path, F_OK) == 0 ) {
@@ -38,8 +38,8 @@ int __create_directory (const char* path) {
 }
 
 /*
-** if could not open this file then return -3
-** if success then return 0
+* if could not open this file then return -3
+* if success then return 0
 */
 int __create_file (
     const char* directory_path,
@@ -63,10 +63,10 @@ int __create_file (
 }
 
 /*
-** create sub directory
-** if success then return 0
-** if directory exist then return -1
-** if make directory error then return -2
+* create sub directory
+* if success then return 0
+* if directory exist then return -1
+* if make directory error then return -2
 */
 int __create_sub_directory (const char* path, const size_t path_length, const char* subpath) {
     char* branches_path = __path_join (path, path_length, subpath);
@@ -95,11 +95,11 @@ int __create_sub_directory (const char* path, const size_t path_length, const ch
 
 
 /*
-** create sub directory
-** if success then return 0
-** if directory exist then return -1
-** if make directory error then return -2
-** if could not open this file then return -3
+* create sub directory
+* if success then return 0
+* if directory exist then return -1
+* if make directory error then return -2
+* if could not open this file then return -3
 */
 int repository_init (const char* path, const char* description) {
     int retval = 0;

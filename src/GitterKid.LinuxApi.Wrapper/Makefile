@@ -15,7 +15,7 @@ LOG_FLAG = -D LOG_FLAG=1
 $(shell mkdir -p ${BIN_DIR})
 $(shell mkdir -p ${OBJS_DIR})
 
-SOURCES = fs_access repository
+SOURCES = fs_access repository __pwio user
 LIBRARY = libgkid.so
 
 all: $(LIBRARY)

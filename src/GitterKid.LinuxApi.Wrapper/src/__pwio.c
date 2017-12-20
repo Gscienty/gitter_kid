@@ -1,7 +1,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <fcntl.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
+#include <signal.h>
 #include <pwd.h>
 #include <string.h>
 #include <shadow.h>
@@ -45,7 +48,7 @@ int __lock_file (const char* file, const char* lock) {
     char buffer[32];
     snprintf (buffer, sizeof (buffer), "%d", pid);
     len = strlen (buffer) + 1;
-    if ( write (fd, buf, len) != len ) {
+    if ( write (fd, buffer, len) != len ) {
         close (fd);
         unlink (file);
         return 0;
@@ -123,7 +126,7 @@ int pw_lock (struct db* db) {
         }
     }
 
-    if ( lock_nowait (db) ) {
+    if ( pw_lock_nowait (db) ) {
         return 1;
     }
 
@@ -234,7 +237,7 @@ static void* __pw_parse (const char* line) {
 
 static int __pw_put (const void* ent, FILE* file) {
     const struct passwd *pw = (const struct passwd*) ent;
-    return (putpwent(pw, file == -1) ? -1 : 0);
+    return (putpwent(pw, file)  == -1 ? -1 : 0);
 }
 
 int pw_name (struct db *db, const char *filename) {
@@ -260,7 +263,7 @@ int pw_open (struct db* db, int mode) {
     db->head = db->tail = db->cursor = NULL;
     db->changed = 0;
     db->fp = fopen (db->filename, db->readonly ? "r" : "r+");
-    if ( !dp->fp ) {
+    if ( !db->fp ) {
         if (mode & O_CREAT) {
             db->isopen = 1;
             return 1;

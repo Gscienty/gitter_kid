@@ -2,7 +2,9 @@
 #include <security/pam_misc.h>
 #include <pwd.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include "user.h"
 
 int __find_new_uid() {
@@ -20,7 +22,7 @@ int __find_new_uid() {
 ** if username exist then return -3
 */
 int user_create (const char* username) {
-    struct struct pam_conv conv = {
+    struct pam_conv conv = {
         misc_conv,
         NULL
     };
@@ -35,7 +37,7 @@ int user_create (const char* username) {
     }
     
     // pam start
-    pam_handle_t pam_h;
+    pam_handle_t *pam_h;
     retval = pam_start ("useradd", pam_passwd->pw_name, &conv, &pam_h);
 
     // authenticate
@@ -49,7 +51,7 @@ int user_create (const char* username) {
     }
     // account management
     if ( retval == PAM_SUCCESS ) {
-        retval = pam_acct_mgmt (pamh, 0);
+        retval = pam_acct_mgmt (pam_h, 0);
 
         if ( retval != PAM_SUCCESS ) {
             pam_end (pam_h, retval);
@@ -68,11 +70,11 @@ int user_create (const char* username) {
 
 struct db * user_get_users () {
     struct db *db_instance = (struct db *) malloc (sizeof (*db_instance));
-    pw_open(db_instance, O_REONLY);
+    pw_open(db_instance, O_RDONLY);
     return db_instance;
 }
 
-void user_users_initialize_cursor (struct db *db) {
+int user_users_initialize_cursor (struct db *db) {
     if ( db == NULL ) {
         return -1;
     }
@@ -113,8 +115,8 @@ int user_users_cursor_move_prev (struct db *db) {
 }
 
 char * get_cursor_line (struct db *db) {
-    struct entry *entry_instance = get_cursor(db);
-    if (entry == NULL) {
+    struct entry *entry_instance = user_users_get_cursor(db);
+    if (entry_instance == NULL) {
         return NULL;
     }
     return entry_instance->line;

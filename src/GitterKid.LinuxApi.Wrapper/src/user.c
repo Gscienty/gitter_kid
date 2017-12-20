@@ -94,6 +94,7 @@ struct db * user_get_users () {
 
 
 void user_dispose_users (struct db *db) {
+    // TODO dispose db
     free (db);
 }
 
@@ -154,7 +155,7 @@ char* get_cursor_loginname (struct db *db) {
         return NULL;
     }
 
-    return ((char **) entry_instance->ptr)[0];
+    return ((struct passwd *) entry_instance->ptr)->pw_name;
 }
 
 int get_cursor_userid (struct db *db) {
@@ -163,11 +164,7 @@ int get_cursor_userid (struct db *db) {
         return -1;
     }
 
-    return strtol (
-        (const char *) ((char **) entry_instance->ptr)[2],
-        (char **) 0,
-        10
-    );
+    return ((struct passwd *) entry_instance->ptr)->pw_uid;
 }
 
 int get_cursor_groupid (struct db *db) {
@@ -176,11 +173,7 @@ int get_cursor_groupid (struct db *db) {
         return -1;
     }
 
-    return strtol (
-        (const char *) ((char **) entry_instance->ptr)[3],
-        (char **) 0,
-        10
-    );
+    return ((struct passwd *) entry_instance->ptr)->pw_gid;
 }
 
 char * get_cursor_username (struct db *db) {
@@ -189,7 +182,7 @@ char * get_cursor_username (struct db *db) {
         return NULL;
     }
 
-    return ((char **) entry_instance->ptr)[4];
+    return ((struct passwd *) entry_instance->ptr)->pw_gecos;
 }
 
 char * get_cursor_dir (struct db *db) {
@@ -198,7 +191,7 @@ char * get_cursor_dir (struct db *db) {
         return NULL;
     }
 
-    return ((char **) entry_instance->ptr)[5];
+    return ((struct passwd *) entry_instance->ptr)->pw_dir;
 }
 
 char * get_cursor_shell (struct db *db) {
@@ -207,6 +200,6 @@ char * get_cursor_shell (struct db *db) {
         return NULL;
     }
 
-    return ((char **) entry_instance->ptr)[6];
+    return ((struct passwd *) entry_instance->ptr)->pw_shell;
 }
 

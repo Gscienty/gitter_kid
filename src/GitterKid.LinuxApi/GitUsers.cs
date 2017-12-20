@@ -7,11 +7,11 @@ namespace GitterKid.LinuxApi
 {
     public class GitUsers : IEnumerable<GitUser>
     {
-        public GitUsers() { }
 
         IEnumerator<GitUser> IEnumerable<GitUser>.GetEnumerator() => this.CreateEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.CreateEnumerator();
+        public GitUsers() { }
 
         private GitUserEnumerator CreateEnumerator() => new GitUserEnumerator();
 

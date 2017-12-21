@@ -1,7 +1,5 @@
-#include <stdio.h>
-
-#ifndef _G_KID_PWIO_
-#define _G_KID_PWIO_
+#ifndef _G_KID_IO_
+#define _G_KID_IO_
 
 struct entry {
     char *line; // store /etc/passwd file's line
@@ -44,21 +42,12 @@ struct db {
     struct entry *tail;
     struct entry *cursor;
 
-    int changed : 1;
-    int isopen : 1;
-    int locked : 1;
-    int readonly : 1;
+    int changed : 0;
+    int isopen : 0;
+    int locked : 0;
+    int readonly : 0;
 };
 
-int pw_lock_nowait (struct db *);
-int pw_lock (struct db *);
-
-void* __pw_dup (const void *);
-void __pw_free (void *);
-const char* __pw_getname (const void *);
-void* __pw_parse (const char *);
-int __pw_put (const void *, FILE *);
-
-int pw_name (struct db *, const char *filename);
-int pw_open (struct db *, int mode, int *last_error);
+// open file & tranfer to struct db
+int open_db (struct db *, int);
 #endif

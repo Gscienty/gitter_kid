@@ -94,7 +94,17 @@ struct db * user_get_users () {
 
 
 void user_dispose_users (struct db *db) {
-    // TODO dispose db
+    if ( db == NULL ) {
+        return ;
+    }
+
+    user_users_initialize_cursor (db);
+
+    do {
+        struct entry *pre_free_entry = user_users_get_cursor (db);
+        free (pre_free_entry->line);
+        db->ops->free (pre_free_entry->ptr);
+    } while (user_users_cursor_move_next (db) == 0);
     free (db);
 }
 

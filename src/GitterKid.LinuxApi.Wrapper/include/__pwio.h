@@ -4,8 +4,8 @@
 #define _G_KID_PWIO_
 
 struct entry {
-    char *line;
-    void *ptr;
+    char *line; // store /etc/passwd file's line
+    void *ptr;  // store struct passwd
     struct entry *prev;
     struct entry *next;
     int changed : 1;
@@ -16,7 +16,7 @@ struct ops {
     // and all strings pointed by it, in malloced memory.
     void* (*dup) (const void *);
 
-    // free the object including any strings pointed by it.
+    // free the struct passwd
     void (*free) (void *);
 
     // return the name of the object.

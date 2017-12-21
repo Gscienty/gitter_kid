@@ -107,3 +107,24 @@ int open_db (struct db *db, int mode) {
     db->isopen = 1;
     return 0;
 }
+
+void disopse_db (struct db *db) {
+    if (db == NULL) {
+        return ;
+    }
+
+    struct entry *free_entry = db->head;
+
+    while (free_entry != NULL) {
+        free (free_entry->line);
+        db->ops->free (free_entry->ptr);
+
+        struct entry *next_entry = free_entry->next;
+        free (free_entry);
+        free_entry = next_entry;
+    }
+
+    fclose (db->fp);
+
+    free (db);
+}

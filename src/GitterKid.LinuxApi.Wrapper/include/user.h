@@ -8,18 +8,19 @@
 #include "define.h"
 #include "__pw.h"
 
-struct db *build_passwd_handle ();
-int open_passwd (struct db *);
+G_KID_EXTERN struct db *build_passwd_handle ();
+G_KID_EXTERN int open_passwd (struct db *);
+G_KID_EXTERN void dispose_passwd (struct db *);
 
-int reset_passwd_cursor (struct db *);
-struct passwd *get_current_passwd (struct db *);
-int move_passwd_cursor_next (struct db *);
+G_KID_EXTERN int reset_passwd_cursor (struct db *);
+G_KID_EXTERN struct passwd *get_current_passwd (struct db *);
+G_KID_EXTERN int move_passwd_cursor_next (struct db *);
 
-char *get_passwd_username (struct passwd *);
-char *get_passwd_dir (struct passwd *);
-char *get_passwd_gecos (struct passwd *);
-int get_passwd_uid (struct passwd *);
-int get_passwd_gid (struct passwd *);
-char *get_passwd_passwd (struct passwd *);
-char *get_passwd_shell (struct passwd *);
+G_KID_EXTERN char *get_passwd_username (struct passwd *);
+G_KID_EXTERN char *get_passwd_dir (struct passwd *);
+G_KID_EXTERN char *get_passwd_gecos (struct passwd *);
+G_KID_EXTERN int get_passwd_uid (struct passwd *);
+G_KID_EXTERN int get_passwd_gid (struct passwd *);
+G_KID_EXTERN char *get_passwd_passwd (struct passwd *);
+G_KID_EXTERN char *get_passwd_shell (struct passwd *);
 #endif

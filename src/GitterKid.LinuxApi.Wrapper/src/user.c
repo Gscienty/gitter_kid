@@ -24,6 +24,10 @@ int open_passwd (struct db *db) {
     return open_db (db, O_RDONLY);
 }
 
+void dispose_passwd (struct db *db) {
+    disopse_db (db);
+}
+
 
 int reset_passwd_cursor (struct db *db) {
     if (db == NULL) {

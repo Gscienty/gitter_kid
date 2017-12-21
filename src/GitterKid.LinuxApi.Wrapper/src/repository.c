@@ -72,7 +72,7 @@ int __create_sub_directory (const char* path, const size_t path_length, const ch
     char* branches_path = __path_join (path, path_length, subpath);
 
     int retval = __create_directory (branches_path);
-    if ( retval != 0 ) {
+    if (retval != 0) {
         free (branches_path);
         return retval;
     }
@@ -83,13 +83,13 @@ int __create_sub_directory (const char* path, const size_t path_length, const ch
 
 #define CREATE_SUB_DIRECTORY(retval, subpath) \
     retval = __create_sub_directory(path, path_length, subpath); \
-    if ( retval != 0 ) { \
+    if (retval != 0) { \
         return retval; \
     }
 
 #define CREATE_ROOT_FILE(retval, filename, content) \
     retval = __create_file(path, path_length, filename, content); \
-    if ( retval != 0 ) { \
+    if (retval != 0) { \
         return retval; \
     }
 
@@ -105,46 +105,46 @@ int repository_init (const char* path, const char* description) {
     int retval = 0;
     // create repository directory
     retval = __create_directory (path);
-    if ( retval != 0 ) {
+    if (retval != 0) {
         return retval;
     }
 
     size_t path_length = strlen (path);
 
     // create repository's branches sub directory
-    CREATE_SUB_DIRECTORY(retval, "/branches")
+    CREATE_SUB_DIRECTORY (retval, "/branches")
 
     // create repository's hooks sub directory
-    CREATE_SUB_DIRECTORY(retval, "/hooks")
+    CREATE_SUB_DIRECTORY (retval, "/hooks")
 
     // create repository's info sub directory
-    CREATE_SUB_DIRECTORY(retval, "/info")
+    CREATE_SUB_DIRECTORY (retval, "/info")
 
     // create repository's objects sub directory
-    CREATE_SUB_DIRECTORY(retval, "/objects")
-    CREATE_SUB_DIRECTORY(retval, "/objects/info")
-    CREATE_SUB_DIRECTORY(retval, "/objects/pack")
+    CREATE_SUB_DIRECTORY (retval, "/objects")
+    CREATE_SUB_DIRECTORY (retval, "/objects/info")
+    CREATE_SUB_DIRECTORY (retval, "/objects/pack")
 
     // create repository's refs sub directory
-    CREATE_SUB_DIRECTORY(retval, "/refs")
-    CREATE_SUB_DIRECTORY(retval, "/refs/heads")
-    CREATE_SUB_DIRECTORY(retval, "/refs/tags")
+    CREATE_SUB_DIRECTORY (retval, "/refs")
+    CREATE_SUB_DIRECTORY (retval, "/refs/heads")
+    CREATE_SUB_DIRECTORY (retval, "/refs/tags")
 
     // create config file
-    CREATE_ROOT_FILE(retval, "/config", "[core]\trepositoryformatversion = 0\n\tfilemode = false\n\tbare = true\n")
+    CREATE_ROOT_FILE (retval, "/config", "[core]\trepositoryformatversion = 0\n\tfilemode = false\n\tbare = true\n")
 
     // create description file
-    CREATE_ROOT_FILE(retval, "/description", description)
+    CREATE_ROOT_FILE (retval, "/description", description)
 
     // create HEAD file
-    CREATE_ROOT_FILE(retval, "/HEAD", "ref: refs/heads/master\n")
+    CREATE_ROOT_FILE (retval, "/HEAD", "ref: refs/heads/master\n")
 
     return 0;
 }
 
 int repository_remove (const char* path) {
 
-    if ( access (path, F_OK) != 0 ) {
+    if (access (path, F_OK) != 0) {
         // directory not exist
         return -1;
     }

@@ -1,19 +1,21 @@
 #include "user.h"
-
+#include <stdio.h>
 int main() {
-    struct db *db = user_get_users ();
-    
-    user_users_initialize_cursor (db);
+    struct db *db = build_passwd_handle ();
+    open_passwd (db);
+
+    reset_passwd_cursor (db);
 
     do {
-        printf ("%d, %s, %d, %s, %s, %s\n",
-            get_cursor_userid (db),
-            get_cursor_loginname (db),
-            get_cursor_groupid (db),
-            get_cursor_username (db),
-            get_cursor_dir (db),
-            get_cursor_shell (db)
+        struct passwd *pw = get_current_passwd (db);
+        printf ("%d:%s:%d:%s:%s:%s\n",
+            get_passwd_uid (pw),
+            get_passwd_username (pw),
+            get_passwd_gid (pw),
+            get_passwd_gecos (pw),
+            get_passwd_dir (pw),
+            get_passwd_shell (pw)
         );
-    } while (user_users_cursor_move_next (db) == 0);
+    } while (move_passwd_cursor_next (db) == 0);
     return 0;
 }

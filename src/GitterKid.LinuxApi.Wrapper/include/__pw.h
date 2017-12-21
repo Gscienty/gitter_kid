@@ -5,7 +5,7 @@
 
 void *__pw_dup (const void *);
 void __pw_free (void *);
-const char *__pw_getname (void *);
+const char *__pw_getname (const void *);
 void *__pw_parse (const char *);
 int __pw_put (const void *, FILE *);
 

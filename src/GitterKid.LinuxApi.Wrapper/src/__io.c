@@ -3,9 +3,14 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define BUFLEN 1024
 int open_db (struct db *db, int mode) {
+    if (db == NULL) {
+        // db is not exist
+        return -6;
+    }
     if (db->isopen || (mode != O_RDONLY && mode != O_RDWR)) {
         // opened
         return -1;
@@ -40,7 +45,7 @@ int open_db (struct db *db, int mode) {
 
     while (db->ops->fgets (buf, buflen, db->fp)) {
         char *cp;
-        while (!(cp = strrchr (buf, '\n') && !feof (db->fp))) {
+        while (!(cp = strrchr (buf, '\n')) && !feof (db->fp)) {
             buflen += BUFLEN;
             cp = (char *) realloc (buf, buflen);
             if (!cp) {

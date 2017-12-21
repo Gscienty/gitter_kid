@@ -1,6 +1,7 @@
 #include "__pw.h"
 #include <pwd.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
 
 void *__pw_dup (const void *p) {
@@ -40,7 +41,7 @@ void __pw_free (void *p) {
     free (obj);
 }
 
-const char *__pw_getname (void *p) {
+const char *__pw_getname (const void *p) {
     const struct passwd *obj = (struct passwd *) p;
     return obj->pw_name;
 }
@@ -56,6 +57,7 @@ void *__pw_parse (const char *line) {
     strncpy (pwbuf, line, len);
 
     register char *cp;
+    register int i;
     char *fields[PW_ITEM_COUNT];
     for (cp = pwbuf, i = 0; i < PW_ITEM_COUNT && cp; i++) {
         fields[i] = cp;

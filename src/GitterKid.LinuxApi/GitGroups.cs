@@ -8,15 +8,9 @@ namespace GitterKid.LinuxApi
     public class GitGroups : IEnumerable<GitGroup>
     {
 
-        IEnumerator<GitGroup> IEnumerable<GitGroup>.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
+        IEnumerator<GitGroup> IEnumerable<GitGroup>.GetEnumerator() => this.CreateEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => this.CreateEnumerator();
 
         public GitGroups() { }
 
@@ -37,7 +31,7 @@ namespace GitterKid.LinuxApi
 
             void IDisposable.Dispose()
             {
-                NativeMethod.DisposeGroup(this._groupHandle);
+                //NativeMethod.DisposeGroup(this._groupHandle);
             }
 
             bool IEnumerator.MoveNext()

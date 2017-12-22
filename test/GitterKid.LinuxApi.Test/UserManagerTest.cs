@@ -15,5 +15,13 @@ namespace GitterKid.LinuxApi.Test
             Assert.True(users.Any(u => u.UserId == 1000));
             Assert.False(users.Any(u => u.UserId == 1001));
         }
+
+        [Fact]
+        public void GroupViewTest()
+        {
+            GitGroups groups = new GitGroups();
+
+            Assert.True(groups.Any(g => g.GroupId == 1000));
+        }
     }
 }

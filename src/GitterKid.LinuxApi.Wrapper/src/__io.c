@@ -118,7 +118,6 @@ void disopse_db (struct db *db) {
     while (free_entry != NULL) {
         free (free_entry->line);
         db->ops->free (free_entry->ptr);
-
         struct entry *next_entry = free_entry->next;
         free (free_entry);
         free_entry = next_entry;

@@ -1,6 +1,7 @@
 #include "user.h"
 #include <stdio.h>
-int main() {
+
+int test_enum_passwd () {
     struct db *db = build_passwd_handle ();
     open_passwd (db);
 
@@ -17,5 +18,11 @@ int main() {
             get_passwd_shell (pw)
         );
     } while (move_passwd_cursor_next (db) == 0);
+
+    dispose_passwd (db);
+}
+
+int main() {
+    test_enum_passwd ();
     return 0;
 }

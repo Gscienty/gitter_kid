@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "user.h"
+#include "__io.h"
 
 struct db *build_passwd_handle () {
     struct db *ret = (struct db *) malloc (sizeof (*ret));
@@ -25,7 +26,7 @@ int open_passwd (struct db *db) {
 }
 
 void dispose_passwd (struct db *db) {
-    disopse_db (db);
+    dispose_db (db);
 }
 
 

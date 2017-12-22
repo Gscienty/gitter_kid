@@ -5,6 +5,9 @@
 #include <string.h>
 
 void *__pw_dup (const void *p) {
+    if (p == NULL) {
+        return NULL;
+    }
     struct passwd *p_origin = (struct passwd *) p;
     struct passwd *p_ret = (struct passwd *) malloc (sizeof (*p_ret));
 

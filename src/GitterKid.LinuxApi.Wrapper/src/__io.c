@@ -108,7 +108,7 @@ int open_db (struct db *db, int mode) {
     return 0;
 }
 
-void disopse_db (struct db *db) {
+void dispose_db (struct db *db) {
     if (db == NULL) {
         return ;
     }

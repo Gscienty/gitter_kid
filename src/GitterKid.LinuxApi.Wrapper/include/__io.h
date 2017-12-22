@@ -53,5 +53,5 @@ struct db {
 // open file & tranfer to struct db
 int open_db (struct db *, int);
 
-void disopse_db (struct db *);
+void dispose_db (struct db *);
 #endif

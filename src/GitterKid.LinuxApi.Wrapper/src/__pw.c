@@ -5,6 +5,9 @@
 #include <string.h>
 
 void *__pw_dup (const void *p) {
+    if (p == NULL) {
+        return NULL;
+    }
     struct passwd *p_origin = (struct passwd *) p;
     struct passwd *p_ret = (struct passwd *) malloc (sizeof (*p_ret));
 
@@ -87,8 +90,8 @@ void *__pw_parse (const char *line) {
     }
 
     char *ep;
-    ret->pw_name = fields[0];
-    ret->pw_passwd = fields[1];
+    ret->pw_name = strdup (fields[0]);
+    ret->pw_passwd = strdup (fields[1]);
     if (fields[2][0] == 0 || ((ret->pw_uid = strtol (fields[2], &ep, 10)) == 0 && *ep)) {
         // could not transfer string to uid
         free (pwbuf);
@@ -101,9 +104,11 @@ void *__pw_parse (const char *line) {
         free (ret);
         return NULL;
     }
-    ret->pw_gecos = fields[4];
-    ret->pw_dir = fields[5];
-    ret->pw_shell = fields[6];
+    ret->pw_gecos = strdup (fields[4]);
+    ret->pw_dir = strdup (fields[5]);
+    ret->pw_shell = strdup (fields[6]);
+
+    free (pwbuf);
 
     return ret;
 }

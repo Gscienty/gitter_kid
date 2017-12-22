@@ -9,7 +9,6 @@ const char *__pw_getname (const void *);
 void *__pw_parse (const char *);
 int __pw_put (const void *, FILE *);
 
-
 static struct ops pw_ops = {
     __pw_dup,
     __pw_free,

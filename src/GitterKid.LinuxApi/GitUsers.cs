@@ -30,6 +30,7 @@ namespace GitterKid.LinuxApi
 
             void IDisposable.Dispose()
             {
+                NativeMethod.DisposePasswd(this._passwdHandle);
             }
 
             bool IEnumerator.MoveNext()
@@ -60,6 +61,8 @@ namespace GitterKid.LinuxApi
             internal extern static IntPtr BuildPasswdHandle();
             [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "open_passwd")]
             internal extern static int OpenPasswd(IntPtr passwdHandle);
+            [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "dispose_passwd")]
+            internal extern static int DisposePasswd(IntPtr passwdHandle);
             [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "reset_passwd_cursor")]
             internal extern static int ResetCursor(IntPtr passwdHandle);
             [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "get_current_passwd")]

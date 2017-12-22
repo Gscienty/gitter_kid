@@ -7,6 +7,7 @@
 
 #include "define.h"
 #include "__pw.h"
+#include "__grp.h"
 
 G_KID_EXTERN struct db *build_passwd_handle ();
 G_KID_EXTERN int open_passwd (struct db *);
@@ -23,4 +24,20 @@ G_KID_EXTERN int get_passwd_uid (struct passwd *);
 G_KID_EXTERN int get_passwd_gid (struct passwd *);
 G_KID_EXTERN char *get_passwd_passwd (struct passwd *);
 G_KID_EXTERN char *get_passwd_shell (struct passwd *);
+
+
+G_KID_EXTERN struct db *build_group_handle ();
+G_KID_EXTERN int open_group (struct db *);
+G_KID_EXTERN void dispose_group (struct db *);
+
+G_KID_EXTERN int reset_group_cursor (struct db *);
+G_KID_EXTERN struct group *get_current_group (struct db *);
+G_KID_EXTERN int move_group_cursor_next (struct db *);
+
+G_KID_EXTERN char *get_group_name (struct group *);
+G_KID_EXTERN char *get_group_passwd (struct group *);
+G_KID_EXTERN int get_group_gid (struct group *);
+G_KID_EXTERN char** get_group_member_cursor (struct group *);
+
+G_KID_EXTERN size_t get_member_cursor_size ();
 #endif

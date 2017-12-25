@@ -42,34 +42,37 @@ namespace GitterKid.LinuxApi
         public class GitGroupEnumerator : IEnumerator<GitGroup>
         {
             private IntPtr _groupHandle;
-            GitGroup IEnumerator<GitGroup>.Current => this.GetCurrent();
+            private bool _isFirst;
 
+            GitGroup IEnumerator<GitGroup>.Current => this.GetCurrent();
             object IEnumerator.Current => this.GetCurrent();
 
             public GitGroupEnumerator(IntPtr groupHandle)
             {
                 this._groupHandle = groupHandle;
+                NativeMethod.ResetCursor(this._groupHandle);
+                this._isFirst = true;
             }
 
             void IDisposable.Dispose() { }
 
             bool IEnumerator.MoveNext()
             {
-                int result = NativeMethod.MoveNextCursor(this._groupHandle);
-
-                if (result == -3)
+                if (this._isFirst)
                 {
-                    NativeMethod.ResetCursor(this._groupHandle);
-
-                    result = NativeMethod.MoveNextCursor(this._groupHandle);
+                    this._isFirst = false;
+                    return NativeMethod.GetCurrentGroup(this._groupHandle) != IntPtr.Zero;
                 }
-
-                return result == 0;
+                else
+                {
+                    return NativeMethod.MoveNextCursor(this._groupHandle) == 0;
+                }
             }
 
             void IEnumerator.Reset()
             {
                 NativeMethod.ResetCursor(this._groupHandle);
+                this._isFirst = true;
             }
 
             private GitGroup GetCurrent() => new GitGroup(NativeMethod.GetCurrentGroup(this._groupHandle));
@@ -105,6 +108,8 @@ namespace GitterKid.LinuxApi
             internal extern static int GroupMemberMoveNext(IntPtr entryHandle);
             [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "dispose_group_member")]
             internal extern static IntPtr DisposeGroupMember(IntPtr entryHandle);
+            [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "get_group_member_count")]
+            internal extern static int GetGroupMemberCount(IntPtr entryHandle);
         }
     }
 }

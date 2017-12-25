@@ -22,7 +22,7 @@ namespace GitterKid.LinuxApi.Test
         {
             GitGroups groups = new GitGroups();
             Assert.True(groups.Any(g => g.GroupId == 1));
-            Assert.False(groups.Any(g => g.GroupId == 0));
+            Assert.True(groups.Any(g => g.GroupId == 0));
         }
 
         [Fact]
@@ -32,13 +32,13 @@ namespace GitterKid.LinuxApi.Test
             string ask = "";
             foreach (var group in groups)
             {
-                ask += "[" + group.GroupName + "]";
+                ask += $"({group.GroupName} - {group.Members.Count})";
                 foreach (var member in group.Members)
                 {
-                    ask += " " + member;
+                    ask += $"[{member}]";
                 }
             }
-            Assert.Equal(ask, "123333333333333333333333333333333333333333333");
+            throw new Exception(ask);
         }
     }
 }

@@ -39,9 +39,9 @@ int test_enum_group () {
         
         struct group_member *mem = get_group_member_cursor (grp);
         reset_group_member_cursor (mem);
-        while (group_member_move_next (mem) == 0) {
-            printf ("\t\t%s\n", get_current_group_member_name (mem));
-        }
+        do {
+            printf ("\t\t%d\t%d\n", get_current_group_member_name (mem), get_group_member_count (mem));
+        } while (group_member_move_next (mem) == 0);
 
         dispose_group_member (mem);
 

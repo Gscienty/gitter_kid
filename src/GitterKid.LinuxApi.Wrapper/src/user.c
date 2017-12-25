@@ -140,7 +140,7 @@ struct group *get_current_group (struct db *db) {
         return NULL;
     }
     if (!db->isopen) {
-        // file /etc/passwd is not opend
+        // file /etc/group is not opend
         return NULL;
     }
     if (!db->cursor) {
@@ -157,7 +157,7 @@ int move_group_cursor_next (struct db *db) {
         return -1;
     }
     if (!db->isopen) {
-        // file /etc/passwd is not opend
+        // file /etc/group is not opend
         return -2;
     }
     if (!db->cursor) {
@@ -185,10 +185,17 @@ struct group_member *get_group_member_cursor (struct group *grp) {
         return NULL;
     }
     ret->base = grp->gr_mem;
-    ret->cursor = -1;
-
+    ret->cursor = 0;
+    register int count = 0;
+    for (count = 0; ret->base[count]; count++);
+    ret->count = count;
     return ret;
 }
+
+int get_group_member_count (struct group_member *grp_mem) {
+    return grp_mem->count;
+}
+
 void reset_group_member_cursor (struct group_member *grp_mem) {
     if (grp_mem == NULL) {
         return ;
@@ -199,9 +206,6 @@ void reset_group_member_cursor (struct group_member *grp_mem) {
 
 char *get_current_group_member_name (struct group_member *grp_mem) {
     if (grp_mem == NULL) {
-        return NULL;
-    }
-    if (grp_mem->cursor == -1) {
         return NULL;
     }
 

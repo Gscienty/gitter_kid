@@ -1,4 +1,3 @@
-#include <grp.h>
 #include <string.h>
 #include <stdlib.h>
 #include "__grp.h"
@@ -8,7 +7,7 @@ void *__grp_dup (const void *p) {
         return NULL;
     }
     struct group *p_origin = (struct group *) p;
-    struct group *p_ret = (struct group *) malloc (sizeof (*ret));
+    struct group *p_ret = (struct group *) malloc (sizeof (*p_ret));
     if (p_ret == NULL) {
         // have not enough free memory
         return NULL;
@@ -47,7 +46,7 @@ void __grp_free (void *p) {
     free (grp->gr_passwd);
     char **mem = grp->gr_mem;
     while (*mem) { free (*mem++); }
-    free (gr->gr_mem);
+    free (grp->gr_mem);
 }
 
 const char *__grp_getname (const void *p) {
@@ -71,29 +70,63 @@ void *__grp_parse (const char *line) {
     register char *cp;
     register int i;
     char *fields[GRP_ITEM_COUNT];
-    for (cp = grpbuf, i = 0; i < GRP_ITEM_COUNT && cp; i++) {
+    for (cp = grpbuf, i = 0; i < GRP_ITEM_COUNT; i++) {
         fields[i] = cp;
         while (*cp && *cp != ':') {
             cp++;
         }
 
-        if (*cp) {
+        if (*cp == ':') {
             *cp++ = 0;
         }
         else {
-            cp = 0;
+            break;
         }
     }
 
-    if (i != GRP_ITEM_COUNT) {
+    if (i != GRP_ITEM_COUNT && i != GRP_ITEM_COUNT - 1) {
+        if (i == GRP_ITEM_COUNT - 1) {
+            fields[3] = 0;
+        }
         free (grpbuf);
         return NULL;
     }
 
     struct group *grp = (struct group *) malloc (sizeof (*grp));
+
     grp->gr_name = strdup (fields[0]);
     grp->gr_passwd = strdup (fields[1]);
-    grp->gr_gid = strtol (fields[2]);
+    char *ep;
+    grp->gr_gid = strtol (fields[2], &ep, 10);
     
+    int member_count = 0;
+    for (cp = fields[3]; *cp; cp++) {
+        member_count++;
+        while (*cp && *cp != ',') {
+            cp++;
+        }
+    }
+    grp->gr_mem = (char **) malloc (sizeof (char *) * (member_count + 1));
+    for (i = 0, cp = fields[3]; i < member_count && cp; i++) {
+        char *tmp = strchr (cp, ',');
+        if (tmp == NULL) {
+            grp->gr_mem[i] = strdup (cp);
+            cp = 0;
+        }
+        else {
+            *tmp = 0;
+            grp->gr_mem[i] = strdup (cp);
+            cp = tmp + 1;
+        }
+    }
+    grp->gr_mem[i] = NULL;
+    free (grpbuf);
+
+    return grp;
 }
 
+int __grp_put (const void *p, FILE *fp) {
+    const struct group *grp = (const struct group *) p;
+
+    return (putgrent (grp, fp) == -1) ? -1 : 0;
+}

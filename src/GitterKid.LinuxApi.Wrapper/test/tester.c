@@ -20,9 +20,38 @@ int test_enum_passwd () {
     } while (move_passwd_cursor_next (db) == 0);
 
     dispose_passwd (db);
+
+    return 0;
+}
+
+int test_enum_group () {
+    struct db *db = build_group_handle ();
+    open_group (db);
+
+    reset_group_cursor (db);
+    do {
+        struct group *grp = get_current_group (db);
+        printf ("%s:%s:%d\n",
+            get_group_name (grp),
+            get_group_passwd (grp),
+            get_group_gid (grp)
+        );
+        
+        struct group_member *mem = get_group_member_cursor (grp);
+        reset_group_member_cursor (mem);
+        while (group_member_move_next (mem) == 0) {
+            printf ("\t\t%s\n", get_current_group_member_name (mem));
+        }
+
+        dispose_group_member (mem);
+
+    } while (move_group_cursor_next (db) == 0);
+
+    dispose_group (db);
 }
 
 int main() {
-    test_enum_passwd ();
+    // test_enum_passwd ();
+    test_enum_group ();
     return 0;
 }

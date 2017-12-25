@@ -61,7 +61,6 @@ int open_db (struct db *db, int mode) {
         if ((cp = strrchr (buf, '\n'))) {
             *cp = 0;
         }
-
         char *line = strdup (buf);
         if (!line) {
             free (buf);

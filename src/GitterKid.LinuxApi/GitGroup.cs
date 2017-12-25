@@ -49,7 +49,7 @@ namespace GitterKid.LinuxApi
             }
         }
 
-        public virtual IEnumerable<string> Members
+        public virtual GitGroupMembers Members
         {
             get
             {
@@ -65,42 +65,68 @@ namespace GitterKid.LinuxApi
         public class GitGroupMembers : IEnumerable<string>
         {
             private IntPtr _membersHandle;
+
+            public int Count { get; private set; }
             internal GitGroupMembers(IntPtr membersHandle)
             {
                 this._membersHandle = membersHandle;
+                this.Count = GitGroups.NativeMethod.GetGroupMemberCount(this._membersHandle);
             }
 
-            IEnumerator<string> IEnumerable<string>.GetEnumerator() => new GitGroupMemberEnumerator(this._membersHandle);
+            IEnumerator<string> IEnumerable<string>.GetEnumerator() => new GitGroupMemberEnumerator(this._membersHandle, this.Count);
 
-            IEnumerator IEnumerable.GetEnumerator() => new GitGroupMemberEnumerator(this._membersHandle);
+            IEnumerator IEnumerable.GetEnumerator() => new GitGroupMemberEnumerator(this._membersHandle, this.Count);
         }
 
         public class GitGroupMemberEnumerator : IEnumerator<string>
         {
-            private IntPtr _memberHandle;
+            private IntPtr _membersHandle;
+            private int _count;
+            private bool _isFirst;
+
             string IEnumerator<string>.Current => this.GetCurrentGroupName();
 
             object IEnumerator.Current => this.GetCurrentGroupName();
 
-            internal GitGroupMemberEnumerator(IntPtr memberHandle)
+            internal GitGroupMemberEnumerator(IntPtr membersHandle, int count)
             {
-                this._memberHandle = memberHandle;
+                this._membersHandle = membersHandle;
+                this._isFirst = true;
+                this._count = count;
             }
             private string GetCurrentGroupName()
             {
-                return Marshal.PtrToStringAnsi(GitGroups.NativeMethod.GetCurrentMemberName(this._memberHandle));    
+                if (this._count == 0)
+                {
+                    return string.Empty;
+                }
+                return Marshal.PtrToStringAnsi(GitGroups.NativeMethod.GetCurrentMemberName(this._membersHandle));    
             }
 
             void IDisposable.Dispose() { }
 
             bool IEnumerator.MoveNext()
             {
-                return GitGroups.NativeMethod.GroupMemberMoveNext(this._memberHandle) == 0;
+                if (this._count == 0)
+                {
+                    return false;
+                }
+                
+                if (this._isFirst)
+                {
+                    this._isFirst = false;
+                    return true;
+                }
+                else
+                {
+                    return GitGroups.NativeMethod.GroupMemberMoveNext(this._membersHandle) == 0;
+                }
             }
 
             void IEnumerator.Reset()
             {
-                GitGroups.NativeMethod.ResetMemberCursor(this._memberHandle);
+                GitGroups.NativeMethod.ResetMemberCursor(this._membersHandle);
+                this._isFirst = true;
             }
         }
     }

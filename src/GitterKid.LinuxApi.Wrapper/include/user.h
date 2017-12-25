@@ -41,9 +41,11 @@ G_KID_EXTERN int get_group_gid (struct group *);
 struct group_member {
     char** base;
     int cursor;
+    int count;
 };
 G_KID_EXTERN struct group_member *get_group_member_cursor (struct group *);
 G_KID_EXTERN void reset_group_member_cursor (struct group_member *);
+G_KID_EXTERN int get_group_member_count (struct group_member *);
 G_KID_EXTERN char *get_current_group_member_name (struct group_member *);
 G_KID_EXTERN int group_member_move_next (struct group_member *);
 G_KID_EXTERN int dispose_group_member (struct group_member *);

@@ -5,15 +5,36 @@ using System.Runtime.InteropServices;
 
 namespace GitterKid.LinuxApi
 {
-    public class GitUsers : IEnumerable<GitUser>
+    public class GitUsers : IEnumerable<GitUser>, IDisposable
     {
-
+        private IntPtr _passwdHandle;
+        private bool disposedValue = false;
         IEnumerator<GitUser> IEnumerable<GitUser>.GetEnumerator() => this.CreateEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.CreateEnumerator();
-        public GitUsers() { }
+        public GitUsers()
+        {
+            this._passwdHandle = NativeMethod.BuildPasswdHandle();
+            NativeMethod.OpenPasswd(this._passwdHandle);
+        }
 
-        private GitUserEnumerator CreateEnumerator() => new GitUserEnumerator();
+        private GitUserEnumerator CreateEnumerator() => new GitUserEnumerator(this._passwdHandle);
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    NativeMethod.DisposePasswd(this._passwdHandle);
+                }
+                disposedValue = true;
+            }
+        }
+        void IDisposable.Dispose()
+        {
+            Dispose(true);
+        }
 
         public class GitUserEnumerator : IEnumerator<GitUser>
         {
@@ -22,16 +43,12 @@ namespace GitterKid.LinuxApi
 
             object IEnumerator.Current => this.GetCurrent();
 
-            public GitUserEnumerator()
+            internal GitUserEnumerator(IntPtr passwdHandle)
             {
-                this._passwdHandle = NativeMethod.BuildPasswdHandle();
-                NativeMethod.OpenPasswd(this._passwdHandle);
+                this._passwdHandle = passwdHandle;
             }
 
-            void IDisposable.Dispose()
-            {
-                NativeMethod.DisposePasswd(this._passwdHandle);
-            }
+            void IDisposable.Dispose() { }
 
             bool IEnumerator.MoveNext()
             {

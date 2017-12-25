@@ -37,7 +37,14 @@ G_KID_EXTERN int move_group_cursor_next (struct db *);
 G_KID_EXTERN char *get_group_name (struct group *);
 G_KID_EXTERN char *get_group_passwd (struct group *);
 G_KID_EXTERN int get_group_gid (struct group *);
-G_KID_EXTERN char** get_group_member_cursor (struct group *);
 
-G_KID_EXTERN size_t get_member_cursor_size ();
+struct group_member {
+    char** base;
+    int cursor;
+};
+G_KID_EXTERN struct group_member *get_group_member_cursor (struct group *);
+G_KID_EXTERN void reset_group_member_cursor (struct group_member *);
+G_KID_EXTERN char *get_current_group_member_name (struct group_member *);
+G_KID_EXTERN int group_member_move_next (struct group_member *);
+G_KID_EXTERN int dispose_group_member (struct group_member *);
 #endif

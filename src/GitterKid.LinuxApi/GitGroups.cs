@@ -5,16 +5,39 @@ using System.Collections;
 
 namespace GitterKid.LinuxApi
 {
-    public class GitGroups : IEnumerable<GitGroup>
+    public class GitGroups : IEnumerable<GitGroup>, IDisposable
     {
+        private IntPtr _groupHandle;
+        private bool disposedValue = false;
 
         IEnumerator<GitGroup> IEnumerable<GitGroup>.GetEnumerator() => this.CreateEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.CreateEnumerator();
 
-        public GitGroups() { }
+        public GitGroups()
+        {
+            this._groupHandle = NativeMethod.BuildGroupHandle();
+            NativeMethod.OpenGroup(this._groupHandle);
+        }
 
-        private GitGroupEnumerator CreateEnumerator() => new GitGroupEnumerator();
+        private GitGroupEnumerator CreateEnumerator() => new GitGroupEnumerator(this._groupHandle);
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    NativeMethod.DisposeGroup(this._groupHandle);
+                }
+                disposedValue = true;
+            }
+        }
+
+        void IDisposable.Dispose()
+        {
+            Dispose(true);
+        }
 
         public class GitGroupEnumerator : IEnumerator<GitGroup>
         {
@@ -23,16 +46,12 @@ namespace GitterKid.LinuxApi
 
             object IEnumerator.Current => this.GetCurrent();
 
-            public GitGroupEnumerator()
+            public GitGroupEnumerator(IntPtr groupHandle)
             {
-                this._groupHandle = NativeMethod.BuildGroupHandle();
-                NativeMethod.OpenGroup(this._groupHandle);
+                this._groupHandle = groupHandle;
             }
 
-            void IDisposable.Dispose()
-            {
-                //NativeMethod.DisposeGroup(this._groupHandle);
-            }
+            void IDisposable.Dispose() { }
 
             bool IEnumerator.MoveNext()
             {
@@ -78,8 +97,14 @@ namespace GitterKid.LinuxApi
             internal extern static int GetGroupId(IntPtr entryHandle);
             [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "get_group_member_cursor")]
             internal extern static IntPtr GetGroupMemberCursor(IntPtr entryHandle);
-            [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "get_memeber_cursor_size")]
-            internal extern static int GetMemberCursorSize();
+            [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "reset_group_member_cursor")]
+            internal extern static IntPtr ResetMemberCursor(IntPtr entryHandle);
+            [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "get_current_group_member_name")]
+            internal extern static IntPtr GetCurrentMemberName(IntPtr entryHandle);
+            [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "group_member_move_next")]
+            internal extern static int GroupMemberMoveNext(IntPtr entryHandle);
+            [DllImport("libgkid.so", CallingConvention = CallingConvention.Cdecl, EntryPoint = "dispose_group_member")]
+            internal extern static IntPtr DisposeGroupMember(IntPtr entryHandle);
         }
     }
 }

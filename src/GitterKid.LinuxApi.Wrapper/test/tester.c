@@ -36,11 +36,14 @@ int test_enum_group () {
             get_group_passwd (grp),
             get_group_gid (grp)
         );
-        char **mem = get_group_member_cursor (grp);
-
-        while (*mem) {
-            printf ("\t%s\n", *mem++);
+        
+        struct group_member *mem = get_group_member_cursor (grp);
+        reset_group_member_cursor (mem);
+        while (group_member_move_next (mem) == 0) {
+            printf ("\t\t%s\n", get_current_group_member_name (mem));
         }
+
+        dispose_group_member (mem);
 
     } while (move_group_cursor_next (db) == 0);
 

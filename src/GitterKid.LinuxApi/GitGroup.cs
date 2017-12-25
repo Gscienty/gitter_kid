@@ -49,6 +49,14 @@ namespace GitterKid.LinuxApi
             }
         }
 
+        public virtual IEnumerable<string> Members
+        {
+            get
+            {
+                return new GitGroupMembers(GitGroups.NativeMethod.GetGroupMemberCursor(this._groupHandle));
+            }
+        }
+
         public GitGroup(IntPtr handle)
         {
             this._groupHandle = handle;
@@ -69,37 +77,30 @@ namespace GitterKid.LinuxApi
 
         public class GitGroupMemberEnumerator : IEnumerator<string>
         {
-            private IntPtr _baseHandle;
-            private int _cursor;
+            private IntPtr _memberHandle;
             string IEnumerator<string>.Current => this.GetCurrentGroupName();
 
             object IEnumerator.Current => this.GetCurrentGroupName();
 
-            internal GitGroupMemberEnumerator(IntPtr baseHandle)
+            internal GitGroupMemberEnumerator(IntPtr memberHandle)
             {
-                this._baseHandle = baseHandle;
-                this._cursor = 0;
+                this._memberHandle = memberHandle;
+            }
+            private string GetCurrentGroupName()
+            {
+                return Marshal.PtrToStringAnsi(GitGroups.NativeMethod.GetCurrentMemberName(this._memberHandle));    
             }
 
-            unsafe private string GetCurrentGroupName() => Marshal.PtrToStringAnsi(
-                *(IntPtr *)(this._baseHandle + GitGroups.NativeMethod.GetMemberCursorSize() * this._cursor)
-            );
+            void IDisposable.Dispose() { }
 
-            void IDisposable.Dispose()
+            bool IEnumerator.MoveNext()
             {
-                
-            }
-
-            unsafe bool IEnumerator.MoveNext()
-            {
-                this._cursor++;
-
-                return *(IntPtr *)(this._baseHandle + GitGroups.NativeMethod.GetMemberCursorSize() * this._cursor) != IntPtr.Zero;
+                return GitGroups.NativeMethod.GroupMemberMoveNext(this._memberHandle) == 0;
             }
 
             void IEnumerator.Reset()
             {
-                this._cursor = 0;
+                GitGroups.NativeMethod.ResetMemberCursor(this._memberHandle);
             }
         }
     }

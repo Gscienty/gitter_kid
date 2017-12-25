@@ -178,9 +178,63 @@ char *get_group_passwd (struct group *grp) {
 int get_group_gid (struct group *grp) {
     return grp->gr_gid;
 }
-char** get_group_member_cursor (struct group *grp) {
-    return grp->gr_mem;
+
+struct group_member *get_group_member_cursor (struct group *grp) {
+    struct group_member *ret = (struct group_member *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        return NULL;
+    }
+    ret->base = grp->gr_mem;
+    ret->cursor = -1;
+
+    return ret;
 }
-size_t get_member_cursor_size () {
-    return sizeof (char **);
+void reset_group_member_cursor (struct group_member *grp_mem) {
+    if (grp_mem == NULL) {
+        return ;
+    }
+
+    grp_mem->cursor = 0;
+}
+
+char *get_current_group_member_name (struct group_member *grp_mem) {
+    if (grp_mem == NULL) {
+        return NULL;
+    }
+    if (grp_mem->cursor == -1) {
+        return NULL;
+    }
+
+    if (grp_mem->base[grp_mem->cursor] == NULL) {
+        return NULL;
+    }
+    else {
+        return grp_mem->base[grp_mem->cursor];
+    }
+}
+
+int group_member_move_next (struct group_member *grp_mem) {
+    if (grp_mem->base[grp_mem->cursor] == NULL) {
+        // cursor point to end of list
+        return -1;
+    }
+
+    grp_mem->cursor++;
+
+    if (grp_mem->base[grp_mem->cursor] == NULL) {
+        // cursor point to end of list
+        return -1;
+    }
+    else {
+        // normal
+        return 0;
+    }
+}
+
+int dispose_group_member (struct group_member *grp_mem) {
+    if (grp_mem == NULL) {
+        return -1;
+    }
+
+    free (grp_mem);
 }

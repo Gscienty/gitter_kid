@@ -21,6 +21,24 @@ namespace GitterKid.LinuxApi.Test
         public void GroupViewTest()
         {
             GitGroups groups = new GitGroups();
+            Assert.True(groups.Any(g => g.GroupId == 1));
+            Assert.False(groups.Any(g => g.GroupId == 0));
+        }
+
+        [Fact]
+        public void GroupUserViewTest()
+        {
+            GitGroups groups = new GitGroups();
+            string ask = "";
+            foreach (var group in groups)
+            {
+                ask += "[" + group.GroupName + "]";
+                foreach (var member in group.Members)
+                {
+                    ask += " " + member;
+                }
+            }
+            Assert.Equal(ask, "123333333333333333333333333333333333333333333");
         }
     }
 }

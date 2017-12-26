@@ -48,10 +48,18 @@ int test_enum_group () {
     } while (move_group_cursor_next (db) == 0);
 
     dispose_group (db);
+
+    return 0;
+}
+
+int test_user_create_account () {
+    printf ("%d\n", create_account ("test", 1));
+    return 0;
 }
 
 int main() {
     // test_enum_passwd ();
-    test_enum_group ();
+    // test_enum_group ();
+    test_user_create_account ();
     return 0;
 }

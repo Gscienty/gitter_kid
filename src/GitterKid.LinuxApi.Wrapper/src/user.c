@@ -242,3 +242,22 @@ int dispose_group_member (struct group_member *grp_mem) {
 
     free (grp_mem);
 }
+
+struct db *build_shadow_handle () {
+    struct db *ret = (struct db *) malloc (sizeof (*ret));
+    if (!ret) {
+        return NULL;
+    }
+
+    strcpy(ret->filename, "/etc/shadow");
+    ret->ops = &spw_ops;
+    ret->head = ret->tail = ret->cursor = NULL;
+}
+
+int open_shadow (struct db *db) {
+    return open_db (db, O_RDONLY);
+}
+
+void dispose_shadow (struct db *db) {
+    dispose_db (db);
+}

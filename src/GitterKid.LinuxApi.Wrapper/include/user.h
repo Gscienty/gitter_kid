@@ -7,6 +7,7 @@
 
 #include "define.h"
 #include "__pw.h"
+#include "__spw.h"
 #include "__grp.h"
 
 G_KID_EXTERN struct db *build_passwd_handle ();
@@ -49,4 +50,10 @@ G_KID_EXTERN int get_group_member_count (struct group_member *);
 G_KID_EXTERN char *get_current_group_member_name (struct group_member *);
 G_KID_EXTERN int group_member_move_next (struct group_member *);
 G_KID_EXTERN int dispose_group_member (struct group_member *);
+
+G_KID_EXTERN struct db *build_shadow_handle ();
+G_KID_EXTERN int open_shadow (struct db *);
+G_KID_EXTERN void dispose_shadow (struct db *);
+
+G_KID_EXTERN int create_account (const char *uname, const char *home, gid_t gid);
 #endif

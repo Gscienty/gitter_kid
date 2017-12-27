@@ -1,5 +1,7 @@
 #include "user.h"
+#include "gitfs.h"
 #include <stdio.h>
+#include <string.h>
 
 int test_enum_passwd () {
     struct db *db = build_passwd_handle ();
@@ -40,7 +42,7 @@ int test_enum_group () {
         struct group_member *mem = get_group_member_cursor (grp);
         reset_group_member_cursor (mem);
         do {
-            printf ("\t\t%d\t%d\n", get_current_group_member_name (mem), get_group_member_count (mem));
+            printf ("\t\t%s\t%d\n", get_current_group_member_name (mem), get_group_member_count (mem));
         } while (group_member_move_next (mem) == 0);
 
         dispose_group_member (mem);
@@ -53,13 +55,29 @@ int test_enum_group () {
 }
 
 int test_user_create_account () {
-    printf ("%d\n", create_account ("test", 1));
+    printf ("%d\n", create_account ("test", 1, 1));
     return 0;
+}
+
+int test_market_init () {
+    struct git_market *market = git_market_build("/home/ant");
+
+    git_market_cursor_reset (market);
+
+    do {
+        struct git_repo *repo = git_market_cursor_current (market);
+        
+        if (strcmp (git_repo_name (repo), "repo") == 0) {
+            git_obj_get (repo, "b4d01e9b0c4a9356736dfddf8830ba9a54f5271c", COMMIT);
+        }
+        printf ("%s - %s, %d\n", git_repo_path (repo), git_repo_name (repo), strcmp (git_repo_name (repo), "gitterRepo"));
+    } while (git_market_cursor_move_next (market) == 0);
 }
 
 int main() {
     // test_enum_passwd ();
     // test_enum_group ();
-    test_user_create_account ();
+    // test_user_create_account ();
+    test_market_init ();
     return 0;
 }

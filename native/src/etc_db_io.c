@@ -1,9 +1,10 @@
-#include "__io.h"
+#include "user.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <malloc.h>
 
 #define BUFLEN 1024
 int open_db (struct db *db, int mode) {

@@ -49,9 +49,10 @@ G_KID_EXTERN char *git_repo_path (struct git_repo *repo);
 G_KID_EXTERN char *git_repo_name (struct git_repo *repo);
 
 enum git_obj_type {
-    BLOB,
-    COMMIT,
-    TREE
+    GIT_OBJ_TYPE_UNKNOW,
+    GIT_OBJ_TYPE_BLOB,
+    GIT_OBJ_TYPE_COMMIT,
+    GIT_OBJ_TYPE_TREE
 };
 
 struct git_obj {
@@ -108,7 +109,7 @@ struct git_obj_tree {
     struct git_obj_tree_item *cursor;
 };
 
-G_KID_EXTERN struct git_obj *git_obj_get (struct git_repo *repo, const char* signture, enum git_obj_type type);
+G_KID_EXTERN struct git_obj *git_obj_get (struct git_repo *repo, const char* signture);
 G_KID_EXTERN void git_obj_dispose (struct git_repo *repo);
 G_KID_EXTERN struct git_obj_blob *git_obj_get_blob (struct git_obj *obj);
 void __git_obj_blob_dispose (struct git_obj_blob *obj);

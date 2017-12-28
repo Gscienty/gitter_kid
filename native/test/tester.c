@@ -68,7 +68,7 @@ int test_market_init () {
         struct git_repo *repo = git_market_cursor_current (market);
         
         if (strcmp (git_repo_name (repo), "repo") == 0) {
-            struct git_obj *obj = git_obj_get (repo, "cdd99b878ae9a412cd9b6627079574674937922a");
+            struct git_obj *obj = git_obj_get (repo, "ce013625030ba8dba906f756967f9e9ca394464a");
         }
     } while (git_market_cursor_move_next (market) == 0);
 }

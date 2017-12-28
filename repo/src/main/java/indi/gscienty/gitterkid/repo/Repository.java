@@ -1,4 +1,4 @@
-package indi.gscienty.gitterkid.repo.entity;
+package indi.gscienty.gitterkid.repo;
 
 import com.sun.jna.Pointer;
 

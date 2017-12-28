@@ -2,7 +2,7 @@ package indi.gscienty.gitterkid.repo;
 
 import com.sun.jna.Pointer;
 
-import indi.gscienty.gitterkid.repo.entity.Repository;
+import indi.gscienty.gitterkid.repo.Repository;
 import indi.gscienty.gitterkid.repo.nativelib.IMarketLibrary;
 import java.util.Iterator;
 

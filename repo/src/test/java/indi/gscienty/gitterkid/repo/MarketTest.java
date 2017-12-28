@@ -1,6 +1,6 @@
 package indi.gscienty.gitterkid.repo;
 
-import indi.gscienty.gitterkid.repo.entity.Repository;
+import indi.gscienty.gitterkid.repo.Repository;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;

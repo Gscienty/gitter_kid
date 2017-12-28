@@ -73,7 +73,7 @@ struct git_obj_commit *git_obj_get_commit (struct git_obj *obj) {
             if (author == NULL) {
                 // cannnot transfer author
                 DBG_LOG (DBG_ERROR, "git_obj_get_commit: author format error");
-                free (ret);
+                __git_obj_commit_dispose (ret);
                 return NULL;
             }
             ret->author = author;
@@ -83,7 +83,7 @@ struct git_obj_commit *git_obj_get_commit (struct git_obj *obj) {
             if (committer == NULL) {
                 // cannnot transfer committer
                 DBG_LOG (DBG_ERROR, "git_obj_get_commit: committer format error");
-                free (ret);
+                __git_obj_commit_dispose (ret);
                 return NULL;
             }
             ret->committer = committer;
@@ -94,7 +94,7 @@ struct git_obj_commit *git_obj_get_commit (struct git_obj *obj) {
             if (parent == NULL) {
                 // not enough free memory
                 DBG_LOG (DBG_ERROR, "git_obj_get_commit: not enough free memory");
-                free (ret);
+                __git_obj_commit_dispose (ret);
                 return NULL;
             }
             parent->sign = ch;
@@ -112,4 +112,26 @@ struct git_obj_commit *git_obj_get_commit (struct git_obj *obj) {
         ch = end_ptr + 1;
     }
     return ret;
+}
+
+void __git_obj_commit_dispose (struct git_obj_commit *obj) {
+    if (obj == NULL) {
+        return ;
+    }
+
+    if (obj->author != NULL) {
+        free (obj->author);
+    }
+    if (obj->committer != NULL) {
+        free (obj->committer);
+    }
+    if (obj->parent_head != NULL) {
+        while (obj->parent_head) {
+            struct git_obj_commit_parent *next = obj->parent_head->next;
+            free (obj->parent_head);
+            obj->parent_head = next;
+        }
+    }
+
+    free (obj);
 }

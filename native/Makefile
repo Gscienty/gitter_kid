@@ -11,7 +11,7 @@ CC = gcc
 SHARED = -shared
 FPIC = -fPIC
 
-LOG_FLAG = -D LOG_FLAG=1
+LOG_FLAG = -D DBG=1
 
 $(shell mkdir -p ${BIN_DIR})
 $(shell mkdir -p ${OBJS_DIR})

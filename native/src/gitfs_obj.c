@@ -1,4 +1,5 @@
 #include "gitfs.h"
+#include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
 #include <zlib.h>
@@ -9,7 +10,7 @@ void *__zalloc (void *q, unsigned int n, unsigned int m) {
     return calloc (n, m);
 }
 
-void *__zfree (void *q, void *p) {
+void __zfree (void *q, void *p) {
     q = NULL;
 
     free (p);
@@ -39,7 +40,7 @@ struct __obj_file_ret {
 struct __obj_file_ret *__get_repo_obj_by_sign (
     struct git_repo *repo,
     const char *signture,
-    const char obj_file_path) {
+    const char *obj_file_path) {
 
     if (obj_file_path == NULL) {
         return NULL;
@@ -58,12 +59,12 @@ struct __obj_file_ret *__get_repo_obj_by_sign (
     fseek (zipfile, 0, SEEK_SET);
 
     unsigned char *buf = malloc (sizeof (*buf) * flen);
-    if (zipbuf == NULL) {
+    if (buf == NULL) {
         // have not enough free memory
         return NULL;
     }
 
-    fread (zipbuf, sizeof (unsigned char), flen, zipfile);
+    fread (buf, sizeof (unsigned char), flen, zipfile);
 
     ret->buf = buf;
     ret->length = flen;
@@ -80,7 +81,7 @@ struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer) {
         return NULL;
     }
 
-    int init_buf_length = sizeof (unsigned char *) * (flen * 3 + 1024);
+    int init_buf_length = sizeof (unsigned char *) * (zip_buffer->length * 3 + 1024);
     ret->buf = (unsigned char *) malloc (sizeof (unsigned char) * init_buf_length);
     if (ret->buf == NULL) {
         // have not enough free memory
@@ -101,7 +102,7 @@ struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer) {
     inflate (&d_stream, Z_NO_FLUSH);
     inflateEnd (&d_stream);
 
-    ret->length = init_buf_length - d_stream->avail_out;
+    ret->length = init_buf_length - d_stream.avail_out;
 
     return ret;
 }
@@ -115,7 +116,7 @@ struct __obj_file_header *__get_git_obj_header (struct __obj_file_ret *inflated_
     if (inflated_buffer == NULL) {
         return NULL;
     }
-    struct __obj_file_ret *ret = (struct __obj_file_header *) malloc (sizeof (*ret));
+    struct __obj_file_header *ret = (struct __obj_file_header *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // not enough free memory
         return NULL;
@@ -134,16 +135,17 @@ struct __obj_file_header *__get_git_obj_header (struct __obj_file_ret *inflated_
         return NULL;
     }
     *space_ptr = 0;
-    ret->length = strtol (space_ptr + 1);
-    ret->type = enum git_obj_type::GIT_OBJ_TYPE_UNKNOW;
+    char *ep;
+    ret->length = strtol (space_ptr + 1, &ep, 10);
+    ret->type = GIT_OBJ_TYPE_UNKNOW;
     if (strcmp (header_line, "blob") == 0) {
-        ret->type = enum git_obj_type::GIT_OBJ_TYPE_BLOB;
+        ret->type = GIT_OBJ_TYPE_BLOB;
     }
     else if (strcmp (header_line, "commit") == 0) {
-        ret->type = enum git_obj_type::GIT_OBJ_TYPE_COMMIT;
+        ret->type = GIT_OBJ_TYPE_COMMIT;
     }
     else if (strcmp (header_line, "tree") == 0) {
-        ret->type = enum git_obj_type::GIT_OBJ_TYPE_TREE;
+        ret->type = GIT_OBJ_TYPE_TREE;
     }
     free (header_line);
 
@@ -161,25 +163,26 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
         // sign illegal
         return NULL;
     }
-    if (zipfile == NULL) {
-        // obj file not exist
-        return NULL;
-    }
     register char *sign_ch;
-    for (sign_ch = signture; *sign_ch; sign_ch++) {
+    for (sign_ch = (char *) signture; *sign_ch; sign_ch++) {
         if (!(('0' <= *sign_ch && *sign_ch <= '9') || ('a' <= *sign_ch && *sign_ch <= 'f'))) {
             // sign illegal
             return NULL;
         }
     }
+
+    DBG_LOG (DBG_INFO, "git_obj_get: passed parameters check.");
+
     struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
+        DBG_LOG (DBG_ERROR, "git_obj_get: not enough free memory");
         return NULL;
     }
     char *obj_file_path = __generate_obj_file_path (repo, signture);
     if (obj_file_path == NULL) {
         //have not enough free memory
+        DBG_LOG (DBG_ERROR, "git_obj_get: not enough free memory");
         free (ret);
         return NULL;
     }
@@ -187,6 +190,7 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
     struct __obj_file_ret *obj_buffer = __get_repo_obj_by_sign (repo, signture, obj_file_path);
     if (obj_buffer == NULL) {
         // cannot get obj file. reason maybe have not enough memory or the object file not exist.
+        DBG_LOG (DBG_ERROR, "git_obj_get: cannot get obj file");
         free (obj_file_path);
         free (ret);
         return NULL;
@@ -199,13 +203,16 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
     if (inflated_buffer == NULL) {
         // cannot inflate buffer. reson maybe have not enough memory
         // or occur a error when inflating this buffer.
+        DBG_LOG (DBG_ERROR, "git_obj_get: cannot inflate buffer");
         free (obj_file_path);
         free (ret);
         return NULL;
     }
     // try get object file header, which contains object file's type & length
     struct __obj_file_header *obj_header = __get_git_obj_header (inflated_buffer);
-    if (obj_header == NULL || obj_header->type == enum git_obj_type::GIT_OBJ_TYPE_UNKNOW) {
+    if (obj_header == NULL || obj_header->type == GIT_OBJ_TYPE_UNKNOW) {
+        // cannot recognize object header
+        DBG_LOG (DBG_ERROR, "git_obj_get: cannot recognize object header");
         free (obj_file_path);
         free (ret);
         free (inflated_buffer->buf);
@@ -218,7 +225,7 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
 
     ret->buf = inflated_buffer->buf;
     ret->path = obj_file_path;
-    ret->sign = signture;
+    ret->sign = strdup (signture);
     ret->type = obj_header->type;
     ret->size = obj_header->length;
     // mark: body is sub-block of 'buf' (used to transfer to special obj type)
@@ -228,19 +235,22 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
     free (inflated_buffer);
 
     switch (ret->type) {
-        case enum git_obj_type::GIT_OBJ_TYPE_BLOB:
+        case GIT_OBJ_TYPE_BLOB:
+            DBG_LOG (DBG_INFO, "git_obj_get: transfer to blob");
             ret->ptr = (void *) git_obj_get_blob (ret);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
             break;
-        case enum git_obj_type::GIT_OBJ_TYPE_COMMIT:
+        case GIT_OBJ_TYPE_COMMIT:
+            DBG_LOG (DBG_INFO, "git_obj_get: transfer to commit");
             ret->ptr = (void *) git_obj_get_commit (ret);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
             break;
-        case enum git_obj_type::GIT_OBJ_TYPE_TREE:
+        case GIT_OBJ_TYPE_TREE:
+            DBG_LOG (DBG_INFO, "git_obj_get: transfer to tree");
             ret->ptr = (void *) git_obj_get_tree (ret);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
@@ -248,9 +258,11 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
             break;
         default:
             obj_type_occur_error:
+            DBG_LOG (DBG_ERROR, "git_obj_get: cannot transfer special object");
             // occur error.
             free (ret->buf);
             free (ret->path);
+            free (ret->sign);
             free (ret);
             return NULL;
     }

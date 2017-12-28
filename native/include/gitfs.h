@@ -84,9 +84,9 @@ struct git_obj_commit_parent {
 };
 
 struct git_obj_commit {
-    struct git_obj_commit_parent *head;
-    struct git_obj_commit_parent *tail;
-    struct git_obj_commit_parent *cursor;
+    struct git_obj_commit_parent *parent_head;
+    struct git_obj_commit_parent *parent_tail;
+    struct git_obj_commit_parent *parent_cursor;
 
     char *tree_sign;
     char *message;

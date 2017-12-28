@@ -55,7 +55,7 @@ int test_enum_group () {
 }
 
 int test_user_create_account () {
-    printf ("%d\n", create_account ("test", 1, 1));
+    printf ("%d\n", create_account ("test", "/home/test", 1));
     return 0;
 }
 
@@ -68,9 +68,9 @@ int test_market_init () {
         struct git_repo *repo = git_market_cursor_current (market);
         
         if (strcmp (git_repo_name (repo), "repo") == 0) {
-            git_obj_get (repo, "b4d01e9b0c4a9356736dfddf8830ba9a54f5271c", COMMIT);
+            struct git_obj *obj = git_obj_get (repo, "6516615f6f72011317b85b0726ce80dbe3fe2f82");
+            DBG_LOG (DBG_INFO, ((struct git_obj_commit *) obj->ptr)->parent_head->sign);
         }
-        printf ("%s - %s, %d\n", git_repo_path (repo), git_repo_name (repo), strcmp (git_repo_name (repo), "gitterRepo"));
     } while (git_market_cursor_move_next (market) == 0);
 }
 

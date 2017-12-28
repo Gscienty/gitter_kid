@@ -112,7 +112,7 @@ struct git_repo *git_market_cursor_current (const struct git_market *market) {
 
 void git_market_cursor_reset (struct git_market *market) {
     if (market == NULL) {
-        return NULL;
+        return ;
     }
     market->cursor = market->head;
 }

@@ -68,8 +68,7 @@ int test_market_init () {
         struct git_repo *repo = git_market_cursor_current (market);
         
         if (strcmp (git_repo_name (repo), "repo") == 0) {
-            struct git_obj *obj = git_obj_get (repo, "6516615f6f72011317b85b0726ce80dbe3fe2f82");
-            DBG_LOG (DBG_INFO, ((struct git_obj_commit *) obj->ptr)->parent_head->sign);
+            struct git_obj *obj = git_obj_get (repo, "cdd99b878ae9a412cd9b6627079574674937922a");
         }
     } while (git_market_cursor_move_next (market) == 0);
 }

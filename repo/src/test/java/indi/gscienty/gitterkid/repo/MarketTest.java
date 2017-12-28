@@ -1,5 +1,6 @@
 package indi.gscienty.gitterkid.repo;
 
+import indi.gscienty.gitterkid.repo.entity.Repository;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -33,6 +34,11 @@ public class MarketTest
      */
     public void testApp()
     {
+        Market market = new Market("/home");
 
+        for (Repository item : market) {
+            System.out.println(item.getName());
+            System.out.println();
+        }
     }
 }

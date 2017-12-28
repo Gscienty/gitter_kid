@@ -6,4 +6,6 @@
 #define G_KID_EXTERN
 #endif // __GNUC__
 
+#include "log.h"
+
 #endif //_G_KID_DEFINE_

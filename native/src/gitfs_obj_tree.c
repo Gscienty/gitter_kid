@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 
-struct git_obj_tree *git_obj_get_tree (struct git_obj *obj) {
+struct git_obj_tree *__git_obj_transfer_tree (struct git_obj *obj) {
     struct git_obj_tree *ret = (struct git_obj_tree *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
@@ -77,4 +77,17 @@ void __git_obj_tree_dispose (struct git_obj_tree *obj) {
         obj->head = next;
     }
     free (obj);
+}
+
+struct git_obj_tree *git_obj_get_tree (struct git_obj *obj) {
+    if (obj == NULL) {
+        return NULL;
+    }
+
+    if (obj->type == GIT_OBJ_TYPE_TREE) {
+        return (struct git_obj_tree *) obj->ptr;
+    }
+    else {
+        return NULL;
+    }
 }

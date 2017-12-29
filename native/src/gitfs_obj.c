@@ -237,21 +237,21 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
     switch (ret->type) {
         case GIT_OBJ_TYPE_BLOB:
             DBG_LOG (DBG_INFO, "git_obj_get: transfer to blob");
-            ret->ptr = (void *) git_obj_get_blob (ret);
+            ret->ptr = (void *) __git_obj_transfer_blob (ret);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
             break;
         case GIT_OBJ_TYPE_COMMIT:
             DBG_LOG (DBG_INFO, "git_obj_get: transfer to commit");
-            ret->ptr = (void *) git_obj_get_commit (ret);
+            ret->ptr = (void *) __git_obj_transfer_commit (ret);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
             break;
         case GIT_OBJ_TYPE_TREE:
             DBG_LOG (DBG_INFO, "git_obj_get: transfer to tree");
-            ret->ptr = (void *) git_obj_get_tree (ret);
+            ret->ptr = (void *) __git_obj_transfer_tree (ret);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
@@ -268,4 +268,30 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
     }
     
     return ret;
+}
+
+enum git_obj_type git_obj_type (struct git_obj *obj) {
+    return obj->type;
+}
+
+void git_obj_dispose (struct git_obj *obj) {
+    if (obj == NULL) {
+        return ;
+    }
+    switch (obj->type) {
+        case GIT_OBJ_TYPE_BLOB:
+            __git_obj_blob_dispose ((struct git_obj_blob *) obj->ptr);
+            break;
+        case GIT_OBJ_TYPE_COMMIT:
+            __git_obj_commit_dispose ((struct git_obj_commit *) obj->ptr);
+            break;
+        case GIT_OBJ_TYPE_TREE:
+            __git_obj_tree_dispose ((struct git_obj_tree *) obj->ptr);
+            break;
+    }
+
+    free (obj->buf);
+    free (obj->path);
+    free (obj->sign);
+    free (obj);
 }

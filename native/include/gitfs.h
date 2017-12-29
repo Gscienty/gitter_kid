@@ -110,12 +110,18 @@ struct git_obj_tree {
 };
 
 G_KID_EXTERN struct git_obj *git_obj_get (struct git_repo *repo, const char* signture);
-G_KID_EXTERN void git_obj_dispose (struct git_repo *repo);
+G_KID_EXTERN void git_obj_dispose (struct git_obj *obj);
+G_KID_EXTERN enum git_obj_type git_obj_type (struct git_obj *obj);
+
 G_KID_EXTERN struct git_obj_blob *git_obj_get_blob (struct git_obj *obj);
-void __git_obj_blob_dispose (struct git_obj_blob *obj);
 G_KID_EXTERN struct git_obj_commit *git_obj_get_commit (struct git_obj *obj);
-void __git_obj_commit_dispose (struct git_obj_commit *obj);
 G_KID_EXTERN struct git_obj_tree *git_obj_get_tree (struct git_obj *obj);
+
+struct git_obj_blob *__git_obj_transfer_blob (struct git_obj *obj);
+void __git_obj_blob_dispose (struct git_obj_blob *obj);
+struct git_obj_commit *__git_obj_transfer_commit (struct git_obj *obj);
+void __git_obj_commit_dispose (struct git_obj_commit *obj);
+struct git_obj_tree *__git_obj_transfer_tree (struct git_obj *obj);
 void __git_obj_tree_dispose (struct git_obj_tree *obj);
 
 G_KID_EXTERN int git_obj_blob_length (struct git_obj_blob *blob_obj);

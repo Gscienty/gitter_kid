@@ -40,7 +40,7 @@ struct git_person_log *__transfer_person_log (const char *ch) {
         return ret;
 }
 
-struct git_obj_commit *git_obj_get_commit (struct git_obj *obj) {
+struct git_obj_commit *__git_obj_transfer_commit (struct git_obj *obj) {
     struct git_obj_commit *ret = (struct git_obj_commit *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
@@ -134,4 +134,17 @@ void __git_obj_commit_dispose (struct git_obj_commit *obj) {
     }
 
     free (obj);
+}
+
+struct git_obj_commit *git_obj_get_commit (struct git_obj *obj) {
+    if (obj == NULL) {
+        return NULL;
+    }
+
+    if (obj->type == GIT_OBJ_TYPE_COMMIT) {
+        return (struct git_obj_commit *) obj->ptr;
+    }
+    else {
+        return NULL;
+    }
 }

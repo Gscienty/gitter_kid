@@ -1,0 +1,36 @@
+package indi.gscienty.gitterkid.repo;
+
+import com.sun.jna.Pointer;
+
+import indi.gscienty.gitterkid.repo.nativelib.IGitObjectLibrary;
+
+public abstract class GitObject {
+    protected IGitObjectLibrary lib;
+    protected Pointer handle;
+    private String signture;
+    private GitObjectType objectType;
+
+    public GitObject(Repository repository, String signture) {
+        this.lib = IGitObjectLibrary.Instance;
+        this.signture = signture;
+        this.handle = this.lib.git_obj_get(repository.getHandle(), this.signture);
+        
+        this.objectType = null;
+    }
+
+    public GitObjectType getObjectType() {
+        if (this.objectType == null) {
+            int numericObjType = this.lib.git_obj_type(this.handle);
+
+            switch (numericObjType) {
+                case 0: this.objectType = GitObjectType.Unknow; break;
+                case 1: this.objectType = GitObjectType.Blob; break;
+                case 2: this.objectType = GitObjectType.Commit; break;
+                case 3: this.objectType = GitObjectType.Tree; break;
+                default: this.objectType = GitObjectType.Unknow;
+            }
+        }
+
+        return this.objectType;
+    }
+}

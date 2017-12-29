@@ -9,5 +9,12 @@ public interface IGitObjectLibrary extends Library {
 
     Pointer git_obj_get(Pointer repositoryPointer, String signture);
     void git_obj_dispose(Pointer gitObjectPointer);
-    
+    int git_obj_type(Pointer gitObjectPointer);
+
+    Pointer git_obj_get_blob(Pointer gitObjectPointer);
+    Pointer git_obj_get_commit(Pointer gitObjectPointer);
+    Pointer git_obj_get_tree(Pointer gitObjectPointer);
+
+    int git_obj_blob_length(Pointer blobPointer);
+    byte[] git_obj_blob_content(Pointer blobPointer);
 }

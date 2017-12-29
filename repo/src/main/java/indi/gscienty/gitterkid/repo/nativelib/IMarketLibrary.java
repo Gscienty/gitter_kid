@@ -19,7 +19,7 @@ public interface IMarketLibrary extends Library {
     // get current git repository
     Pointer git_market_cursor_current(Pointer marketPointer);
     // get repository's path
-    String git_repo_path (Pointer repositoryPointer);
+    String git_repo_path(Pointer repositoryPointer);
     // get repository's name
-    String git_repo_name (Pointer repositoryPointer);
+    String git_repo_name(Pointer repositoryPointer);
 }

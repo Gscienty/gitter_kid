@@ -26,3 +26,17 @@ struct git_obj_blob *git_obj_get_blob (struct git_obj *obj) {
         return NULL;
     }
 }
+
+int git_obj_blob_length (struct git_obj_blob *blob_obj) {
+    if (blob_obj == NULL) {
+        return 0;
+    }
+    return blob_obj->length;
+}
+
+void *git_obj_blob_content (struct git_obj_blob *blob_obj) {
+    if (blob_obj == NULL) {
+        return 0;
+    }
+    return blob_obj->content;
+}

@@ -16,5 +16,5 @@ public interface IGitObjectLibrary extends Library {
     Pointer git_obj_get_tree(Pointer gitObjectPointer);
 
     int git_obj_blob_length(Pointer blobPointer);
-    byte[] git_obj_blob_content(Pointer blobPointer);
+    Pointer git_obj_blob_content(Pointer blobPointer);
 }

@@ -15,7 +15,7 @@ public class GitBlob extends GitObject {
 
     private void Initialize() {
         this.length = this.lib.git_obj_blob_length(this.blobHandle);
-        this.content = this.lib.git_obj_blob_content(this.blobHandle);
+        this.content = this.lib.git_obj_blob_content(this.blobHandle).getByteArray(0, this.length);
     }
 
     public int getLength() {

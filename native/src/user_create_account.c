@@ -56,13 +56,46 @@ int __create_home (const char *home, uid_t uid, gid_t gid) {
     return 0;
 }
 
-int create_account (const char *uname, const char *home, gid_t gid) {
-    uid_t uid = __find_new_uid (uname);
-    if (uid < 0) {
-        return uid;
+int create_account (const char *name, const char *home, gid_t gid) {
+    pam_handle_t *pamh = NULL;
+    int retval = PAM_SUCCESS;
+
+    struct passwd *pampw = getpwuid (getuid ());
+    if (pampw == NULL) {
+        retval = PAM_USER_UNKNOWN;
     }
 
-    if (__create_home (home, uid, gid) == 0) {
-        
+    struct pam_conv conv = { misc_conv, NULL };
+
+    if (retval == PAM_SUCCESS) {
+        retval = pam_start ("useradd", pampw->pw_name, &conv, &pamh);
+    }
+    if (retval == PAM_SUCCESS) {
+        retval = pam_authenticate (pamh, 0);
+        if (retval != PAM_SUCCESS) {
+            pam_end (pamh, retval);
+        }
+    }
+    if (retval == PAM_SUCCESS) {
+        retval = pam_acct_mgmt (pamh, 0);
+        if (retval != PAM_SUCCESS) {
+            pam_end (pamh, retval);
+        }
+    }
+    if (retval != PAM_SUCCESS) {
+        DBG_LOG (DBG_ERROR, "PAM authentication failed");
+        return -1;
+    }
+
+    if (getpwnam (name)) {
+        DBG_LOG (DBG_ERROR, "use name is used");
+        return -2;
+    }
+
+    uid_t uid = __find_new_uid (name);
+    if (uid < 0) {
+        pam_end (pamh, 0);
+        DBG_LOG (DBG_ERROR, "could not find new uid");
+        return -3;
     }
 }

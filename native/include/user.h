@@ -110,6 +110,7 @@ static struct ops grp_ops = {
 G_KID_EXTERN struct db *build_passwd_handle ();
 G_KID_EXTERN int open_passwd (struct db *);
 G_KID_EXTERN void dispose_passwd (struct db *);
+G_KID_EXTERN int save_db (struct db *);
 
 G_KID_EXTERN int reset_passwd_cursor (struct db *);
 G_KID_EXTERN struct passwd *get_current_passwd (struct db *);

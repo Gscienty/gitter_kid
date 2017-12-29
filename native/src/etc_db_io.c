@@ -5,6 +5,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <malloc.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <utime.h>
 
 #define BUFLEN 1024
 int open_db (struct db *db, int mode) {
@@ -126,4 +129,210 @@ void dispose_db (struct db *db) {
     fclose (db->fp);
 
     free (db);
+}
+
+struct entry *__find_entry_by_name (struct db *db, const char *name) {
+    struct entry *ret = NULL;
+    for (ret = db->head; ret; ret->next) {
+        void *ep = ret->ptr;
+        if (ep && strcmp (db->ops->getname (ret->ptr), name) == 0) {
+            break;
+        }
+    }
+
+    return ret;
+}
+
+int db_append (struct db *db, const void *p) {
+    if (!db->isopen || db->readonly) {
+        DBG_LOG (DBG_ERROR, "db_append: could not append premission denied");
+        return -1;
+    }
+
+    void *ptr = db->ops->dup (p);
+    if (ptr == NULL) {
+        DBG_LOG (DBG_ERROR, "db_append: format error. count not transfer legal format");
+        return -2;
+    }
+
+    struct entry *entry = __find_entry_by_name (db, db->ops->getname (ptr));
+    if (entry != NULL) {
+        db->ops->free (ptr);
+        DBG_LOG (DBG_WARNING, "db_append: exist same name's entry");
+        return -3;
+    }
+
+    entry = (struct entry *) malloc (sizeof (*entry));
+    if (entry == NULL) {
+        db->ops->free (ptr);
+        DBG_LOG (DBG_ERROR, "db_append: have not enough free memory");
+        return -4;
+    }
+
+    entry->ptr = ptr;
+    entry->line = NULL;
+    entry->changed = 1;
+    entry->next = NULL;
+    entry->prev = db->tail;
+    if (db->head == NULL) {
+        db->head = entry;
+    }
+    if (db->tail != NULL) {
+        db->tail->next = entry;
+    }
+    db->tail = entry;
+    db->changed = 1;
+
+    return 0;
+}
+
+int __backup (const char *backup, FILE *fp) {
+    struct stat sb;
+    struct utimbuf ub;
+    if (fstat (fileno (fp), &sb)) {
+        return -1;
+    }
+    mode_t mask = umask (077);
+    FILE *bkfp = fopen (backup, "w");
+    umask (mask);
+    if (bkfp == NULL) {
+        return -1;
+    }
+    char c;
+    if (fseek (fp, 0, SEEK_SET) == 0) {
+        while ((c = getc (fp)) != EOF) {
+            if (putc (c, bkfp) == EOF) {
+                break;
+            }
+        }
+    }
+    if (c != EOF || ferror (fp) || fflush (bkfp)) {
+        fclose (bkfp);
+        return -1;
+    }
+    if (fclose (bkfp)) {
+        return -1;
+    }
+
+    ub.actime = sb.st_atime;
+    ub.modtime = sb.st_mtime;
+    utime (backup, &ub);
+    return 0;
+}
+
+FILE *__fopen_perms (const char *name, const char *mode, const struct stat *sb) {
+    mode_t mask = umask (0777);
+    FILE *fp = fopen (name, mode);
+    umask (mask);
+    if (fp == NULL) {
+        return NULL;
+    }
+
+    if (fchown (fileno (fp), sb->st_uid, sb->st_gid)) {
+        fclose (fp);
+        unlink (name);
+        return NULL;
+    }
+    if (fchmod (fileno (fp), sb->st_mode & 0664)) {
+        fclose (fp);
+        unlink (name);
+        return NULL;
+    }
+
+    return fp;
+}
+
+int __write_db (const struct db *db) {
+    struct entry *p;
+    for (p = db->head; p; p = p->next) {
+        if (p->changed) {
+            void *ptr = p->ptr;
+            if (db->ops->put (ptr, db->fp)) {
+                return -1;
+            }
+            else if (p->line) {
+                if (db->ops->fputs (p->line, db->fp) == EOF) {
+                    return -1;
+                }
+                if (putc ('\n', db->fp) == EOF) {
+                    return -1;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+int save_db (struct db *db) {
+    if (db == NULL) {
+        return -1;
+    }
+    if (db->isopen == 0) {
+        DBG_LOG (DBG_ERROR, "file is not opend");
+        return -2;
+    }
+    if (db->changed == 0) {
+        // success
+        return 0;
+    }
+    if (db->readonly == 1) {
+        DBG_LOG (DBG_ERROR, "premission denied. this file cannot write");
+        return -3;
+    }
+    char buf[1024];
+    struct stat sb;
+    memset (&sb, 0, sizeof (sb));
+    if (db->fp) {
+        if (fstat (fileno (db->fp), &sb)) {
+            fclose (db->fp);
+            db->fp = NULL;
+            DBG_LOG (DBG_ERROR, "occur error");
+            return -4;
+        }
+
+        snprintf (buf, sizeof (buf), "%s-", db->filename);
+        if (__backup (buf, db->fp) != 0) {
+            DBG_LOG (DBG_ERROR, "occur error");
+            return -4;
+        }
+        if (fclose (db->fp)) {
+            DBG_LOG (DBG_ERROR, "occur error");
+            return -4;
+        }
+    }
+    else {
+        sb.st_mode = 0400;
+        sb.st_uid = 0;
+        sb.st_gid = 0;
+    }
+
+    snprintf (buf, sizeof (buf), "%s+", db->filename);
+    db->fp = __fopen_perms (buf, "w", &sb);
+    if (db->fp == NULL) {
+        DBG_LOG (DBG_ERROR, "occur error");
+        return -5;
+    }
+    if (__write_db (db)) {
+        DBG_LOG (DBG_ERROR, "occur error");
+        return -6;
+    }
+    if (fflush (db->fp)) {
+        DBG_LOG (DBG_ERROR, "occur error");
+        return -7;
+    }
+    if (fsync (fileno (db->fp))) {
+        DBG_LOG (DBG_ERROR, "occur error");
+        return -8;
+    }
+    if (fclose (db->fp)) {
+        DBG_LOG (DBG_ERROR, "occur error");
+        return -9;
+    }
+    if (rename (buf, db->filename)) {
+        DBG_LOG (DBG_ERROR, "occur error");
+        return -10;
+    }
+
+    return 0;
 }

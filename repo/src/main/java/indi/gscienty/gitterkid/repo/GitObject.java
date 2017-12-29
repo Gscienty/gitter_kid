@@ -6,21 +6,21 @@ import indi.gscienty.gitterkid.repo.nativelib.IGitObjectLibrary;
 
 public abstract class GitObject {
     protected IGitObjectLibrary lib;
-    protected Pointer handle;
+    protected Pointer objHandle;
     private String signture;
     private GitObjectType objectType;
 
     public GitObject(Repository repository, String signture) {
         this.lib = IGitObjectLibrary.Instance;
         this.signture = signture;
-        this.handle = this.lib.git_obj_get(repository.getHandle(), this.signture);
+        this.objHandle = this.lib.git_obj_get(repository.getHandle(), this.signture);
         
         this.objectType = null;
     }
 
     public GitObjectType getObjectType() {
         if (this.objectType == null) {
-            int numericObjType = this.lib.git_obj_type(this.handle);
+            int numericObjType = this.lib.git_obj_type(this.objHandle);
 
             switch (numericObjType) {
                 case 0: this.objectType = GitObjectType.Unknow; break;

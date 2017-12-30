@@ -17,4 +17,11 @@ public interface IGitObjectLibrary extends Library {
 
     int git_obj_blob_length(Pointer blobPointer);
     Pointer git_obj_blob_content(Pointer blobPointer);
+    
+    void git_obj_tree_reset(Pointer treeObjectPointer);
+    int git_obj_tree_move_next(Pointer treeObjectPointer);
+    Pointer git_obj_tree_current(Pointer treeObjectPointer);
+    
+    int git_obj_tree_item_type(Pointer treeItemObjectPointer);
+    String git_obj_tree_item_name(Pointer treeItemObjectPointer);
 }

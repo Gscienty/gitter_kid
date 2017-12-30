@@ -71,7 +71,7 @@ int create_account (struct db *db, const char *name, const char *home, const cha
         retval = pam_start ("useradd", pampw->pw_name, &conv, &pamh);
     }
     if (retval == PAM_SUCCESS) {
-        //retval = pam_authenticate (pamh, 0);
+        retval = pam_authenticate (pamh, 0);
         if (retval != PAM_SUCCESS) {
             pam_end (pamh, retval);
         }

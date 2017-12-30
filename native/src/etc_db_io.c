@@ -260,13 +260,13 @@ int __write_db (const struct db *db) {
             if (db->ops->put (ptr, db->fp)) {
                 return -1;
             }
-            else if (p->line) {
-                if (db->ops->fputs (p->line, db->fp) == EOF) {
-                    return -1;
-                }
-                if (putc ('\n', db->fp) == EOF) {
-                    return -1;
-                }
+        }
+        else if (p->line) {
+            if (db->ops->fputs (p->line, db->fp) == EOF) {
+                return -1;
+            }
+            if (putc ('\n', db->fp) == EOF) {
+                return -1;
             }
         }
     }

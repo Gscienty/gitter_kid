@@ -133,7 +133,7 @@ void *__grp_parse (const char *line) {
 int __grp_put (const void *p, FILE *fp) {
     const struct group *grp = (const struct group *) p;
 
-    return (putgrent (grp, fp) == -1) ? -1 : 0;
+    return -1;
 }
 
 struct db *build_group_handle () {

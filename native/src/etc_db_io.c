@@ -10,40 +10,46 @@
 #include <utime.h>
 
 #define BUFLEN 1024
-int open_db (struct db *db, int mode) {
+int __open_db (struct db *db, int mode) {
     if (db == NULL) {
         // db is not exist
+        DBG_LOG (DBG_ERROR, "open_db: db is not exist");
         return -6;
     }
     if (db->isopen || (mode != O_RDONLY && mode != O_RDWR)) {
         // opened
+        DBG_LOG (DBG_ERROR, "open_db: file is opened");
         return -1;
     }
 
     db->readonly = (mode == O_RDONLY);
     if (!db->readonly && !db->locked) {
         // cannot read it
+        DBG_LOG (DBG_ERROR, "open_db: db cannot read it");
         return -2;
     }
 
     db->head = db->tail = db->cursor = NULL;
     db->changed = 0;
     db->fp = fopen (db->filename, db->readonly ? "r" : "r+");
-
+    
     if ( !db->fp ) {
         if ( (mode & O_CREAT) ) {
             db->isopen = 1;
             return 0;
         }
         // file not exist
+        DBG_LOG (DBG_ERROR, "open_db: file is not exist");
         return -3;
     }
+    db->isopen = 1;
 
     int buflen = BUFLEN;
     char *buf = (char *) malloc (buflen);
     if (!buf) {
         fclose (db->fp);
         // have not enough free memory
+        DBG_LOG (DBG_ERROR, "open_db: have not enough free memory");
         return -4;
     }
 
@@ -56,6 +62,7 @@ int open_db (struct db *db, int mode) {
                 free (buf);
                 fclose (db->fp);
                 // have not enough free memory
+                DBG_LOG (DBG_ERROR, "open_db: have not enough free memory");
                 return -4;
             }
             buf = cp;
@@ -70,6 +77,7 @@ int open_db (struct db *db, int mode) {
             free (buf);
             fclose (db->fp);
             // have not enough free memory
+            DBG_LOG (DBG_ERROR, "open_db: have not free memory");
             return -4;
         }
         void *eptr = db->ops->parse (line);
@@ -78,6 +86,7 @@ int open_db (struct db *db, int mode) {
             free (buf);
             fclose (db->fp);
             // cannot parse this line
+            DBG_LOG (DBG_ERROR, "open_db: cannot parse this line");
             return -5;
         }
 
@@ -89,6 +98,7 @@ int open_db (struct db *db, int mode) {
             free (buf);
             fclose (db->fp);
             // have not enough free memory
+            DBG_LOG (DBG_ERROR, "open_db: have not enough free memory");
             return -4;
         }
 
@@ -111,7 +121,7 @@ int open_db (struct db *db, int mode) {
     return 0;
 }
 
-void dispose_db (struct db *db) {
+void __dispose_db (struct db *db) {
     if (db == NULL) {
         return ;
     }
@@ -133,7 +143,7 @@ void dispose_db (struct db *db) {
 
 struct entry *__find_entry_by_name (struct db *db, const char *name) {
     struct entry *ret = NULL;
-    for (ret = db->head; ret; ret->next) {
+    for (ret = db->head; ret; ret = ret->next) {
         void *ep = ret->ptr;
         if (ep && strcmp (db->ops->getname (ret->ptr), name) == 0) {
             break;
@@ -143,29 +153,29 @@ struct entry *__find_entry_by_name (struct db *db, const char *name) {
     return ret;
 }
 
-int db_append (struct db *db, const void *p) {
+int __append_db (struct db *db, const void *p) {
     if (!db->isopen || db->readonly) {
-        DBG_LOG (DBG_ERROR, "db_append: could not append premission denied");
+        DBG_LOG (DBG_ERROR, "append_db: could not append premission denied");
         return -1;
     }
 
     void *ptr = db->ops->dup (p);
     if (ptr == NULL) {
-        DBG_LOG (DBG_ERROR, "db_append: format error. count not transfer legal format");
+        DBG_LOG (DBG_ERROR, "append_db: format error. count not transfer legal format");
         return -2;
     }
 
     struct entry *entry = __find_entry_by_name (db, db->ops->getname (ptr));
     if (entry != NULL) {
         db->ops->free (ptr);
-        DBG_LOG (DBG_WARNING, "db_append: exist same name's entry");
+        DBG_LOG (DBG_WARNING, "append_db: exist same name's entry");
         return -3;
     }
 
     entry = (struct entry *) malloc (sizeof (*entry));
     if (entry == NULL) {
         db->ops->free (ptr);
-        DBG_LOG (DBG_ERROR, "db_append: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "append_db: have not enough free memory");
         return -4;
     }
 
@@ -264,7 +274,7 @@ int __write_db (const struct db *db) {
     return 0;
 }
 
-int save_db (struct db *db) {
+int __save_db (struct db *db) {
     if (db == NULL) {
         return -1;
     }

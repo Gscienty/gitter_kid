@@ -137,11 +137,12 @@ struct db *build_passwd_handle () {
 }
 
 int open_passwd (struct db *db) {
-    return open_db (db, O_RDONLY);
+    db->locked = 1; // test lock
+    return __open_db (db, O_RDWR);
 }
 
 void dispose_passwd (struct db *db) {
-    dispose_db (db);
+    __dispose_db (db);
 }
 
 
@@ -214,4 +215,8 @@ int get_passwd_uid (struct passwd *pw) {
 }
 int get_passwd_gid (struct passwd *pw) {
     return pw->pw_gid;
+}
+
+int __append_passwd (struct db *db, struct passwd *pw) {
+
 }

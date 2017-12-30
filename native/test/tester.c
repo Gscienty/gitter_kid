@@ -54,11 +54,6 @@ int test_enum_group () {
     return 0;
 }
 
-int test_user_create_account () {
-    printf ("%d\n", create_account ("test", "/home/test", 1));
-    return 0;
-}
-
 int test_market_init () {
     struct git_market *market = git_market_build("/home/ant");
 
@@ -71,12 +66,21 @@ int test_market_init () {
             struct git_obj *obj = git_obj_get (repo, "ce013625030ba8dba906f756967f9e9ca394464a");
         }
     } while (git_market_cursor_move_next (market) == 0);
+    return 0;
+}
+
+int test_create_account () {
+    struct db *db = build_passwd_handle ();
+    printf ("open_passwd: %d\n", open_passwd (db));
+    printf ("%d\n", create_account (db, "test", "/home/test", "/bin/sh", 1000));
+    return 0;
 }
 
 int main() {
     // test_enum_passwd ();
     // test_enum_group ();
     // test_user_create_account ();
-    test_market_init ();
+    // test_market_init ();
+    test_create_account ();
     return 0;
 }

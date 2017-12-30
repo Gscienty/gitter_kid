@@ -67,9 +67,9 @@ struct db *build_shadow_handle () {
 }
 
 int open_shadow (struct db *db) {
-    return open_db (db, O_RDONLY);
+    return __open_db (db, O_RDONLY);
 }
 
 void dispose_shadow (struct db *db) {
-    dispose_db (db);
+    __dispose_db (db);
 }

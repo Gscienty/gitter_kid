@@ -54,9 +54,10 @@ struct db {
 };
 
 // open file & tranfer to struct db
-int open_db (struct db *, int);
-
-void dispose_db (struct db *);
+int __open_db (struct db *, int);
+int __save_db (struct db *);
+int __append_db (struct db *, const void *);
+void __dispose_db (struct db *);
 
 void *__pw_dup (const void *);
 void __pw_free (void *);
@@ -110,7 +111,6 @@ static struct ops grp_ops = {
 G_KID_EXTERN struct db *build_passwd_handle ();
 G_KID_EXTERN int open_passwd (struct db *);
 G_KID_EXTERN void dispose_passwd (struct db *);
-G_KID_EXTERN int save_db (struct db *);
 
 G_KID_EXTERN int reset_passwd_cursor (struct db *);
 G_KID_EXTERN struct passwd *get_current_passwd (struct db *);
@@ -153,6 +153,6 @@ G_KID_EXTERN struct db *build_shadow_handle ();
 G_KID_EXTERN int open_shadow (struct db *);
 G_KID_EXTERN void dispose_shadow (struct db *);
 
-G_KID_EXTERN int create_account (const char *uname, const char *home, gid_t gid);
+G_KID_EXTERN int create_account (struct db *db, const char *name, const char *home, const char *shell, gid_t gid);
 
 #endif

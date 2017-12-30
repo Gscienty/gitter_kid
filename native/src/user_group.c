@@ -148,11 +148,11 @@ struct db *build_group_handle () {
 }
 
 int open_group (struct db *db) {
-    return open_db (db, O_RDONLY);
+    return __open_db (db, O_RDONLY);
 }
 
 void dispose_group (struct db *db) {
-    dispose_db (db);
+    __dispose_db (db);
 }
 
 int reset_group_cursor (struct db *db) {

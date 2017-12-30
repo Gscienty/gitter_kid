@@ -40,3 +40,11 @@ void *git_obj_blob_content (struct git_obj_blob *blob_obj) {
     }
     return blob_obj->content;
 }
+
+void __git_obj_blob_dispose (struct git_obj_blob *obj) {
+    if (obj == NULL) {
+        return ;
+    }
+
+    free (obj);
+}

@@ -7,12 +7,14 @@ import indi.gscienty.gitterkid.repo.nativelib.IGitObjectLibrary;
 public abstract class GitObject {
     protected IGitObjectLibrary lib;
     protected Pointer objHandle;
+    protected Repository repository;
     private String signture;
     private GitObjectType objectType;
 
     public GitObject(Repository repository, String signture) {
         this.lib = IGitObjectLibrary.Instance;
         this.signture = signture;
+        this.repository = repository;
         this.objHandle = this.lib.git_obj_get(repository.getHandle(), this.signture);
         
         this.objectType = null;

@@ -19,7 +19,11 @@ public abstract class GitObject {
         
         this.objectType = null;
     }
-
+    
+    /**
+     * 获取实体对象的类型
+     * @return
+     */
     public GitObjectType getObjectType() {
         if (this.objectType == null) {
             int numericObjType = this.lib.git_obj_type(this.objHandle);

@@ -8,6 +8,10 @@ public class PersonLog {
 	private Pointer handle;
 	private IGitObjectLibrary lib;
 	
+	/**
+	 * 构造方法
+	 * @param handle person log指针
+	 */
 	public PersonLog(Pointer handle) {
 		this.handle = handle;
 		this.lib = IGitObjectLibrary.Instance;

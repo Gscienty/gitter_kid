@@ -1,10 +1,12 @@
 package indi.gscienty.gitterkid.repo;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.sun.jna.Pointer;
-
-import indi.gscienty.gitterkid.repo.nativelib.IGitObjectLibrary;
 
 /**
  * Tree 实体
@@ -13,7 +15,7 @@ import indi.gscienty.gitterkid.repo.nativelib.IGitObjectLibrary;
  */
 public class GitTree 
 	extends GitObject
-	implements Iterable<GitTree.Item>, Iterator<GitTree.Item> {
+	implements Iterable<GitTree.Item>, Iterator<GitTree.Item>, IQueryable<GitTree.Item> {
 	
 	private Pointer handle;
 	private boolean iterateFirst;
@@ -51,6 +53,53 @@ public class GitTree
 			default:
 				return new BlobItem(this.repository, name, signture);
 		}
+	}
+	
+	/**
+	 * Tree中是否存在满足某条件的Tree Item
+	 */
+	public boolean any(Predicate<Item> predicate) {
+		for (Item item : this) {
+			if (predicate.test(item)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Tree中的元素是否全部满足某条件
+	 */
+	public boolean all(Predicate<Item> predicate) {
+		for (Item item : this) {
+			if (predicate.test(item) == false) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * 返回Tree中第一个满足某条件的Tree Item
+	 */
+	public Item first(Predicate<Item> predicate) {
+		for (Item item : this) {
+			if (predicate.test(item)) {
+				return item;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 将Tree内的元素映射成为新的集合
+	 */
+	public <R> List<R> filter(Function<Item, R> transfer) {
+		List<R> result = new LinkedList<R>();
+		for (Item item : this) {
+			result.add(transfer.apply(item));
+		}
+		return result;
 	}
 	
 	/**

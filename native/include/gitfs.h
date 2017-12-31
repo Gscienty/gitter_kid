@@ -202,11 +202,6 @@ G_KID_EXTERN void *git_obj_blob_content (struct git_obj_blob *blob_obj);
 // return: tree 的签名
 G_KID_EXTERN char *git_obj_commit_tree_sign (struct git_obj_commit *commit_obj);
 
-// 获取与 commit 关联的 tree
-// param <commit_obj>: commit object
-// return: tree
-G_KID_EXTERN struct git_obj_tree *git_obj_commit_tree (struct git_obj_commit *commit_obj);
-
 // 获取 commit 的作者信息
 // param <commit_obj>: commit object
 // return: 作者信息
@@ -240,11 +235,6 @@ G_KID_EXTERN struct git_obj_commit_parent *git_obj_commit_parent_current (struct
 // param <commit_parent_obj>: 上游 commit 签名结构体
 // return: 上游 commit 签名
 G_KID_EXTERN char *git_obj_commit_parent_sign (struct git_obj_commit_parent *commit_parent_obj);
-
-// 通过上游 commit 签名获取上游 commit
-// param <commit_parent_obj>: 上游 commit 签名结构体
-// return: 上游 commit
-G_KID_EXTERN struct git_obj_commit *git_obj_commit_parent_commit (struct git_obj_commit_parent *commit_parent_obj);
 
 
 // 通过 person log 获取名称

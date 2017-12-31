@@ -148,3 +148,105 @@ struct git_obj_commit *git_obj_get_commit (struct git_obj *obj) {
         return NULL;
     }
 }
+
+char *git_obj_commit_tree_sign (struct git_obj_commit *commit_obj) {
+    if (commit_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_commit_tree_sign: commit object is null");
+        return NULL;
+    }
+    return commit_obj->tree_sign;
+}
+
+struct git_person_log *git_obj_commit_author (struct git_obj_commit *commit_obj) {
+    if (commit_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_commit_author: commit object is null");
+        return NULL;
+    }
+    return commit_obj->author;
+}
+
+struct git_person_log *git_obj_commit_committer (struct git_obj_commit *commit_obj) {
+    if (commit_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_commit_committer: commit object is null");
+        return NULL;
+    }
+    return commit_obj->committer;
+}
+
+char *git_obj_commit_message (struct git_obj_commit *commit_obj) {
+    if (commit_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_commit_message: commit object is null");
+        return NULL;
+    }
+    return commit_obj->message;
+}
+
+void git_obj_commit_parent_reset (struct git_obj_commit *commit_obj) {
+    if (commit_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_commit_parent_reset: commit object is null");
+        return NULL;
+    }
+    commit_obj->parent_cursor = commit_obj->parent_head;
+}
+
+int git_obj_commit_parent_move_next (struct git_obj_commit *commit_obj) {
+    if (commit_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_commit_parent_move_next: commit object is null");
+        return -1;
+    }
+    if (commit_obj->parent_cursor == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_commit_parent_move_next: commit object's parent cursor is null");
+        return -2;
+    }
+
+    commit_obj->parent_cursor = commit_obj->parent_cursor->next;
+    return commit_obj->parent_cursor != NULL ? 0 : -3;
+}
+
+struct git_obj_commit_parent *git_obj_commit_parent_current (struct git_obj_commit *commit_obj) {
+    if (commit_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_commit_parent_current: commit object is null");
+        return NULL;
+    }
+    return commit_obj->parent_cursor;
+}
+
+char *git_obj_commit_parent_sign (struct git_obj_commit_parent *commit_parent_obj) {
+    if (commit_parent_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_commit_parent_sign: commit's parent object is null");
+        return NULL;
+    }
+    return commit_parent_obj->sign;
+}
+
+char *git_person_log_name (struct git_person_log *person_log) {
+    if (person_log == NULL) {
+        DBG_LOG (DBG_ERROR, "git_person_log_name: person log object is null");
+        return NULL;
+    }
+    return person_log->name;
+}
+
+char *git_person_log_mail (struct git_person_log *person_log) {
+    if (person_log == NULL) {
+        DBG_LOG (DBG_ERROR, "git_person_log_mail: person log object is null");
+        return NULL;
+    }
+    return person_log->mail;
+}
+
+unsigned long git_person_log_timestamp (struct git_person_log *person_log) {
+    if (person_log == NULL) {
+        DBG_LOG (DBG_ERROR, "git_person_log_timestamp: person log object is null");
+        return 0;
+    }
+    return person_log->timestamp;
+}
+
+char *git_person_timezone (struct git_person_log *person_log) {
+    if (person_log == NULL) {
+        DBG_LOG (DBG_ERROR, "git_person_timezone: person log object is null");
+        return NULL;
+    }
+    return person_log->timezone;
+}

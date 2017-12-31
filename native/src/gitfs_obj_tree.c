@@ -91,3 +91,60 @@ struct git_obj_tree *git_obj_get_tree (struct git_obj *obj) {
         return NULL;
     }
 }
+
+void git_obj_tree_reset (struct git_obj_tree *tree_obj) {
+    if (tree_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_tree_reset: tree object is null");
+        return ;
+    }
+    tree_obj->cursor = tree_obj->head;
+}
+
+int git_obj_tree_move_next (struct git_obj_tree *tree_obj) {
+    if (tree_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_tree_move_next: tree object is null");
+        return -1;
+    }
+    if (tree_obj->cursor == NULL) {
+        DBG_LOG (DBG_INFO, "git_obj_tree_move_next: neet reset");
+        return -2;
+    }
+    tree_obj->cursor = tree_obj->cursor->next;
+    if (tree_obj->cursor == NULL) {
+        DBG_LOG (DBG_INFO, "git_obj_tree_move_next: not have next entry");
+        return -3;
+    }
+    return 0;
+}
+
+struct git_obj_tree_item *git_obj_tree_current (struct git_obj_tree *tree_obj) {
+    if (tree_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_tree_current: tree object is null");
+        return NULL;
+    }
+    return tree_obj->cursor;
+}
+
+char *git_obj_tree_item_sign (struct git_obj_tree_item *tree_item_obj) {
+    if (tree_item_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_tree_item_sign: tree item object is null");
+        return NULL;
+    }
+    return tree_item_obj->sign;
+}
+
+char *git_obj_tree_item_name (struct git_obj_tree_item *tree_item_obj) {
+    if (tree_item_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_tree_item_name: tree item object is null");
+        return NULL;
+    }
+    return tree_item_obj->name;
+}
+
+enum git_obj_type git_obj_tree_item_type (struct git_obj_tree_item *tree_item_obj) {
+    if (tree_item_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_tree_item_name: tree item object is null");
+        return NULL;
+    }
+    return tree_item_obj->type == 40000 ? GIT_OBJ_TYPE_TREE : GIT_OBJ_TYPE_BLOB;
+}

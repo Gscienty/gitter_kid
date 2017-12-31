@@ -296,5 +296,5 @@ G_KID_EXTERN char *git_obj_tree_item_name (struct git_obj_tree_item *tree_item_o
 // 获取 tree item 中的类型
 // param <tree_item_obj>: tree item object
 // return: item 的类型
-G_KID_EXTERN int git_obj_tree_item_type (struct git_obj_tree_item *tree_item_obj);
+G_KID_EXTERN enum git_obj_type git_obj_tree_item_type (struct git_obj_tree_item *tree_item_obj);
 #endif

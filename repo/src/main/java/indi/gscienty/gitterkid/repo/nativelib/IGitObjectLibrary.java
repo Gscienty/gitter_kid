@@ -128,11 +128,18 @@ public interface IGitObjectLibrary extends Library {
      */
     void git_obj_commit_parent_reset(Pointer commitObjectPointer);
     /**
+     * 获取commit实体中parent游标指向的当前parent
+     * @param commitObjectPointer commit实体
+     * @return commit parent实体
+     */
+    Pointer git_obj_commit_parent_current(Pointer commitObjectPointer);
+    /**
      * 将commit实体中parent的游标向下移动
      * @param commitObjectPointer commit实体
      * @return 当向下移动成功时，则返回0
      */
-    Pointer git_obj_commit_parent_current(Pointer commitObjectPointer);
+    int git_obj_commit_parent_move_next(Pointer commitObjectPointer);
+    
     /**
      * 获取当前commit实体中parent游标所指向的parent签名
      * @param commitParentObjectPointer commit实体

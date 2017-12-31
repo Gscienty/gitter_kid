@@ -46,4 +46,31 @@ public class Repository {
     public Pointer getHandle() {
         return this.handle;
     }
+    
+    /**
+     * 获取当前仓库内的Commit
+     * @param signture Commit签名
+     * @return Commit实体
+     */
+    public GitCommit getCommit(String signture) {
+    	return new GitCommit(this, signture);
+    }
+    
+    /**
+     * 获取当前仓库内的Blob
+     * @param signture Blob签名
+     * @return Blob实体
+     */
+    public GitBlob getBlob(String signture) {
+    	return new GitBlob(this, signture);
+    }
+    
+    /**
+     * 获取当前仓库的Tree
+     * @param signture Tree签名
+     * @return Tree实体
+     */
+    public GitTree getTree(String signture) {
+    	return new GitTree(this, signture);
+    }
 }

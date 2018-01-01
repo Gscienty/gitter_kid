@@ -29,7 +29,7 @@ struct git_market *git_market_build (const char *basepath) {
     }
     int basepath_length = strlen (basepath);
     while ((ent = readdir (dir))) {
-        if (ent->d_type == 4 && ent->d_name[0] != '.') {
+        if (ent->d_type == DT_DIR && ent->d_name[0] != '.') {
             struct git_repo *repo = (struct git_repo *) malloc (sizeof (*repo));
             if (repo == NULL) {
                 goto free_repo_list;
@@ -95,8 +95,12 @@ void git_market_dispose (struct git_market *market) {
 }
 
 int git_market_cursor_move_next (struct git_market *market) {
-    if (market->cursor == NULL) {
-        // null or not reset yet
+    if (market == NULL) {
+        DBG_LOG (DBG_ERROR, "git_market_cursor_move_next: market is null");
+        return -1;
+    }
+    if (market->cursor == NULL) 
+        DBG_LOG (DBG_ERROR, ":git_market_cursor_move_net: market's cursor is null");
         return -1;
     }
 

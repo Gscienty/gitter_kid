@@ -22,4 +22,13 @@ public interface IRepositoryLibrary extends Library {
      * @return 仓库名称
      */
     String git_repo_name(Pointer repositoryPointer);
+    
+    Pointer git_branches_get(Pointer repositoryPointer);
+    void git_branches_dispose(Pointer branchesPointer);
+    void git_branches_reset(Pointer branchesPointer);
+    int git_branches_move_next(Pointer branchesPointer);
+    Pointer git_branches_get_current(Pointer branchesPointer);
+    
+    String git_branch_get_name(Pointer branchPointer);
+    String git_branch_get_last_commit_sign(Pointer branchPointer);
 }

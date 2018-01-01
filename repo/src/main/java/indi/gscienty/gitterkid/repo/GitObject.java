@@ -39,4 +39,13 @@ public abstract class GitObject {
 
         return this.objectType;
     }
+    
+    /**
+     * 析构方法
+     */
+    @Override
+    protected void finalize() throws Throwable {
+        this.lib.git_obj_dispose(this.objHandle);
+        super.finalize();
+    }
 }

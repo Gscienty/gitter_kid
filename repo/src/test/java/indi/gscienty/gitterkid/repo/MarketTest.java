@@ -1,6 +1,5 @@
 package indi.gscienty.gitterkid.repo;
 
-import indi.gscienty.gitterkid.repo.Repository;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -28,17 +27,11 @@ public class MarketTest
     {
         return new TestSuite( MarketTest.class );
     }
-
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        Market market = new Market("/home");
-
-        for (Repository item : market) {
-            System.out.println(item.getName());
-            System.out.println();
-        }
+    
+    public void testQueryable() {
+    	Market market = new Market("/home/ant");
+    	assertTrue(market.any(repository -> repository.getName().equals("repo")));
+    	assertFalse(market.all(repository -> repository.getName().equals("not_exist")));
+    	assertNotNull(market.first(repo -> repo.getName().equals("repo")));
     }
 }

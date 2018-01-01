@@ -76,11 +76,29 @@ int test_create_account () {
     return 0;
 }
 
+
+int test_branches () {
+    struct git_market *market = git_market_build("/home/ant");
+
+    git_market_cursor_reset (market);
+
+    do {
+        struct git_repo *repo = git_market_cursor_current (market);
+        
+        if (strcmp (git_repo_name (repo), "repo") == 0) {
+            git_branches_get (repo);
+            break;
+        }
+    } while (git_market_cursor_move_next (market) == 0);
+    return 0;
+}
+
 int main() {
     // test_enum_passwd ();
     // test_enum_group ();
     // test_user_create_account ();
     // test_market_init ();
-    test_create_account ();
+    // test_create_account ();
+    test_branches ();
     return 0;
 }

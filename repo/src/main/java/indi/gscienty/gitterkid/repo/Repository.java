@@ -19,10 +19,9 @@ public class Repository {
      */
     public Repository(Pointer repositoryPointer) {
         this.handle = repositoryPointer;
-
         this.lib = IRepositoryLibrary.Instance;
     }
-    
+
     /**
      * 获取仓库路径
      * @return 仓库路径

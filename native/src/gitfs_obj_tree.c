@@ -144,7 +144,7 @@ char *git_obj_tree_item_name (struct git_obj_tree_item *tree_item_obj) {
 enum git_obj_type git_obj_tree_item_type (struct git_obj_tree_item *tree_item_obj) {
     if (tree_item_obj == NULL) {
         DBG_LOG (DBG_ERROR, "git_obj_tree_item_name: tree item object is null");
-        return NULL;
+        return GIT_OBJ_TYPE_UNKNOW;
     }
     return tree_item_obj->type == 40000 ? GIT_OBJ_TYPE_TREE : GIT_OBJ_TYPE_BLOB;
 }

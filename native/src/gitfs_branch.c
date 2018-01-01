@@ -79,6 +79,7 @@ struct git_branches *git_branches_get (struct git_repo *repo) {
             }
             FILE *head = fopen (ref_path, "r");
             fread(branch->last_commit_sign, sizeof (char), 40, head);
+            branch->last_commit_sign[40] = 0;
             fclose (head);
             free (ref_path);
 

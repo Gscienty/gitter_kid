@@ -138,6 +138,7 @@ void __git_obj_commit_dispose (struct git_obj_commit *obj) {
 
 struct git_obj_commit *git_obj_get_commit (struct git_obj *obj) {
     if (obj == NULL) {
+        DBG_LOG (DBG_ERROR, "git_obj_get_commit: object is null");
         return NULL;
     }
 
@@ -145,6 +146,7 @@ struct git_obj_commit *git_obj_get_commit (struct git_obj *obj) {
         return (struct git_obj_commit *) obj->ptr;
     }
     else {
+        DBG_LOG (DBG_ERROR, "git_obj_get_commit: object's type error");
         return NULL;
     }
 }

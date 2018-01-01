@@ -76,6 +76,28 @@ G_KID_EXTERN char *git_repo_path (struct git_repo *repo);
 // return: 仓库名称
 G_KID_EXTERN char *git_repo_name (struct git_repo *repo);
 
+struct git_branch {
+    char *name;
+    char *last_commit_sign;
+
+    struct git_branch *prev;
+    struct git_branch *next;
+};
+
+struct git_branches {
+    struct git_branch *head;
+    struct git_branch *tail;
+    struct git_branch *cursor;
+};
+
+G_KID_EXTERN struct git_branches *git_branches_get (struct git_repo *repo);
+G_KID_EXTERN void git_branches_dispose (struct git_branches *branches);
+G_KID_EXTERN void git_branches_reset (struct git_branches *branches);
+G_KID_EXTERN int git_branches_move_next (struct git_branches *branches);
+G_KID_EXTERN struct git_branch *git_branches_get_current (struct git_branches *branches);
+G_KID_EXTERN char *git_branch_get_name (struct git_branch *branch);
+G_KID_EXTERN char *git_branch_get_last_commit_sign (struct git_branch *branch);
+
 // git object 类型
 enum git_obj_type {
     GIT_OBJ_TYPE_UNKNOW, // 未知类型

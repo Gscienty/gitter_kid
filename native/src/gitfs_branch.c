@@ -133,7 +133,7 @@ int git_branches_move_next (struct git_branches *branches) {
 
 struct git_branch *git_branches_get_current (struct git_branches *branches) {
     if (branches == NULL) {
-        DBG_ERROR (DBG_ERROR, "git_branches_get_current: branches is null");
+        DBG_LOG (DBG_ERROR, "git_branches_get_current: branches is null");
         return NULL;
     }
     return branches->cursor;

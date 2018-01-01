@@ -99,7 +99,7 @@ int git_market_cursor_move_next (struct git_market *market) {
         DBG_LOG (DBG_ERROR, "git_market_cursor_move_next: market is null");
         return -1;
     }
-    if (market->cursor == NULL) 
+    if (market->cursor == NULL) {
         DBG_LOG (DBG_ERROR, ":git_market_cursor_move_net: market's cursor is null");
         return -1;
     }

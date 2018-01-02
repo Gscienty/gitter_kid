@@ -1,8 +1,8 @@
 package indi.gscienty.gitterkid.repo;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -95,7 +95,7 @@ public class GitTree
 	 * 将Tree内的元素映射成为新的集合
 	 */
 	public <R> List<R> filter(Function<Item, R> transfer) {
-		List<R> result = new LinkedList<R>();
+		List<R> result = new Vector<>();
 		for (Item item : this) {
 			result.add(transfer.apply(item));
 		}

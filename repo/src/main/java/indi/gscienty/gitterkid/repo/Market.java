@@ -5,8 +5,8 @@ import com.sun.jna.Pointer;
 import indi.gscienty.gitterkid.repo.Repository;
 import indi.gscienty.gitterkid.repo.nativelib.IMarketLibrary;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -104,7 +104,7 @@ public class Market
 	 * 映射仓库市场内的仓库到新的集合
 	 */
 	public <R> List<R> filter(Function<Repository, R> transfer) {
-		List<R> result = new LinkedList<R>();
+		List<R> result = new Vector<>();
 		for (Repository repository : this) {
 			result.add(transfer.apply(repository));
 		}

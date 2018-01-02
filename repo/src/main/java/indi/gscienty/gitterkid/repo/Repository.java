@@ -1,11 +1,5 @@
 package indi.gscienty.gitterkid.repo;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 import com.sun.jna.Pointer;
 
 import indi.gscienty.gitterkid.repo.nativelib.IRepositoryLibrary;

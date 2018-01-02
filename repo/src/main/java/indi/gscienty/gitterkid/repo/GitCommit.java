@@ -1,8 +1,8 @@
 package indi.gscienty.gitterkid.repo;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -98,7 +98,7 @@ public class GitCommit extends GitObject {
 		}
 
 		public <R> List<R> filter(Function<String, R> transfer) {
-			List<R> result = new LinkedList<R>();
+			List<R> result = new Vector<>();
 			for (String parent : this) {
 				result.add(transfer.apply(parent));
 			}

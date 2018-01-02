@@ -24,7 +24,9 @@ public class GitBranchTest extends TestCase {
 		assertNotNull(branch);
 		assertEquals(branch.getName(), "master");
 		assertNotNull(branch.getLastCommit().getTree());
-		
+		System.out.println(branch.getLastCommit().getAuthor().getName());
+		System.out.println(branch.getLastCommit().getAuthor().getMail());
+		System.out.println(branch.getLastCommit().getAuthor().getTimestamp());
 		branch.getLastCommit().getTree().forEach(item -> {
 			System.out.println(item.getGitObjectType());
 			System.out.println(item.getName());

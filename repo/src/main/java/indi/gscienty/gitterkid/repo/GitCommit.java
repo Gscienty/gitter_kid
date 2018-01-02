@@ -57,21 +57,31 @@ public class GitCommit extends GitObject {
 		return new PersonLog(this.lib.git_obj_commit_committer(this.handle));
 	}
 	
+	/**
+	 * 获取commit的上游commit
+	 * @return CommitParents
+	 */
+	public CommitParents getParents() {
+		return new CommitParents(this.handle, this.repository);
+	}
+	
 	public class CommitParents
-		implements Iterable<String>, Iterator<String>, IQueryable<String>{
+		implements Iterable<GitCommit>, Iterator<GitCommit>, IQueryable<GitCommit>{
+		private Repository repository;
 		private Pointer handle;
 		private boolean iterateFirst;
 		private IGitObjectLibrary lib;
 		
-		public CommitParents(Pointer handle, IGitObjectLibrary lib) {
+		public CommitParents(Pointer handle, Repository repository) {
+			this.repository = repository;
 			this.handle = handle;
-			this.lib = lib;
+			this.lib = IGitObjectLibrary.Instance;
 			this.iterateFirst = true;
 			this.lib.git_obj_commit_parent_reset(this.handle);
 		}
 
-		public boolean any(Predicate<String> predicate) {
-			for (String parent : this) {
+		public boolean any(Predicate<GitCommit> predicate) {
+			for (GitCommit parent : this) {
 				if (predicate.test(parent)) {
 					return true;
 				}
@@ -79,8 +89,8 @@ public class GitCommit extends GitObject {
 			return false;
 		}
 
-		public boolean all(Predicate<String> predicate) {
-			for (String parent : this) {
+		public boolean all(Predicate<GitCommit> predicate) {
+			for (GitCommit parent : this) {
 				if (predicate.test(parent) == false) {
 					return false;
 				}
@@ -88,8 +98,8 @@ public class GitCommit extends GitObject {
 			return true;
 		}
 
-		public String first(Predicate<String> predicate) {
-			for (String parent : this) {
+		public GitCommit first(Predicate<GitCommit> predicate) {
+			for (GitCommit parent : this) {
 				if (predicate.test(parent)) {
 					return parent;
 				}
@@ -97,9 +107,9 @@ public class GitCommit extends GitObject {
 			return null;
 		}
 
-		public <R> List<R> filter(Function<String, R> transfer) {
+		public <R> List<R> filter(Function<GitCommit, R> transfer) {
 			List<R> result = new Vector<>();
-			for (String parent : this) {
+			for (GitCommit parent : this) {
 				result.add(transfer.apply(parent));
 			}
 			return result;
@@ -113,12 +123,16 @@ public class GitCommit extends GitObject {
 			return this.lib.git_obj_commit_parent_move_next(this.handle) == 0;
 		}
 
-		public String next() {
+		public GitCommit next() {
 			Pointer parentPointer = this.lib.git_obj_commit_parent_current(this.handle);
-			return this.lib.git_obj_commit_parent_sign(parentPointer);
+			String commitSignture = this.lib.git_obj_commit_parent_sign(parentPointer);
+			if (commitSignture.isEmpty()) {
+				return null;
+			}
+			return new GitCommit(this.repository, commitSignture);
 		}
 
-		public Iterator<String> iterator() {
+		public Iterator<GitCommit> iterator() {
 			this.lib.git_obj_commit_parent_reset(this.handle);
 			return this;
 		}

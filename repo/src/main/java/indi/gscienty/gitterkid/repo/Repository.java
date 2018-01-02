@@ -73,6 +73,10 @@ public class Repository {
     	return new GitTree(this, signture);
     }
     
+    /**
+     * 获取当前仓库的Branches
+     * @return Branches
+     */
     public GitBranches getBranches() {
     	return new GitBranches(this, this.lib.git_branches_get(this.handle));
     }

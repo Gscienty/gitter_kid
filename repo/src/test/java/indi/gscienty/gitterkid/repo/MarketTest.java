@@ -29,7 +29,7 @@ public class MarketTest
     }
     
     public void testQueryable() {
-    	Market market = new Market("/home/ant");
+    	Market market = new Market("/home/m1231996c/repositories");
     	assertTrue(market.any(repository -> repository.getName().equals("repo")));
     	assertFalse(market.all(repository -> repository.getName().equals("not_exist")));
     	assertNotNull(market.first(repo -> repo.getName().equals("repo")));

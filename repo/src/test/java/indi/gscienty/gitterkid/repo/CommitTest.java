@@ -14,19 +14,19 @@ public class CommitTest extends TestCase {
 	}
 	
 	public void testCommit() {
-		Market market = new Market("/home/ant");
+		Market market = new Market("/home/m1231996c/repositories");
 		
 		Repository repository = market.first(repo -> repo.getName().equals("repo"));
-		GitCommit commit = repository.getCommit("6516615f6f72011317b85b0726ce80dbe3fe2f82");
+		GitCommit commit = repository.getCommit("1f94aca4d8793849f52afb2255b55799d9803e5d");
 		assertNotNull(commit);
-		assertEquals(commit.getMessage(), "world\n");
+		assertEquals(commit.getMessage(), "test1\n");
 	}
 	
 	public void testPersonLog() {
-		Market market = new Market("/home/ant/");
+		Market market = new Market("/home/m1231996c/repositories");
 		Repository repository = market.first(repo -> repo.getName().equals("repo"));
-		GitCommit commit = repository.getCommit("6516615f6f72011317b85b0726ce80dbe3fe2f82");
-		assertEquals(commit.getAuthor().getName(), "Gscienty");
-		assertEquals(commit.getCommitter().getName(), "Gscienty");
+		GitCommit commit = repository.getCommit("1f94aca4d8793849f52afb2255b55799d9803e5d");
+		assertEquals(commit.getAuthor().getName(), "mfs");
+		assertEquals(commit.getCommitter().getName(), "mfs");
 	}
 }

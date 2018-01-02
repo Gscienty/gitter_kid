@@ -15,7 +15,7 @@ public class GitBranchTest extends TestCase {
 	}
 	
 	public void testBranch() {
-		Market market = new Market("/home/ant");
+		Market market = new Market("/home/m1231996c/repositories");
 		Repository repository = market.first(repo -> repo.getName().equals("repo"));
 		
 		assertNull(repository.getBranches().first(b -> b.getName().equals("not_exist")));

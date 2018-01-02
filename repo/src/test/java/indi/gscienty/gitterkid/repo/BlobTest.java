@@ -19,7 +19,7 @@ public class BlobTest extends TestCase {
     }
 
     public void testBlob() {
-        Market market = new Market("/home/ant");
+        Market market = new Market("/home/m1231996c/repositories");
         Repository repository = null;
 
         for (Repository item : market) {
@@ -33,6 +33,7 @@ public class BlobTest extends TestCase {
         assertTrue(blob.getObjectType() == GitObjectType.Blob);
         try {
 			assertTrue(new String(blob.getContent(), "ASCII").equals("hello\n"));
+			assertEquals(blob.getLength(), 6);
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

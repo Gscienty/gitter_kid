@@ -20,6 +20,10 @@ public abstract class GitObject {
         this.objectType = null;
     }
     
+    public String getSignture() {
+    	return this.signture;
+    }
+    
     /**
      * 获取实体对象的类型
      * @return

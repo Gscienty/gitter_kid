@@ -37,26 +37,18 @@ struct __obj_file_ret {
     int length;
 };
 
-struct __obj_file_ret *__get_repo_obj_by_sign (
-    struct git_repo *repo,
-    const char *signture,
-    const char *obj_file_path) {
-
-    if (obj_file_path == NULL) {
-        return NULL;
-    }
-
+// object file stored by loose type. get object content
+struct __obj_file_ret *__get_repo_obj_by_sign_loose (FILE *object_file) {
     struct __obj_file_ret *ret = (struct __obj_file_ret *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
+        DBG_LOG (DBG_ERROR, "__get_repo_obj_by_sign: have not enough free memory");
         return NULL;
     }
 
-    FILE *zipfile = fopen (obj_file_path, "rb");
-
-    fseek (zipfile, 0, SEEK_END);
-    int flen = ftell (zipfile);
-    fseek (zipfile, 0, SEEK_SET);
+    fseek (object_file, 0, SEEK_END);
+    int flen = ftell (object_file);
+    fseek (object_file, 0, SEEK_SET);
 
     unsigned char *buf = malloc (sizeof (*buf) * flen);
     if (buf == NULL) {
@@ -64,7 +56,7 @@ struct __obj_file_ret *__get_repo_obj_by_sign (
         return NULL;
     }
 
-    fread (buf, sizeof (unsigned char), flen, zipfile);
+    fread (buf, sizeof (unsigned char), flen, object_file);
 
     ret->buf = buf;
     ret->length = flen;
@@ -72,6 +64,28 @@ struct __obj_file_ret *__get_repo_obj_by_sign (
     return ret;
 }
 
+// get repository's object file
+struct __obj_file_ret *__get_repo_obj_by_sign (
+    struct git_repo *repo,
+    const char *signture,
+    const char *obj_file_path) {
+
+    if (obj_file_path == NULL) {
+        DBG_LOG (DBG_ERROR, "__get_repo_obj_by_sign: object file's path is null");
+        return NULL;
+    }
+
+    FILE *object_file = fopen (obj_file_path, "rb");
+    if (object_file == NULL) {
+        DBG_LOG (DBG_ERROR, "__get_repo_obj_by_sign: cannot open object file");
+        return NULL;
+    }
+    else {
+        return __get_repo_obj_by_sign_loose (object_file);
+    }
+}
+
+// inflate object file
 struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer) {
     if (zip_buffer == NULL) {
         return NULL;

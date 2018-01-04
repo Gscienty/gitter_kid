@@ -85,7 +85,7 @@ int test_branches () {
     do {
         struct git_repo *repo = git_market_cursor_current (market);
         
-        if (strcmp (git_repo_name (repo), "repo") == 0) {
+        if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
             struct git_branches *branches = git_branches_get (repo);
             git_branches_reset (branches);
 
@@ -102,12 +102,65 @@ int test_branches () {
     return 0;
 }
 
+int test_commits_parent () {
+    //659cba9dc3f15adc2ba51f0fb66b92ef7127186d
+    struct git_market *market = git_market_build("/home/ant");
+
+    git_market_cursor_reset (market);
+
+    do {
+        struct git_repo *repo = git_market_cursor_current (market);
+        
+        if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
+            struct git_obj *obj = git_obj_get (repo, "54415a12532e7e77dfc4037962e870abe72e0300");
+            struct git_obj_commit *commit = git_obj_get_commit (obj);
+
+            git_obj_commit_parent_reset (commit);
+            do {
+                struct git_obj_commit_parent *parent = git_obj_commit_parent_current (commit);
+                printf ("%s\n", git_obj_commit_parent_sign (parent));
+            } while (git_obj_commit_parent_move_next (commit) == 0);
+
+            break;
+        }
+    } while (git_market_cursor_move_next (market) == 0);
+    return 0;
+}
+
+int test_pack () {
+    struct git_market *market = git_market_build("/home/ant");
+    git_market_cursor_reset (market);
+
+    do {
+        struct git_repo *repo = git_market_cursor_current (market);
+        if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
+            struct git_packes *packes = git_packes_get (repo);
+            git_packes_reset (packes);
+            do {
+                git_pack_open (git_packes_get_current (packes));
+                printf ("%s, %d\n",
+                    git_packes_get_current (packes)->idx_path,
+                    (git_packes_get_current (packes)->count)
+                );
+
+                printf ("%d\n", rdt_find (
+                    git_packes_get_current (packes)->rdtree,
+                    "ff6a022e1aa20aa8c0ef679283f80df1173aba13")->val
+                );
+            } while (git_packes_move_next (packes) == 0);
+        }
+    } while (git_market_cursor_move_next (market) == 0);
+    return 0;
+}
+
 int main() {
     // test_enum_passwd ();
     // test_enum_group ();
     // test_user_create_account ();
     // test_market_init ();
     // test_create_account ();
-    test_branches ();
+    // test_branches ();
+    // test_commits_parent ();
+    test_pack ();
     return 0;
 }

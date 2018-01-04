@@ -2,6 +2,7 @@
 #define _G_KID_REPOSITORY_
 
 #include "define.h"
+#include "rbtree.h"
 
 int __access_file_readable (const char* filepath);
 int __access_file_writable (const char* filepath);
@@ -75,6 +76,41 @@ G_KID_EXTERN char *git_repo_path (struct git_repo *repo);
 // param <repo>: 仓库指针
 // return: 仓库名称
 G_KID_EXTERN char *git_repo_name (struct git_repo *repo);
+
+struct git_pack_idx {
+    void* sign; // ting: this field store what not char-string but byte-string's start address
+    int offset;
+};
+
+struct git_pack {
+    char *idx_path;
+    void *idx_map;
+    int idx_fd;
+    int idx_size;
+    int count;
+    
+    struct rdt *rdtree;
+
+    struct git_pack *prev;
+    struct git_pack *next;
+};
+
+struct git_packes {
+    struct git_pack *head;
+    struct git_pack *tail;
+    struct git_pack *cursor;
+};
+
+G_KID_EXTERN struct git_packes *git_packes_get (struct git_repo *repo);
+G_KID_EXTERN void git_packes_dispose (struct git_packes *packes);
+G_KID_EXTERN void git_packes_reset (struct git_packes *packes);
+G_KID_EXTERN struct git_pack *git_packes_get_current (struct git_packes *packes);
+G_KID_EXTERN int git_packes_move_next (struct git_packes *packes);
+
+G_KID_EXTERN int git_pack_is_open (struct git_pack *pack);
+G_KID_EXTERN int git_pack_open (struct git_pack *pack);
+
+int __git_pack_count (struct git_pack *pack);
 
 struct git_branch {
     char *name;

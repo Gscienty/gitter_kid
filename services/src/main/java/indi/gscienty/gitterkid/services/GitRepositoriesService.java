@@ -5,6 +5,11 @@ import java.util.List;
 import indi.gscienty.gitterkid.repo.Market;
 import indi.gscienty.gitterkid.repo.Repository;
 
+/**
+ * 仓库市场服务
+ * @author ant
+ *
+ */
 public class GitRepositoriesService {
 	private Market market;
 	

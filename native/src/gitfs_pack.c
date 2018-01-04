@@ -63,7 +63,6 @@ struct git_packes *git_packes_get (struct git_repo *repo) {
             pack->idx_fd = 0;
             pack->idx_size = 0;
             pack->count = 0;
-            pack->idxs = NULL;
 
             pack->next = NULL;
             pack->prev = result->tail;
@@ -172,13 +171,6 @@ int git_pack_open (struct git_pack *pack) {
         DBG_LOG (DBG_ERROR, "git_pack_open: idx file cannot got count");
         return -5;
     }
-    if (__git_pack_idx_init (pack) == 0) {
-        close (pack->idx_fd);
-        pack->idx_fd = 0;
-        pack->idx_map = NULL;
-        DBG_LOG (DBG_ERROR, "git_pack_open: idx file cannot got count");
-        return -6;
-    }
     return 0;
 }
 
@@ -205,7 +197,7 @@ int __git_pack_count (struct git_pack *pack) {
     return count;
 }
 
-char *__git_pack_get_nth_signture (struct git_pack *pack, int n) {
+void *__git_pack_get_nth_signture (struct git_pack *pack, int n) {
     if (pack == NULL) {
         DBG_LOG (DBG_ERROR, "__git_pack_get_nth_signture: pack is null");
         return NULL;
@@ -214,57 +206,19 @@ char *__git_pack_get_nth_signture (struct git_pack *pack, int n) {
         DBG_LOG (DBG_ERROR, "__git_pack_get_nth_signture: pack need open idx file");
         return NULL;
     }
-
-    unsigned char *retval = (char *) malloc (sizeof (*retval) * 21);
-    if (retval == NULL) {
-        DBG_LOG (DBG_ERROR, "__git_pack_get_nth_signture: have not enough free memory");
-    }
-
-    memcpy (retval, pack->idx_map + 8 + 1024 + 20 * n, 20);
-    retval[20] = 0;
-
-    return retval;
+    return pack->idx_map + 8 + 1024 + 20 * n;
 }
 
 int __git_pack_get_nth_offset (struct git_pack *pack, int n) {
     if (pack == NULL) {
         DBG_LOG (DBG_ERROR, "__git_pack_get_nth_signture: pack is null");
-        return NULL;
+        return 0;
     }
     if (pack->idx_map == NULL) {
         DBG_LOG (DBG_ERROR, "__git_pack_get_nth_signture: pack need open idx file");
-        return NULL;
+        return 0;
     }
 
     unsigned int *retval = (int *) (pack->idx_map + 8 + 1024 + 24 * pack->count + 4 * n);
     return ntohl (*retval);
-}
-
-int __git_pack_idx_init (struct git_pack *pack) {
-    if (pack == NULL) {
-        DBG_LOG (DBG_ERROR, "__git_pack_idx_init: pack is null");
-        return -1;
-    }
-    if (pack->count == 0) {
-        DBG_LOG (DBG_ERROR, "__git_pack_idx_init: pack need calc count. call '__git_pack_count' first.");
-        return -2;
-    }
-
-    pack->idxs = (struct git_pack_idx *) malloc (sizeof (struct git_pack_idx) * pack->count);
-    if (pack->idxs == NULL) {
-        DBG_LOG (DBG_ERROR, "__git_pack_idx_init: have not enough free memory");
-        return -3;
-    }
-
-    int i;
-    for (i = 0; i < pack->count; i++) {
-        pack->idxs[i].sign = __git_pack_get_nth_signture (pack, i);
-        pack->idxs[i].offset = __git_pack_get_nth_offset (pack, i);
-
-        int k;
-        for (k = 0; k < 20; k++) {
-            printf ("%02x", pack->idxs[i].sign[k]);
-        }
-        printf ("  %d\n", pack->idxs[i].offset);
-    }
 }

@@ -77,7 +77,7 @@ G_KID_EXTERN char *git_repo_path (struct git_repo *repo);
 G_KID_EXTERN char *git_repo_name (struct git_repo *repo);
 
 struct git_pack_idx {
-    unsigned char* sign; // ting: this field store what not char-string but byte-string
+    void* sign; // ting: this field store what not char-string but byte-string's start address
     int offset;
 };
 
@@ -87,7 +87,6 @@ struct git_pack {
     int idx_fd;
     int idx_size;
     int count;
-    struct git_pack_idx *idxs;
 
     struct git_pack *prev;
     struct git_pack *next;
@@ -109,7 +108,6 @@ G_KID_EXTERN int git_pack_is_open (struct git_pack *pack);
 G_KID_EXTERN int git_pack_open (struct git_pack *pack);
 
 int __git_pack_count (struct git_pack *pack);
-int __git_pack_idx_init (struct git_pack *pack);
 
 struct git_branch {
     char *name;

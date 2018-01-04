@@ -2,6 +2,7 @@
 #define _G_KID_REPOSITORY_
 
 #include "define.h"
+#include "rbtree.h"
 
 int __access_file_readable (const char* filepath);
 int __access_file_writable (const char* filepath);
@@ -87,6 +88,8 @@ struct git_pack {
     int idx_fd;
     int idx_size;
     int count;
+    
+    struct rdt *rdtree;
 
     struct git_pack *prev;
     struct git_pack *next;

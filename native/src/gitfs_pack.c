@@ -63,6 +63,7 @@ struct git_packes *git_packes_get (struct git_repo *repo) {
             pack->idx_fd = 0;
             pack->idx_size = 0;
             pack->count = 0;
+            pack->rdtree = NULL;
 
             pack->next = NULL;
             pack->prev = result->tail;
@@ -171,6 +172,8 @@ int git_pack_open (struct git_pack *pack) {
         DBG_LOG (DBG_ERROR, "git_pack_open: idx file cannot got count");
         return -5;
     }
+    
+    __git_pack_build_rdtree (pack);
     return 0;
 }
 
@@ -221,4 +224,25 @@ int __git_pack_get_nth_offset (struct git_pack *pack, int n) {
 
     unsigned int *retval = (int *) (pack->idx_map + 8 + 1024 + 24 * pack->count + 4 * n);
     return ntohl (*retval);
+}
+
+void __git_pack_build_rdtree (struct git_pack *pack) {
+    if (pack == NULL) {
+        DBG_LOG (DBG_ERROR, "__git_pack_build_rdtree: pack is null");
+        return;
+    }
+    if (pack->idx_map == NULL) {
+        DBG_LOG (DBG_ERROR, "__git_pack_build_rdtree: pack need open idx file");
+        return;
+    }
+    if (pack->rdtree != NULL) {
+        DBG_LOG (DBG_ERROR, "__git_pack_build_rdtree: already exist red black tree");
+        return;
+    }
+
+    pack->rdtree = rdt_build ();
+    int i;
+    for (i = 0; i < pack->count; i++) {
+        rdt_insert (pack->rdtree, __git_pack_get_nth_signture (pack, i), __git_pack_get_nth_offset (pack, i));
+    }
 }

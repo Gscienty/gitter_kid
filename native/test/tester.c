@@ -142,6 +142,11 @@ int test_pack () {
                     git_packes_get_current (packes)->idx_path,
                     (git_packes_get_current (packes)->count)
                 );
+
+                printf ("%d\n", rdt_find (
+                    git_packes_get_current (packes)->rdtree,
+                    "ff6a022e1aa20aa8c0ef679283f80df1173aba13")->val
+                );
             } while (git_packes_move_next (packes) == 0);
         }
     } while (git_market_cursor_move_next (market) == 0);

@@ -207,3 +207,7 @@ struct rdt_node *rdt_find (struct rdt *tree, const char *key) {
 
     return NULL;
 }
+
+void rdt_dispose (struct rdt *tree) {
+    // TODO
+}

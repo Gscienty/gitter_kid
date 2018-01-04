@@ -186,7 +186,7 @@ char *git_obj_commit_message (struct git_obj_commit *commit_obj) {
 void git_obj_commit_parent_reset (struct git_obj_commit *commit_obj) {
     if (commit_obj == NULL) {
         DBG_LOG (DBG_ERROR, "git_obj_commit_parent_reset: commit object is null");
-        return NULL;
+        return;
     }
     commit_obj->parent_cursor = commit_obj->parent_head;
 }

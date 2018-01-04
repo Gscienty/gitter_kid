@@ -137,7 +137,11 @@ int test_pack () {
             struct git_packes *packes = git_packes_get (repo);
             git_packes_reset (packes);
             do {
-                printf ("%s\n", git_packes_get_current (packes)->idx_name);
+                git_pack_open (git_packes_get_current (packes));
+                printf ("%s, %d\n",
+                    git_packes_get_current (packes)->idx_path,
+                    (git_packes_get_current (packes)->count)
+                );
             } while (git_packes_move_next (packes) == 0);
         }
     } while (git_market_cursor_move_next (market) == 0);

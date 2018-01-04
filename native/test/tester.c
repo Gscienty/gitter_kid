@@ -127,6 +127,23 @@ int test_commits_parent () {
     return 0;
 }
 
+int test_pack () {
+    struct git_market *market = git_market_build("/home/ant");
+    git_market_cursor_reset (market);
+
+    do {
+        struct git_repo *repo = git_market_cursor_current (market);
+        if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
+            struct git_packes *packes = git_packes_get (repo);
+            git_packes_reset (packes);
+            do {
+                printf ("%s\n", git_packes_get_current (packes)->idx_name);
+            } while (git_packes_move_next (packes) == 0);
+        }
+    } while (git_market_cursor_move_next (market) == 0);
+    return 0;
+}
+
 int main() {
     // test_enum_passwd ();
     // test_enum_group ();
@@ -134,6 +151,7 @@ int main() {
     // test_market_init ();
     // test_create_account ();
     // test_branches ();
-    test_commits_parent ();
+    // test_commits_parent ();
+    test_pack ();
     return 0;
 }

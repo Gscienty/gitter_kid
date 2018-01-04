@@ -76,6 +76,28 @@ G_KID_EXTERN char *git_repo_path (struct git_repo *repo);
 // return: 仓库名称
 G_KID_EXTERN char *git_repo_name (struct git_repo *repo);
 
+struct git_pack {
+    char *idx_name;
+    void *idx_map;
+    int offset;
+    int length;
+
+    struct git_pack *prev;
+    struct git_pack *next;
+};
+
+struct git_packes {
+    struct git_pack *head;
+    struct git_pack *tail;
+    struct git_pack *cursor;
+};
+
+G_KID_EXTERN struct git_packes *git_packes_get (struct git_repo *repo);
+G_KID_EXTERN void git_packes_dispose (struct git_packes *packes);
+G_KID_EXTERN void git_packes_reset (struct git_packes *packes);
+G_KID_EXTERN struct git_pack *git_packes_get_current (struct git_packes *packes);
+G_KID_EXTERN int git_packes_move_next (struct git_packes *packes);
+
 struct git_branch {
     char *name;
     char *last_commit_sign;

@@ -12,7 +12,7 @@ struct rdt *rdt_build () {
     return result;
 }
 
-void rdt_insert (struct rdt *tree, void *key, int val) {
+void rdt_insert (struct rdt *tree, void *key, int offset, int len) {
     if (tree == NULL) {
         DBG_LOG (DBG_ERROR, "rdt_insert: tree is null");
         return;
@@ -24,7 +24,8 @@ void rdt_insert (struct rdt *tree, void *key, int val) {
         return;
     }
     n->key = key;
-    n->val = val;
+    n->offset = offset;
+    n->len = len;
     n->parent = n->left = n->right = &tree->nil;
     n->color = RDTREE_COLOR_RED;
 

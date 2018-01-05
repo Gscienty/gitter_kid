@@ -10,7 +10,8 @@ enum rdt_color {
 
 struct rdt_node {
     void *key;
-    int val;
+    int offset;
+    int len;
     enum rdt_color color;
 
     struct rdt_node *parent;
@@ -25,7 +26,7 @@ struct rdt {
 };
 
 struct rdt *rdt_build ();
-void rdt_insert (struct rdt *tree, void *key, int val);
+void rdt_insert (struct rdt *tree, void *key, int offset, int len);
 struct rdt_node *rdt_find (struct rdt *tree, const char *key);
 void rdt_dispose (struct rdt *tree);
 

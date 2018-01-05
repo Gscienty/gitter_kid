@@ -172,7 +172,7 @@ int git_pack_open (struct git_pack *pack) {
         DBG_LOG (DBG_ERROR, "git_pack_open: idx file cannot got count");
         return -5;
     }
-    
+
     __git_pack_build_rdtree (pack);
     return 0;
 }
@@ -226,6 +226,30 @@ int __git_pack_get_nth_offset (struct git_pack *pack, int n) {
     return ntohl (*retval);
 }
 
+void __git_pack_build_rdtree_qsort_indexes (struct git_pack *pack, int *indexes, int start, int end) {
+    if (start >= end) {
+        return;
+    }
+
+    int i = start;
+    int j = end;
+    int k = indexes[start];
+    while (i < j) {
+        while (i < j && __git_pack_get_nth_offset (pack, k) < __git_pack_get_nth_offset (pack, indexes[j])) {
+            j--;
+        }
+        indexes[i] = indexes[j];
+        while (i < j && __git_pack_get_nth_offset (pack, indexes[i]) < __git_pack_get_nth_offset (pack, k)) {
+            i++;
+        }
+        indexes[j] = indexes[i];
+    }
+    indexes[i] = k;
+
+    __git_pack_build_rdtree_qsort_indexes (pack, indexes, start, i - 1);
+    __git_pack_build_rdtree_qsort_indexes (pack, indexes, i + 1, end);
+}
+
 void __git_pack_build_rdtree (struct git_pack *pack) {
     if (pack == NULL) {
         DBG_LOG (DBG_ERROR, "__git_pack_build_rdtree: pack is null");
@@ -240,9 +264,40 @@ void __git_pack_build_rdtree (struct git_pack *pack) {
         return;
     }
 
-    pack->rdtree = rdt_build ();
+    int *indexes = (int *) malloc (sizeof (*indexes) * pack->count);
     int i;
     for (i = 0; i < pack->count; i++) {
-        rdt_insert (pack->rdtree, __git_pack_get_nth_signture (pack, i), __git_pack_get_nth_offset (pack, i));
+        indexes[i] = i;
     }
+    __git_pack_build_rdtree_qsort_indexes (pack, indexes, 0, pack->count - 1);
+
+    int base_len = strlen (pack->idx_path);
+    char *pack_file_path = (char *) malloc (sizeof (char) * (base_len + 2));
+
+    strncpy (pack_file_path, pack->idx_path, base_len - 3);
+    strcpy (pack_file_path + base_len - 3, "pack");
+
+    struct stat st;
+
+    if (stat (pack_file_path, &st) != 0) {
+        DBG_LOG (DBG_ERROR, "__git_pack_build_rdtree: cannot get .pack file stat");
+        free (pack_file_path);
+        free (indexes);
+        return;
+    }
+    free (pack_file_path);
+
+    pack->rdtree = rdt_build ();
+    for (i = 0; i < pack->count; i++) {
+        rdt_insert (
+            pack->rdtree,
+            __git_pack_get_nth_signture (pack, indexes[i]),
+            __git_pack_get_nth_offset (pack, indexes[i]),
+            i + 1 == pack->count
+                ? st.st_size - __git_pack_get_nth_offset (pack, indexes[i])
+                : __git_pack_get_nth_offset (pack, indexes[i + 1]) - __git_pack_get_nth_offset (pack, indexes[i])
+        );
+    }
+
+    free (indexes);
 }

@@ -111,6 +111,7 @@ G_KID_EXTERN int git_pack_is_open (struct git_pack *pack);
 G_KID_EXTERN int git_pack_open (struct git_pack *pack);
 
 int __git_pack_count (struct git_pack *pack);
+void __git_pack_build_rdtree (struct git_pack *pack);
 
 struct git_branch {
     char *name;

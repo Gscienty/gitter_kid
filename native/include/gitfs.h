@@ -77,43 +77,6 @@ G_KID_EXTERN char *git_repo_path (struct git_repo *repo);
 // return: 仓库名称
 G_KID_EXTERN char *git_repo_name (struct git_repo *repo);
 
-struct git_pack_idx {
-    void* sign; // ting: this field store what not char-string but byte-string's start address
-    int offset;
-};
-
-struct git_pack {
-    char *idx_path;
-    void *idx_map;
-    int idx_fd;
-    int idx_size;
-    int count;
-    
-    struct rdt *rdtree;
-
-    struct git_pack *prev;
-    struct git_pack *next;
-};
-
-struct git_packes {
-    struct git_pack *head;
-    struct git_pack *tail;
-    struct git_pack *cursor;
-};
-
-G_KID_EXTERN struct git_packes *git_packes_get (struct git_repo *repo);
-G_KID_EXTERN void git_packes_dispose (struct git_packes *packes);
-G_KID_EXTERN void git_packes_reset (struct git_packes *packes);
-G_KID_EXTERN struct git_pack *git_packes_get_current (struct git_packes *packes);
-G_KID_EXTERN int git_packes_move_next (struct git_packes *packes);
-
-G_KID_EXTERN int git_pack_is_open (struct git_pack *pack);
-G_KID_EXTERN int git_pack_open (struct git_pack *pack);
-
-int __git_pack_count (struct git_pack *pack);
-void __git_pack_build_rdtree (struct git_pack *pack);
-void *__git_pack_get_obj (struct git_pack *pack, const char *signture);
-
 struct git_branch {
     char *name;
     char *last_commit_sign;
@@ -139,17 +102,43 @@ G_KID_EXTERN char *git_branch_get_last_commit_sign (struct git_branch *branch);
 
 struct __obj_file_ret {
     unsigned char *buf;
-    int length;
+    int len;
 };
 
-struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer);
+struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer, int inflated_buffer_len);
 
 // git object 类型
 enum git_obj_type {
     GIT_OBJ_TYPE_UNKNOW, // 未知类型
     GIT_OBJ_TYPE_BLOB,   // blob
     GIT_OBJ_TYPE_COMMIT, // commit
-    GIT_OBJ_TYPE_TREE    // tree
+    GIT_OBJ_TYPE_TREE,   // tree
+    GIT_OBJ_TYPE_TAG     // tag
+};
+
+
+struct git_pack_idx {
+    void* sign; // ting: this field store what not char-string but byte-string's start address
+    int offset;
+};
+
+struct git_pack {
+    char *idx_path;
+    void *idx_map;
+    int idx_fd;
+    int idx_size;
+    int count;
+    
+    struct rdt *rdtree;
+
+    struct git_pack *prev;
+    struct git_pack *next;
+};
+
+struct git_packes {
+    struct git_pack *head;
+    struct git_pack *tail;
+    struct git_pack *cursor;
 };
 
 // git object 结构体
@@ -166,7 +155,7 @@ struct git_obj {
 // blob 结构体
 struct git_obj_blob {
     void *content; // blob 文件内容
-    int length;    // blob 文件内容长度
+    int len;    // blob 文件内容长度
 };
 
 // person log 结构体
@@ -212,6 +201,19 @@ struct git_obj_tree {
     struct git_obj_tree_item *tail;
     struct git_obj_tree_item *cursor;
 };
+
+G_KID_EXTERN struct git_packes *git_packes_get (struct git_repo *repo);
+G_KID_EXTERN void git_packes_dispose (struct git_packes *packes);
+G_KID_EXTERN void git_packes_reset (struct git_packes *packes);
+G_KID_EXTERN struct git_pack *git_packes_get_current (struct git_packes *packes);
+G_KID_EXTERN int git_packes_move_next (struct git_packes *packes);
+
+G_KID_EXTERN int git_pack_is_open (struct git_pack *pack);
+G_KID_EXTERN int git_pack_open (struct git_pack *pack);
+
+int __git_pack_count (struct git_pack *pack);
+void __git_pack_build_rdtree (struct git_pack *pack);
+struct git_obj *__git_pack_get_obj (struct git_pack *pack, const char *signture);
 
 
 // 获取仓库内的git object

@@ -303,9 +303,9 @@ void __git_pack_build_rdtree (struct git_pack *pack) {
     free (indexes);
 }
 
-int __git_pack_get_obj_get_packfd (struct git_pack *pack) {
+int __git_get_packfd (struct git_pack *pack) {
     if (pack == NULL) {
-        DBG_LOG (DBG_ERROR, "__git_pack_get_obj_get_packfd: pack is null");
+        DBG_LOG (DBG_ERROR, "__git_get_packfd: pack is null");
         return -1;
     }
 
@@ -320,6 +320,75 @@ int __git_pack_get_obj_get_packfd (struct git_pack *pack) {
     return packfd;
 }
 
+struct __git_packitem {
+    void *mmaped_base;
+    int inner_offset;
+    int mmaped_len;
+
+    unsigned char item_type;
+    int origin_len;
+};
+
+struct __git_packitem *__git_packitem_mmap (struct git_pack *pack, int packfd, int packfile_offset, int pack_len) {
+    struct __git_packitem *result = (struct __git_packitem *) malloc (sizeof (*result));
+    if (result == NULL) {
+        DBG_LOG (DBG_ERROR, "__git_pack_mmap: have not enough free memory");
+        return NULL;
+    }
+
+    // get memory page
+    const int page_size = sysconf (_SC_PAGESIZE);
+    // calc nth memory page count
+    int nth_page = packfile_offset / page_size;
+    // inner page offset
+    int page_inner_offset = packfile_offset - (nth_page * page_size);
+    // calc physical len
+    result->mmaped_len = pack_len + page_inner_offset;
+    // mmap file's sub-content
+    result->mmaped_base = mmap (NULL, result->mmaped_len, PROT_READ, MAP_SHARED, packfd, page_size * nth_page);
+    if (result->mmaped_base == (void *) -1) {
+        DBG_LOG (DBG_ERROR, "__git_pack_get_obj: map failure");
+        free (result);
+        return NULL;
+    }
+
+    // calc item type & inflated content length
+    result->item_type = ((*(unsigned char *) (result->mmaped_base + page_inner_offset)) & 0x70);
+    result->origin_len = ((*(unsigned char *) (result->mmaped_base + page_inner_offset)) & 0x0F);
+    result->inner_offset = page_inner_offset;
+    while (((*(unsigned char *) (result->mmaped_base + result->inner_offset)) & 0x80) != 0) {
+        result->inner_offset++;
+        result->origin_len = (result->origin_len << 7)
+            | ((*(unsigned char *) (result->mmaped_base + result->inner_offset)) & 0x7F);
+    }
+    result->inner_offset++;
+
+    return result;
+}
+
+void __git_packitem_munmap (struct __git_packitem *mmaped) {
+    if (mmaped == NULL) {
+        DBG_LOG (DBG_ERROR, "__git_pack_munmap: mmaped is null");
+        return;
+    }
+    if (mmaped->mmaped_base != 0) {
+        munmap (mmaped->mmaped_base, mmaped->mmaped_len);
+    }
+    free (mmaped);
+}
+
+struct __obj_file_ret *__git_packitem_inflate (struct __git_packitem *packitem) {
+    struct __obj_file_ret *deflated_obj = (struct __obj_file_ret *) malloc (sizeof (*deflated_obj));
+    if (deflated_obj == NULL) {
+        DBG_LOG (DBG_ERROR, "__git_pack_get_obj: have not enough free memory");
+        return NULL;
+    }
+    deflated_obj->buf = packitem->mmaped_base + packitem->inner_offset;
+    deflated_obj->len = packitem->mmaped_len - packitem->inner_offset;
+    return __inflate (deflated_obj, packitem->origin_len);
+    
+}
+
 void *__git_pack_get_obj (struct git_pack *pack, const char *signture) {
     if (pack == NULL) {
         DBG_LOG (DBG_ERROR, "__git_pack_get_obj: pack is null");
@@ -330,41 +399,40 @@ void *__git_pack_get_obj (struct git_pack *pack, const char *signture) {
         return NULL;
     }
 
+    // find idx's node what contains pack item's offset & len by red black tree
     struct rdt_node *node = rdt_find (pack->rdtree, signture);
     if (node == NULL) {
         DBG_LOG (DBG_INFO, "__git_pack_get_obj: have not finded entry");
         return NULL;
     }
 
-    int packfd = __git_pack_get_obj_get_packfd (pack);
+    // open pack file
+    int packfd = __git_get_packfd (pack);
     if (packfd == -1) {
         DBG_LOG (DBG_ERROR, "__git_pack_get_obj: cannot open pack file");
         return NULL;
     }
 
-    //
-    const int page_size = sysconf (_SC_PAGESIZE);
-    int jumped_page_count = node->offset / page_size;
-    int page_offset = node->offset - (jumped_page_count * page_size);
-    unsigned char *pack_obj = mmap (
-        NULL,
-        node->len + page_offset,
-        PROT_READ, MAP_SHARED,
-        packfd,
-        page_size * jumped_page_count
-    );
-    if (pack_obj == (void *) -1) {
-        DBG_LOG (DBG_ERROR, "__git_pack_get_obj: map failure");
+    // get deflated pack item
+    struct __git_packitem *packitem = __git_packitem_mmap (pack, packfd, node->offset, node->len);
+    if (packitem == NULL) {
+        DBG_LOG (DBG_ERROR, "__git_pack_get_obj: cannot get pack item");
+        close (packfd);
         return NULL;
     }
 
-    unsigned char item_type = (pack_obj[0] & 0x70) >> 4;
-    // TODO
+    // inflate pack item
+    struct __obj_file_ret *inflated_packitem = __git_packitem_inflate (packitem);
+    __git_packitem_munmap (packitem);
+    close (packfd);
+    if (inflated_packitem == NULL) {
+        DBG_LOG (DBG_ERROR, "__git_pack_get_obj: cannot infalte packitem");
+        return NULL;
+    }
 
-    struct __obj_file_ret *obj_item = (struct __obj_file_ret *) malloc (sizeof (*obj_item));
-    obj_item->buf = content;
-    obj_item->length = node->len;
-
-    struct __obj_file_ret *inflated_obj_item = __inflate (obj_item);
-    printf ("%s\n", inflated_obj_item->buf);
+    struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__git_pack_get_obj: have not enough free memory");
+        return NULL;
+    }
 }

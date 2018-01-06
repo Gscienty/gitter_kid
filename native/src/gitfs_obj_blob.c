@@ -9,7 +9,7 @@ struct git_obj_blob *__git_obj_transfer_blob (struct git_obj *obj) {
         DBG_LOG (DBG_INFO, "have not enough free memory");
         return NULL;
     }
-    ret->length = obj->size;
+    ret->len = obj->size;
     ret->content = obj->body;
     
     return ret;
@@ -31,7 +31,7 @@ int git_obj_blob_length (struct git_obj_blob *blob_obj) {
     if (blob_obj == NULL) {
         return 0;
     }
-    return blob_obj->length;
+    return blob_obj->len;
 }
 
 void *git_obj_blob_content (struct git_obj_blob *blob_obj) {

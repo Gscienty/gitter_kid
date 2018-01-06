@@ -55,7 +55,7 @@ struct __obj_file_ret *__get_repo_obj_by_sign_loose (FILE *object_file) {
     fread (buf, sizeof (unsigned char), flen, object_file);
 
     ret->buf = buf;
-    ret->length = flen;
+    ret->len = flen;
 
     return ret;
 }
@@ -82,7 +82,7 @@ struct __obj_file_ret *__get_repo_obj_by_sign (
 }
 
 // inflate object file
-struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer) {
+struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer, int inflated_buffer_len) {
     if (zip_buffer == NULL) {
         return NULL;
     }
@@ -91,8 +91,7 @@ struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer) {
         return NULL;
     }
 
-    int init_buf_length = sizeof (unsigned char *) * (zip_buffer->length * 3 + 1024);
-    ret->buf = (unsigned char *) malloc (sizeof (unsigned char) * init_buf_length);
+    ret->buf = (unsigned char *) malloc (sizeof (unsigned char) * inflated_buffer_len);
     if (ret->buf == NULL) {
         // have not enough free memory
         DBG_LOG (DBG_ERROR, "__inflate: have not enough free memory");
@@ -105,15 +104,15 @@ struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer) {
     d_stream.zfree = __zfree;
     d_stream.opaque = (voidpf) 0;
     d_stream.next_in = zip_buffer->buf;
-    d_stream.avail_in = (unsigned int) zip_buffer->length;
+    d_stream.avail_in = (unsigned int) zip_buffer->len;
 
     int err = inflateInit (&d_stream);
     d_stream.next_out = ret->buf;
-    d_stream.avail_out = (unsigned int) init_buf_length;
+    d_stream.avail_out = (unsigned int) inflated_buffer_len;
     inflate (&d_stream, Z_NO_FLUSH);
     inflateEnd (&d_stream);
 
-    ret->length = init_buf_length - d_stream.avail_out;
+    ret->len = inflated_buffer_len - d_stream.avail_out;
 
     return ret;
 }
@@ -207,7 +206,7 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
         return NULL;
     }
     // inflate origin object file's content
-    struct __obj_file_ret *inflated_buffer = __inflate (obj_buffer);
+    struct __obj_file_ret *inflated_buffer = __inflate (obj_buffer, obj_buffer->len * 3 + 1024);
     // clear object file's used memory
     free (obj_buffer->buf);
     free (obj_buffer);
@@ -302,7 +301,9 @@ void git_obj_dispose (struct git_obj *obj) {
     }
 
     free (obj->buf);
-    free (obj->path);
+    if (obj->path != NULL) {
+        free (obj->path);
+    }
     free (obj->sign);
     free (obj);
 }

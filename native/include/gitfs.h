@@ -112,6 +112,7 @@ G_KID_EXTERN int git_pack_open (struct git_pack *pack);
 
 int __git_pack_count (struct git_pack *pack);
 void __git_pack_build_rdtree (struct git_pack *pack);
+void *__git_pack_get_obj (struct git_pack *pack, const char *signture);
 
 struct git_branch {
     char *name;
@@ -134,6 +135,14 @@ G_KID_EXTERN int git_branches_move_next (struct git_branches *branches);
 G_KID_EXTERN struct git_branch *git_branches_get_current (struct git_branches *branches);
 G_KID_EXTERN char *git_branch_get_name (struct git_branch *branch);
 G_KID_EXTERN char *git_branch_get_last_commit_sign (struct git_branch *branch);
+
+
+struct __obj_file_ret {
+    unsigned char *buf;
+    int length;
+};
+
+struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer);
 
 // git object 类型
 enum git_obj_type {

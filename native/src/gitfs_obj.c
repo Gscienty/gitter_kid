@@ -32,10 +32,6 @@ char *__generate_obj_file_path (struct git_repo *repo, const char *signture) {
     return ret;
 }
 
-struct __obj_file_ret {
-    unsigned char *buf;
-    int length;
-};
 
 // object file stored by loose type. get object content
 struct __obj_file_ret *__get_repo_obj_by_sign_loose (FILE *object_file) {
@@ -99,6 +95,7 @@ struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer) {
     ret->buf = (unsigned char *) malloc (sizeof (unsigned char) * init_buf_length);
     if (ret->buf == NULL) {
         // have not enough free memory
+        DBG_LOG (DBG_ERROR, "__inflate: have not enough free memory");
         free (ret);
         return NULL;
     }

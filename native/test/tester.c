@@ -142,6 +142,7 @@ int test_pack () {
                     git_packes_get_current (packes)->idx_path,
                     (git_packes_get_current (packes)->count)
                 );
+                __git_pack_get_obj (git_packes_get_current (packes), "ca1c10bf904926224e1358910d637320e91945d3");
             } while (git_packes_move_next (packes) == 0);
         }
     } while (git_market_cursor_move_next (market) == 0);

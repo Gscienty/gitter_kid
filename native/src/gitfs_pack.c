@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include <limits.h>
 
 struct git_packes *git_packes_get (struct git_repo *repo) {
     if (repo == NULL) {
@@ -272,20 +273,20 @@ void __git_pack_build_rdtree (struct git_pack *pack) {
     __git_pack_build_rdtree_qsort_indexes (pack, indexes, 0, pack->count - 1);
 
     int base_len = strlen (pack->idx_path);
-    char *pack_file_path = (char *) malloc (sizeof (char) * (base_len + 2));
+    char *packfile_path = (char *) malloc (sizeof (char) * (base_len + 2));
 
-    strncpy (pack_file_path, pack->idx_path, base_len - 3);
-    strcpy (pack_file_path + base_len - 3, "pack");
+    strncpy (packfile_path, pack->idx_path, base_len - 3);
+    strcpy (packfile_path + base_len - 3, "pack");
 
     struct stat st;
 
-    if (stat (pack_file_path, &st) != 0) {
+    if (stat (packfile_path, &st) != 0) {
         DBG_LOG (DBG_ERROR, "__git_pack_build_rdtree: cannot get .pack file stat");
-        free (pack_file_path);
+        free (packfile_path);
         free (indexes);
         return;
     }
-    free (pack_file_path);
+    free (packfile_path);
 
     pack->rdtree = rdt_build ();
     for (i = 0; i < pack->count; i++) {
@@ -300,4 +301,70 @@ void __git_pack_build_rdtree (struct git_pack *pack) {
     }
 
     free (indexes);
+}
+
+int __git_pack_get_obj_get_packfd (struct git_pack *pack) {
+    if (pack == NULL) {
+        DBG_LOG (DBG_ERROR, "__git_pack_get_obj_get_packfd: pack is null");
+        return -1;
+    }
+
+    // get pack file;
+    int basepath_length = strlen (pack->idx_path);
+    char *packfile_path = (char *) malloc (sizeof (char) * (basepath_length + 2));
+    strncpy (packfile_path, pack->idx_path, basepath_length - 3);
+    strcpy (packfile_path + basepath_length - 3, "pack");
+
+    int packfd = open (packfile_path, O_RDONLY);
+    free (packfile_path);
+    return packfd;
+}
+
+void *__git_pack_get_obj (struct git_pack *pack, const char *signture) {
+    if (pack == NULL) {
+        DBG_LOG (DBG_ERROR, "__git_pack_get_obj: pack is null");
+        return NULL;
+    }
+    if (signture == NULL || strlen (signture) != 40) {
+        DBG_LOG (DBG_ERROR, "__git_pack_get_obj: signture illegal");
+        return NULL;
+    }
+
+    struct rdt_node *node = rdt_find (pack->rdtree, signture);
+    if (node == NULL) {
+        DBG_LOG (DBG_INFO, "__git_pack_get_obj: have not finded entry");
+        return NULL;
+    }
+
+    int packfd = __git_pack_get_obj_get_packfd (pack);
+    if (packfd == -1) {
+        DBG_LOG (DBG_ERROR, "__git_pack_get_obj: cannot open pack file");
+        return NULL;
+    }
+
+    //
+    const int page_size = sysconf (_SC_PAGESIZE);
+    int jumped_page_count = node->offset / page_size;
+    int page_offset = node->offset - (jumped_page_count * page_size);
+    unsigned char *pack_obj = mmap (
+        NULL,
+        node->len + page_offset,
+        PROT_READ, MAP_SHARED,
+        packfd,
+        page_size * jumped_page_count
+    );
+    if (pack_obj == (void *) -1) {
+        DBG_LOG (DBG_ERROR, "__git_pack_get_obj: map failure");
+        return NULL;
+    }
+
+    unsigned char item_type = (pack_obj[0] & 0x70) >> 4;
+    // TODO
+
+    struct __obj_file_ret *obj_item = (struct __obj_file_ret *) malloc (sizeof (*obj_item));
+    obj_item->buf = content;
+    obj_item->length = node->len;
+
+    struct __obj_file_ret *inflated_obj_item = __inflate (obj_item);
+    printf ("%s\n", inflated_obj_item->buf);
 }

@@ -323,6 +323,7 @@ int __git_get_packfd (struct git_pack *pack) {
 struct __git_packitem {
     void *mmaped_base;
     int inner_offset;
+    int _n;
     int mmaped_len;
 
     unsigned char item_type;
@@ -373,6 +374,7 @@ struct __git_packitem *__git_packitem_mmap (struct git_pack *pack, int packfile_
             | ((*(unsigned char *) (result->mmaped_base + result->inner_offset)) & 0x7F);
     }
     result->inner_offset++;
+    result->_n = result->inner_offset - page_inner_offset;
 
     return result;
 }
@@ -427,6 +429,32 @@ struct git_obj_ref_delta *__git_obj_transfer_ref_delta (struct git_obj *obj, int
 
     free (inflated_buffer);
 
+    return ret;
+}
+
+struct git_obj_ofs_delta *__git_obj_transfer_ofs_delta (struct git_obj *obj, int n, int deflated_len) {
+    struct git_obj_ofs_delta *ret = (struct git_obj_ofs_delta *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__git_obj_transfer_ofs_delta: have not enough free memory");
+        return NULL;
+    }
+    ret->offset = 0;
+    int i;
+    for (i = 0; i < n; i++) {
+        ret->offset = (ret->offset << 7) | (*(unsigned char *) (obj->body + i) & 0x7F);
+    }
+
+    struct __obj_file_ret *deflated_buffer = (struct __obj_file_ret *) malloc (sizeof (*deflated_buffer));
+    deflated_buffer->buf = obj->body + n;
+    deflated_buffer->len = obj->size - n;
+    struct __obj_file_ret *inflated_buffer = __inflate (deflated_buffer, deflated_len);
+    free (deflated_buffer);
+
+    ret->content = inflated_buffer->buf;
+    ret->len = inflated_buffer->len;
+
+    free (inflated_buffer);
+    
     return ret;
 }
 
@@ -501,6 +529,14 @@ struct git_obj *__git_pack_get_obj (struct git_pack *pack, const char *signture)
         ret->buf = (void *) malloc (ret->size);
         memcpy (ret->buf, packitem->mmaped_base + packitem->inner_offset, ret->size);
         ret->body = ret->buf;
+        ret->ptr = __git_obj_transfer_ofs_delta (ret, packitem->_n, packitem->origin_len);
+
+        __git_packitem_dispose (packitem);
+
+        printf ("%d\n", packitem->origin_len);
+        printf ("%d\n", ret->size);
+        printf ("%d\n", (unsigned int) ((struct git_obj_ofs_delta *) ret->ptr)->offset);
+        printf ("%s\n", (char *) (((struct git_obj_ofs_delta *) ret->ptr)->content));
     }
     else {
         // get object length
@@ -516,8 +552,6 @@ struct git_obj *__git_pack_get_obj (struct git_pack *pack, const char *signture)
         ret->buf = inflated_packitem->buf;
         ret->body = ret->buf;
         ret->ptr = NULL;
-
-        //printf ("%s\n", ret->body);
     }
     printf ("%d\t%d\n", ret->size, ret->type);
     return ret;

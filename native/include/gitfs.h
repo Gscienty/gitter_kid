@@ -149,6 +149,12 @@ struct git_obj_ref_delta {
     int len;
 };
 
+struct git_obj_ofs_delta {
+    void *content;
+    int len;
+    int offset;
+};
+
 // git object 结构体
 struct git_obj {
     void *buf;

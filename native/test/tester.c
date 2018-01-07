@@ -142,7 +142,11 @@ int test_pack () {
                     git_packes_get_current (packes)->idx_path,
                     (git_packes_get_current (packes)->count)
                 );
-                __git_pack_get_obj (git_packes_get_current (packes), "ca1c10bf904926224e1358910d637320e91945d3");
+                // __git_pack_get_obj (git_packes_get_current (packes), "0f45d6566321ef72e498d1e289398fab1fd5026f");
+                // __git_pack_get_obj (git_packes_get_current (packes), "ca1c10bf904926224e1358910d637320e91945d3");
+
+                __git_pack_get_obj (git_packes_get_current (packes), "e53ee7b4ea4576d131fdce313a4c5204bd8d0eec");
+                __git_pack_get_obj (git_packes_get_current (packes), "c1a37f7eacfbd0c1d6d3250b92e81999e99fb1c7");
             } while (git_packes_move_next (packes) == 0);
         }
     } while (git_market_cursor_move_next (market) == 0);

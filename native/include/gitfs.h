@@ -109,11 +109,13 @@ struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer, int inflate
 
 // git object 类型
 enum git_obj_type {
-    GIT_OBJ_TYPE_UNKNOW, // 未知类型
-    GIT_OBJ_TYPE_BLOB,   // blob
-    GIT_OBJ_TYPE_COMMIT, // commit
-    GIT_OBJ_TYPE_TREE,   // tree
-    GIT_OBJ_TYPE_TAG     // tag
+    GIT_OBJ_TYPE_UNKNOW,    // 未知类型
+    GIT_OBJ_TYPE_BLOB,      // blob
+    GIT_OBJ_TYPE_COMMIT,    // commit
+    GIT_OBJ_TYPE_TREE,      // tree
+    GIT_OBJ_TYPE_TAG,       // tag
+    GIT_OBJ_TYPE_OFS_DELTA, // offset delta
+    GIT_OBJ_TYPE_REF_DELTA  // reference delta
 };
 
 
@@ -139,6 +141,12 @@ struct git_packes {
     struct git_pack *head;
     struct git_pack *tail;
     struct git_pack *cursor;
+};
+
+struct git_obj_ref_delta {
+    void *sign;
+    void *content;
+    int len;
 };
 
 // git object 结构体

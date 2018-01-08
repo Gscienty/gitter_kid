@@ -143,8 +143,20 @@ struct git_packes {
     struct git_pack *cursor;
 };
 
+struct __git_packitem {
+    void *mmaped_base;
+    int inner_offset;
+    int _n;
+    int mmaped_len;
+
+    unsigned char item_type;
+    int origin_len;
+
+    int pack_fd;
+};
+
 struct git_obj_ref_delta {
-    void *sign;
+    void *base_sign; // ting: this field store what not char-string but byte-string's start address
     void *content;
     int len;
 };

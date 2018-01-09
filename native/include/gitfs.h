@@ -118,29 +118,20 @@ enum git_obj_type {
     GIT_OBJ_TYPE_REF_DELTA  // reference delta
 };
 
-
-struct git_pack_idx {
-    void* sign; // ting: this field store what not char-string but byte-string's start address
-    int offset;
-};
-
-struct git_pack {
-    char *idx_path;
-    void *idx_map;
-    int idx_fd;
-    int idx_size;
+struct __gitpack {
+    char *sign;
     int count;
-    
-    struct rdt *rdtree;
 
-    struct git_pack *prev;
-    struct git_pack *next;
+    struct rdt *rd_tree;
+
+    struct __gitpack *prev;
+    struct __gitpack *next;
 };
 
-struct git_packes {
-    struct git_pack *head;
-    struct git_pack *tail;
-    struct git_pack *cursor;
+struct __gitpack_collection {
+    struct __gitpack *head;
+    struct __gitpack *tail;
+    struct __gitpack *cursor;
 };
 
 struct __git_packitem {

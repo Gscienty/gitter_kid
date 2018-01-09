@@ -159,7 +159,9 @@ struct git_obj *__git_pack_get_obj (struct git_pack *pack, const char *signture)
         default: ret->type = GIT_OBJ_TYPE_UNKNOW; break;
     }
 
-    printf ("%s\t%d\n", ret->sign, ret->type);
+    if (ret != NULL) {
+        printf ("%s\t%d\n", ret->sign, ret->type);
+    }
 
     __git_packitem_dispose (packitem);
 

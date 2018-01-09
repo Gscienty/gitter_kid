@@ -13,7 +13,7 @@ struct git_obj *__git_packitem_transfer_ref_delta_build_git_obj (struct __git_pa
     ret->path = NULL;
     ret->sign = strdup (signture);
     ret->type = GIT_OBJ_TYPE_REF_DELTA;
-    ret->ptr = ref_delta;
+    ret->ptr = NULL;
     ret->size = inflated_obj->len;
     ret->body = inflated_obj->buf;
     free (inflated_obj);
@@ -39,11 +39,10 @@ struct git_obj *__git_packitem_transfer_ref_delta (struct __git_packitem *packit
 
     // wrapped to git_obj
     struct git_obj *ret = __git_packitem_transfer_ref_delta_build_git_obj (packitem, signture);
-    
+
     ref_delta->head = ref_delta->tail = ref_delta->cursor = NULL;
     __git_obj_transfer_delta (ret, &ref_delta->head, &ref_delta->tail);
-
+    
     ret->ptr = ref_delta;
-
     return ret;
 }

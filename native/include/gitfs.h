@@ -162,16 +162,16 @@ enum git_obj_delta_type {
 
 struct __git_obj_delta {
     enum git_obj_delta_type type;
-    void *start;
-    union ctx {
-        struct copy {
-            int len;
-            int offset;
-        };
-        struct insert {
-            int len;
-        };
-    };
+    union {
+        struct {
+            size_t len;
+            size_t offset;
+        } copy;
+        struct {
+            size_t len;
+            void *start;
+        } insert;
+    } ctx;
 
     struct __git_obj_delta* prev;
     struct __git_obj_delta* next;

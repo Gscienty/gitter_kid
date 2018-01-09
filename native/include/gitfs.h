@@ -155,16 +155,42 @@ struct __git_packitem {
     int pack_fd;
 };
 
+enum git_obj_delta_type {
+    GIT_OBJ_DELTA_INSERT,
+    GIT_OBJ_DELTA_COPY
+};
+
+struct __git_obj_delta {
+    enum git_obj_delta_type type;
+    void *start;
+    union ctx {
+        struct copy {
+            int len;
+            int offset;
+        };
+        struct insert {
+            int len;
+        };
+    };
+
+    struct __git_obj_delta* prev;
+    struct __git_obj_delta* next;
+};
+
 struct git_obj_ref_delta {
     void *base_sign; // ting: this field store what not char-string but byte-string's start address
-    void *content;
-    int len;
+
+    struct __git_obj_delta* head;
+    struct __git_obj_delta* tail;
+    struct __git_obj_delta* cursor;
 };
 
 struct git_obj_ofs_delta {
-    void *content;
-    int len;
-    int offset;
+    int negative_offset;
+
+    struct __git_obj_delta* head;
+    struct __git_obj_delta* tail;
+    struct __git_obj_delta* cursor;
 };
 
 // git object 结构体
@@ -243,6 +269,7 @@ struct git_obj *__git_pack_get_obj (struct git_pack *pack, const char *signture)
 
 struct __obj_file_ret *__git_packitem_inflate (struct __git_packitem *packitem);
 
+void __git_obj_transfer_delta (struct git_obj *obj, struct __git_obj_delta **head_ptr, struct __git_obj_delta **tail_ptr);
 struct git_obj *__git_packitem_transfer_ofs_delta (struct __git_packitem *packitem, const char *signture);
 struct git_obj *__git_packitem_transfer_ref_delta (struct __git_packitem *packitem, const char *signture);
 

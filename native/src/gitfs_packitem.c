@@ -105,84 +105,6 @@ struct __obj_file_ret *__git_packitem_inflate (struct __git_packitem *packitem) 
     return inflated_obj;
 }
 
-struct git_obj *__git_packitem_transfer_ref_delta (struct __git_packitem *packitem, const char *signture) {
-    struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
-    if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__git_packitem_transfer_ref_delta: have not enough free memory");
-        return NULL;
-    }
-    struct git_obj_ref_delta *ref_delta = (struct git_obj_ref_delta *) malloc (sizeof (*ref_delta));
-    if (ref_delta == NULL) {
-        DBG_LOG (DBG_ERROR, "__git_packitem_transfer_ref_delta: have not enough free memory");
-        free (ret);
-        return NULL;
-    }
-    ref_delta->base_sign = (void *) malloc (20);
-    if (ref_delta->base_sign == NULL) {
-        DBG_LOG (DBG_ERROR, "__git_packitem_transfer_ref_delta: have not enough free memory");
-        free (ret);
-        free (ref_delta);
-        return NULL;
-    }
-    memcpy (ref_delta->base_sign, packitem->mmaped_base + packitem->inner_offset, 20);
-    packitem->inner_offset += 20;
-
-    struct __obj_file_ret *inflated_obj = __git_packitem_inflate (packitem);
-    ref_delta->content = inflated_obj->buf;
-    ref_delta->len = inflated_obj->len;
-    free (inflated_obj);
-
-    ret->buf = ref_delta->content;
-    ret->path = NULL;
-    ret->sign = strdup (signture);
-    ret->type = GIT_OBJ_TYPE_REF_DELTA;
-    ret->ptr = ref_delta;
-    ret->size = ref_delta->len;
-    ret->body = ref_delta->content;
-
-    return ret;
-}
-
-struct git_obj *__git_packitem_transfer_ofs_delta (struct __git_packitem *packitem, const char *signture) {
-    struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
-    if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__git_packitem_transfer_ofs_delta: have not enough free memory");
-        return NULL;
-    }
-    struct git_obj_ofs_delta *ofs_delta = (struct git_obj_ofs_delta *) malloc (sizeof (*ofs_delta));
-    if (ofs_delta == NULL) {
-        DBG_LOG (DBG_ERROR, "__git_packitem_transfer_ofs_delta: have not enough free memory");
-        free (ret);
-        return NULL;
-    }
-    unsigned int offset = 0x00000000;
-    unsigned int mask = 0x00000000;
-    int i;
-    for (i = 0; i < packitem->_n - 1; i++) {
-        mask |= 0x7F << (7 * i);
-        offset |= ((*(unsigned char *) (packitem->mmaped_base + packitem->inner_offset + i)) & 0x7F) << (7 * i);
-    }
-    mask |= 0xFF << (7 * (packitem->_n - 1));
-    offset |= ((*(unsigned char *) (packitem->mmaped_base + packitem->inner_offset + packitem->_n - 1)) & 0x7F) << (7 * (packitem->_n - 1));
-    offset = ~mask | offset;
-    ofs_delta->offset = offset;
-
-    packitem->inner_offset += packitem->_n;
-    struct __obj_file_ret *inflated_obj = __git_packitem_inflate (packitem);
-    ofs_delta->content = inflated_obj->buf;
-    ofs_delta->len = inflated_obj->len;
-    free (inflated_obj);
-
-    ret->buf = ofs_delta->content;
-    ret->path = NULL;
-    ret->sign = strdup (signture);
-    ret->type = GIT_OBJ_TYPE_OFS_DELTA;
-    ret->ptr = ofs_delta;
-    ret->size = ofs_delta->len;
-    ret->body = ofs_delta->content;
-
-    return ret;
-}
 
 struct __git_packitem *__git_pack_get_packitem (struct git_pack *pack, const char *signture) {
     if (pack == NULL) {
@@ -230,14 +152,14 @@ struct git_obj *__git_pack_get_obj (struct git_pack *pack, const char *signture)
             break;
         case 0x60: // GIT_OBJ_TYPE_OFS_DELTA;
             ret = __git_packitem_transfer_ofs_delta (packitem, signture);
-            printf ("OFS: %s\n", (char *) ((struct git_obj_ofs_delta *) ret->ptr)->content);
             break;
         case 0x70: // GIT_OBJ_TYPE_REF_DELTA;
             ret = __git_packitem_transfer_ref_delta (packitem, signture);
-            printf ("REF: %s\n", (char *) ((struct git_obj_ref_delta *) ret->ptr)->content);
             break;
         default: ret->type = GIT_OBJ_TYPE_UNKNOW; break;
     }
+
+    printf ("%s\t%d\n", ret->sign, ret->type);
 
     __git_packitem_dispose (packitem);
 

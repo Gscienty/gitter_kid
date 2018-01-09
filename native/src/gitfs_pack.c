@@ -321,7 +321,7 @@ void __git_pack_build_rdtree (struct git_pack *pack) {
             __git_pack_get_nth_signture (pack, indexes[i]),
             __git_pack_get_nth_offset (pack, indexes[i]),
             i + 1 == pack->count
-                ? st.st_size - __git_pack_get_nth_offset (pack, indexes[i])
+                ? st.st_size - 20 - __git_pack_get_nth_offset (pack, indexes[i])
                 : __git_pack_get_nth_offset (pack, indexes[i + 1]) - __git_pack_get_nth_offset (pack, indexes[i])
         );
     }

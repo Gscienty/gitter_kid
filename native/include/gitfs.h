@@ -241,6 +241,11 @@ int __git_pack_count (struct git_pack *pack);
 void __git_pack_build_rdtree (struct git_pack *pack);
 struct git_obj *__git_pack_get_obj (struct git_pack *pack, const char *signture);
 
+struct __obj_file_ret *__git_packitem_inflate (struct __git_packitem *packitem);
+
+struct git_obj *__git_packitem_transfer_ofs_delta (struct __git_packitem *packitem, const char *signture);
+struct git_obj *__git_packitem_transfer_ref_delta (struct __git_packitem *packitem, const char *signture);
+
 
 // 获取仓库内的git object
 // param <repo>: 仓库指针

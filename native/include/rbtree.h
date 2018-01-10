@@ -27,14 +27,9 @@ struct rdt {
 
 struct rdt *rdt_build ();
 void rdt_insert (struct rdt *tree, void *key, int offset, int len);
-struct rdt_node *rdt_find (struct rdt *tree, const char *key);
+struct rdt_node *rdt_find__char_string (const struct rdt *tree, const void *key);
+struct rdt_node *rdt_find__byte_string (const struct rdt *tree, const void *key);
 void rdt_dispose (struct rdt *tree);
-
-void __rdt_left_rotate (struct rdt *tree, struct rdt_node *n);
-void __rdt_right_rotate (struct rdt *tree, struct rdt_node *n);
-void __rdt_insert_fix (struct rdt *tree, struct rdt_node *n);
-int __compare_byte_string (const void *a, const void *b);
-int __compare_char_string (const char *a, const void *b);
 
 
 #endif

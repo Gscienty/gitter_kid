@@ -136,6 +136,8 @@ int test_pack () {
         if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
             struct __gitpack_collection *pack_coll = __gitpack_collection_get (repo);
 
+            printf ("%d\n", __gitpack_obj_get__char_string (pack_coll, "3b846780303b8994088f884c3dfed48c04e6a2b0"));
+
             //     __git_pack_get_obj (git_packes_get_current (packes), "0f45d6566321ef72e498d1e289398fab1fd5026f");
             //     __git_pack_get_obj (git_packes_get_current (packes), "ca1c10bf904926224e1358910d637320e91945d3");
 

@@ -43,7 +43,6 @@ struct __gitpack *__gitpack_get (const char *idx_name) {
     ret->count = 0;
     ret->rd_tree = NULL;
     ret->prev = ret->next = NULL;
-
     return ret;
 }
 
@@ -77,7 +76,6 @@ struct __opend_mmap_file *__gitpack_idxfile_open (const char *path, size_t path_
         DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: have not enough free memory");
         return NULL;
     }
-
     char *idx_path = (char *) malloc (sizeof (char) * (path_len + 63));
     if (idx_path == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: have not enough free memory");
@@ -205,7 +203,6 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
         DBG_LOG (DBG_ERROR, "__gitpack_collection_get: repo is null");
         return NULL;
     }
-
     struct __gitpack_collection *ret = (struct __gitpack_collection *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_collection_get: have not enough free memory");
@@ -240,6 +237,7 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
                 return NULL;
             }
             
+
             struct __opend_mmap_file *idx_mmaped = __gitpack_idxfile_open (repo->path, ret->repo_path_len, pack);
             if (idx_mmaped == NULL) {
                 __gitpack_collection_dispose (ret);

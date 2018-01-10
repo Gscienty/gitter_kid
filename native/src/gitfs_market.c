@@ -58,6 +58,7 @@ struct git_market *git_market_build (const char *basepath) {
                 strcpy (repo->path + basepath_length, ent->d_name);
                 strcpy (repo->path + basepath_length + repo_name_length, "/");
             }
+            repo->packes = __gitpack_collection_get (repo);
             repo->prev = ret->tail;
             repo->next = NULL;
 

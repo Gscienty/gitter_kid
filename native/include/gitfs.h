@@ -11,13 +11,38 @@ int __access_file_exist (const char* filepath);
 int __access_chmod (const char* path, unsigned int mode);
 int __access_chown (const char* path, unsigned int owner, unsigned int group);
 
+struct __gitpack {
+    char *sign;
+    int count;
+
+    struct rdt *rd_tree;
+
+    struct __gitpack *prev;
+    struct __gitpack *next;
+};
+
+struct __gitpack_collection {
+    char *repo_path;
+    size_t repo_path_len;
+
+    struct __gitpack *head;
+    struct __gitpack *tail;
+};
+
+struct git_obj *__gitpack_obj_get__char_string (struct __gitpack_collection *collection, const char *sign);
+struct git_obj *__gitpack_obj_get__byte_string (struct __gitpack_collection *collection, const void *sign);
+
+
 // 仓库结构体
 struct git_repo {
-    char *path;             // 仓库路径
-    char *name;             // 仓库名称
-    struct git_repo *prev;  // 下一个仓库
-    struct git_repo *next;  // 上一个仓库
+    char *path;                             // 仓库路径
+    char *name;                             // 仓库名称
+    struct __gitpack_collection *packes;    // 压缩包集合
+    struct git_repo *prev;                  // 下一个仓库
+    struct git_repo *next;                  // 上一个仓库
 };
+
+struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo);
 
 // 仓库市场结构体
 struct git_market {
@@ -118,27 +143,6 @@ enum git_obj_type {
     GIT_OBJ_TYPE_REF_DELTA  // reference delta
 };
 
-struct __gitpack {
-    char *sign;
-    int count;
-
-    struct rdt *rd_tree;
-
-    struct __gitpack *prev;
-    struct __gitpack *next;
-};
-
-struct __gitpack_collection {
-    char *repo_path;
-    size_t repo_path_len;
-
-    struct __gitpack *head;
-    struct __gitpack *tail;
-};
-
-struct git_obj *__gitpack_obj_get__char_string (struct __gitpack_collection *collection, const char *sign);
-struct git_obj *__gitpack_obj_get__byte_string (struct __gitpack_collection *collection, const void *sign);
-
 // git object 结构体
 struct git_obj {
     void *buf;
@@ -199,8 +203,6 @@ struct git_obj_tree {
     struct git_obj_tree_item *tail;
     struct git_obj_tree_item *cursor;
 };
-
-struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo);
 
 // 获取仓库内的git object
 // param <repo>: 仓库指针

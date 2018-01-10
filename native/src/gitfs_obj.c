@@ -3,6 +3,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <zlib.h>
+#include <unistd.h>
 
 void *__zalloc (void *q, unsigned int n, unsigned int m) {
     q = NULL;
@@ -53,7 +54,7 @@ struct __deflate_param *__inflate (struct __deflate_param *zip_buffer, int infla
 }
 
 char *__gitobj_path_get (struct git_repo *repo, const char *signture) {
-    int path_length = strlen (repo->path);
+    size_t path_length = strlen (repo->path);
     char *ret = (char *) malloc (sizeof (char) * (path_length + 50));
     if (ret == NULL) {
         // have not enough free memory
@@ -64,6 +65,12 @@ char *__gitobj_path_get (struct git_repo *repo, const char *signture) {
     strncpy (ret + path_length + 8, signture, 2);
     strcpy (ret + path_length + 10, "/");
     strcpy (ret + path_length + 11, signture + 2);
+
+    if (access (ret, F_OK) != 0) {
+        // bug: call '__gitpack_collection_get (repo);' after error.
+        free (ret);
+        return NULL;
+    }
 
     return ret;
 }
@@ -110,7 +117,7 @@ struct __deflate_param *__gitobj_get (const char *path) {
     }
     struct __deflate_param *ret = __gitobj_loose_content (object_file);
 
-    close (object_file);
+    fclose (object_file);
     
     return ret;
 }
@@ -180,60 +187,31 @@ struct __deflate_param *__gitobj_get_content (const char *path) {
     }
 }
 
-struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
-    if (repo == NULL) {
-        return NULL;
-    }
-    if (signture == NULL) {
-        return NULL;
-    }
-    if (strlen (signture) != 40) {
-        // sign illegal
-        return NULL;
-    }
-    register char *sign_ch;
-    for (sign_ch = (char *) signture; *sign_ch; sign_ch++) {
-        if (!(('0' <= *sign_ch && *sign_ch <= '9') || ('a' <= *sign_ch && *sign_ch <= 'f'))) {
-            // sign illegal
-            return NULL;
-        }
-    }
-
+struct git_obj *__gitobj_loose_get (const char *obj_path, const char *signture) {
     struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
         DBG_LOG (DBG_ERROR, "git_obj_get: not enough free memory");
         return NULL;
     }
-    char *obj_path = __gitobj_path_get (repo, signture);
-    if (obj_path == NULL) {
-        //have not enough free memory
-        DBG_LOG (DBG_ERROR, "git_obj_get: not enough free memory");
-        free (ret);
-        return NULL;
-    }
 
-    struct __deflated_param *inflated_buffer = __gitobj_get_content (obj_path);
-    if (inflated_buffer == NULL) {
-        free (ret);
-        return NULL;
-    }
+    struct __deflate_param *inflated_buffer = __gitobj_get_content (obj_path);
+    if (inflated_buffer == NULL) return NULL;
 
     // try get object file header, which contains object file's type & length
     struct __gitobj_header *obj_header = __gitobj_header_get (inflated_buffer);
     if (obj_header == NULL || obj_header->type == GIT_OBJ_TYPE_UNKNOW) {
         // cannot recognize object header
         DBG_LOG (DBG_ERROR, "git_obj_get: cannot recognize object header");
-        free (obj_path);
         free (ret);
         free (inflated_buffer->buf);
         free (inflated_buffer);
         if (obj_header != NULL) free (obj_header);        
         return NULL;
     }
-
+    
     ret->buf = inflated_buffer->buf;
-    ret->path = obj_path;
+    ret->path = (char *) obj_path;
     ret->sign = strdup (signture);
     ret->type = obj_header->type;
     ret->size = obj_header->length;
@@ -275,8 +253,37 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
             free (ret);
             return NULL;
     }
-    
     return ret;
+}
+
+struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
+    if (repo == NULL) {
+        return NULL;
+    }
+    if (signture == NULL) {
+        return NULL;
+    }
+    if (strlen (signture) != 40) {
+        // sign illegal
+        return NULL;
+    }
+    char *sign_ch;
+    for (sign_ch = (char *) signture; *sign_ch; sign_ch++) {
+        if (!(('0' <= *sign_ch && *sign_ch <= '9') || ('a' <= *sign_ch && *sign_ch <= 'f'))) {
+            // sign illegal
+            return NULL;
+        }
+    }
+    
+    char *obj_path = __gitobj_path_get (repo, signture);
+
+    if (obj_path == NULL) {
+        return __gitpack_obj_get__char_string (repo->packes, signture);
+    }
+    else{
+         // get obj by loose
+        return __gitobj_loose_get (obj_path, signture);
+    }
 }
 
 enum git_obj_type git_obj_type (struct git_obj *obj) {

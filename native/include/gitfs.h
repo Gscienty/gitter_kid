@@ -100,12 +100,12 @@ G_KID_EXTERN char *git_branch_get_name (struct git_branch *branch);
 G_KID_EXTERN char *git_branch_get_last_commit_sign (struct git_branch *branch);
 
 
-struct __obj_file_ret {
+struct __deflate_param {
     unsigned char *buf;
     int len;
 };
 
-struct __obj_file_ret *__inflate (struct __obj_file_ret *zip_buffer, int inflated_buffer_len);
+struct __deflate_param *__inflate (struct __deflate_param *zip_buffer, int inflated_buffer_len);
 
 // git object 类型
 enum git_obj_type {
@@ -130,6 +130,7 @@ struct __gitpack {
 
 struct __gitpack_collection {
     char *repo_path;
+    size_t repo_path_len;
 
     struct __gitpack *head;
     struct __gitpack *tail;

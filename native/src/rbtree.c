@@ -158,7 +158,7 @@ void rdt_insert (struct rdt *tree, void *key, int offset, int len) {
         return;
     }
     n->key = key;
-    n->offset = offset;
+    n->off = offset;
     n->len = len;
     n->parent = n->left = n->right = &tree->nil;
     n->color = RDTREE_COLOR_RED;

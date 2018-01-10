@@ -220,9 +220,9 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
         return NULL;
     }
     
-    int path_len = strlen (repo->path);
+    ret->repo_path_len = strlen (repo->path);
 
-    DIR *dir = __gitpack_packdir_get (repo->path, path_len);
+    DIR *dir = __gitpack_packdir_get (repo->path, ret->repo_path_len);
     if (dir == NULL) {
         free (ret);
         return NULL;
@@ -240,7 +240,7 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
                 return NULL;
             }
             
-            struct __opend_mmap_file *idx_mmaped = __gitpack_idxfile_open (repo->path, path_len, pack);
+            struct __opend_mmap_file *idx_mmaped = __gitpack_idxfile_open (repo->path, ret->repo_path_len, pack);
             if (idx_mmaped == NULL) {
                 __gitpack_collection_dispose (ret);
                 closedir (dir);

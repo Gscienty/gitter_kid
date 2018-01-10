@@ -10,7 +10,7 @@ enum rdt_color {
 
 struct rdt_node {
     void *key;
-    int offset;
+    int off;
     int len;
     enum rdt_color color;
 

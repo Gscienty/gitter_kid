@@ -12,49 +12,53 @@ struct rdt *rdt_build () {
     return result;
 }
 
-void rdt_insert (struct rdt *tree, void *key, int offset, int len) {
-    if (tree == NULL) {
-        DBG_LOG (DBG_ERROR, "rdt_insert: tree is null");
-        return;
-    }
+int __compare_byte_string (const void *a, const void *b) {
+    unsigned char *vala = (unsigned char *) a;
+    unsigned char *valb = (unsigned char *) b;
 
-    struct rdt_node *n = (struct rdt_node *) malloc (sizeof (*n));
-    if (n == NULL) {
-        DBG_LOG (DBG_ERROR, "rdt_insert: have not enough free memory");
-        return;
-    }
-    n->key = key;
-    n->offset = offset;
-    n->len = len;
-    n->parent = n->left = n->right = &tree->nil;
-    n->color = RDTREE_COLOR_RED;
-
-    struct rdt_node *x = tree->root;
-    struct rdt_node *y = &tree->nil;
-
-    while (x != &tree->nil) {
-        y = x;
-
-        if (__compare_byte_string (n->key, x->key) == -1) {
-            x = x->left;
+    int i;
+    for (i = 0; i < 20; i++) {
+        if (vala[i] < valb[i]) {
+            return -1;
         }
-        else {
-            x = x->right;
+        else if (vala[i] > valb[i]) {
+            return 1;
         }
     }
-    n->parent = y;
 
-    if (y == &tree->nil) {
-        tree->root = n;
-    }
-    else if (__compare_byte_string (n->key, y->key) == -1) {
-        y->left = n;
+    return 0;
+}
+
+unsigned char __transfer_hex_to_harf_byte (char c) {
+    if ('0' <= c && c <= '9') {
+        return c - '0';
     }
     else {
-        y->right = n;
+        return c - 'a' + 10;
+    }
+}
+
+unsigned char __transfer_hex_to_byte (const char *str, int offset) {
+    
+    return (__transfer_hex_to_harf_byte (str[offset << 1]) << 4)
+        | (__transfer_hex_to_harf_byte (str[(offset << 1) + 1]));
+}
+
+int __compare_char_string (const void *a, const void *b) {
+    unsigned char *valb = (unsigned char *) b;
+
+    int i;
+    for (i = 0; i < 20; i++) {
+        unsigned char valai = __transfer_hex_to_byte ((const char *) a, i);
+        if (valai < valb[i]) {
+            return -1;
+        }
+        else if (valai > valb[i]) {
+            return 1;
+        }
     }
 
-    __rdt_insert_fix (tree, n);
+    return 0;
 }
 
 void __rdt_left_rotate (struct rdt *tree, struct rdt_node *n) {
@@ -76,7 +80,6 @@ void __rdt_left_rotate (struct rdt *tree, struct rdt_node *n) {
     m->left = n;
     n->parent = m;
 }
-
 
 void __rdt_right_rotate (struct rdt *tree, struct rdt_node *n) {
     struct rdt_node *m = n->left;
@@ -143,58 +146,60 @@ void __rdt_insert_fix (struct rdt *tree, struct rdt_node *n) {
     tree->root->color = RDTREE_COLOR_BLACK;
 }
 
-int __compare_byte_string (const void *a, const void *b) {
-    unsigned char *vala = (unsigned char *) a;
-    unsigned char *valb = (unsigned char *) b;
-
-    int i;
-    for (i = 0; i < 20; i++) {
-        if (vala[i] < valb[i]) {
-            return -1;
-        }
-        else if (vala[i] > valb[i]) {
-            return 1;
-        }
+void rdt_insert (struct rdt *tree, void *key, int offset, int len) {
+    if (tree == NULL) {
+        DBG_LOG (DBG_ERROR, "rdt_insert: tree is null");
+        return;
     }
 
-    return 0;
-}
+    struct rdt_node *n = (struct rdt_node *) malloc (sizeof (*n));
+    if (n == NULL) {
+        DBG_LOG (DBG_ERROR, "rdt_insert: have not enough free memory");
+        return;
+    }
+    n->key = key;
+    n->offset = offset;
+    n->len = len;
+    n->parent = n->left = n->right = &tree->nil;
+    n->color = RDTREE_COLOR_RED;
 
-unsigned char __transfer_hex_to_harf_byte (char c) {
-    if ('0' <= c && c <= '9') {
-        return c - '0';
+    struct rdt_node *x = tree->root;
+    struct rdt_node *y = &tree->nil;
+
+    while (x != &tree->nil) {
+        y = x;
+
+        if (__compare_byte_string (n->key, x->key) == -1) {
+            x = x->left;
+        }
+        else {
+            x = x->right;
+        }
+    }
+    n->parent = y;
+
+    if (y == &tree->nil) {
+        tree->root = n;
+    }
+    else if (__compare_byte_string (n->key, y->key) == -1) {
+        y->left = n;
     }
     else {
-        return c - 'a' + 10;
-    }
-}
-
-unsigned char __transfer_hex_to_byte (const char *str, int offset) {
-    return (__transfer_hex_to_harf_byte (str[offset << 1]) << 4)
-        | (__transfer_hex_to_harf_byte (str[(offset << 1) + 1]));
-}
-
-int __compare_char_string (const char *a, const void *b) {
-    unsigned char *valb = (unsigned char *) b;
-
-    int i;
-    for (i = 0; i < 20; i++) {
-        unsigned char valai = __transfer_hex_to_byte (a, i);
-        if (valai < valb[i]) {
-            return -1;
-        }
-        else if (valai > valb[i]) {
-            return 1;
-        }
+        y->right = n;
     }
 
-    return 0;
+    __rdt_insert_fix (tree, n);
 }
 
-struct rdt_node *rdt_find (struct rdt *tree, const char *key) {
+struct rdt_node *__rdt_find (tree, key, compare)
+    const struct rdt *tree;
+    const void *key;
+    int (*compare) (const void *key, const void *node_tree);
+{
     struct rdt_node *retnode = tree->root;
+    
     while (retnode != &tree->nil) {
-        int compare_result = __compare_char_string (key, retnode->key);
+        int compare_result = compare (key, retnode->key);
         if (compare_result == 0) {
             return retnode;
         }
@@ -207,6 +212,14 @@ struct rdt_node *rdt_find (struct rdt *tree, const char *key) {
     }
 
     return NULL;
+}
+
+struct rdt_node *rdt_find__char_string (const struct rdt *tree, const void *key) {
+    return __rdt_find (tree, key, __compare_char_string);
+}
+
+struct rdt_node *rdt_find__byte_string (const struct rdt *tree, const void *key) {
+    return __rdt_find (tree, key, __compare_byte_string);
 }
 
 void rdt_dispose (struct rdt *tree) {

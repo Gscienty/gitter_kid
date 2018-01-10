@@ -129,22 +129,14 @@ struct __gitpack {
 };
 
 struct __gitpack_collection {
+    char *repo_path;
+
     struct __gitpack *head;
     struct __gitpack *tail;
-    struct __gitpack *cursor;
 };
 
-struct __git_packitem {
-    void *mmaped_base;
-    int inner_offset;
-    int _n;
-    int mmaped_len;
-
-    unsigned char item_type;
-    int origin_len;
-
-    int pack_fd;
-};
+struct git_obj *__gitpack_obj_get__char_string (struct __gitpack_collection *collection, const char *sign);
+struct git_obj *__gitpack_obj_get__byte_string (struct __gitpack_collection *collection, const void *sign);
 
 // git object 结构体
 struct git_obj {

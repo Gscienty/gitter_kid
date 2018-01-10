@@ -209,8 +209,9 @@ struct git_obj *__gitpack_obj_get (collection, finded_pack)
         DBG_LOG (DBG_INFO, "REF_DELTA");
         break;
     }
-
     __gitpack_mmap_dispose (mmaped);
+
+    return ret;
 }
 
 struct git_obj *__gitpack_obj_get__byte_string (struct __gitpack_collection *collection, const void *sign) {

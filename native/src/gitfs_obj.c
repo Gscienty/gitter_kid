@@ -16,71 +16,6 @@ void __zfree (void *q, void *p) {
     free (p);
 }
 
-char *__generate_obj_file_path (struct git_repo *repo, const char *signture) {
-    int path_length = strlen (repo->path);
-    char *ret = (char *) malloc (sizeof (char) * (path_length + 50));
-    if (ret == NULL) {
-        // have not enough free memory
-        return NULL;
-    }
-    strcpy (ret, repo->path);
-    strcpy (ret + path_length, "objects/");
-    strncpy (ret + path_length + 8, signture, 2);
-    strcpy (ret + path_length + 10, "/");
-    strcpy (ret + path_length + 11, signture + 2);
-
-    return ret;
-}
-
-
-// object file stored by loose type. get object content
-struct __deflate_param *__get_repo_obj_by_sign_loose (FILE *object_file) {
-    struct __deflate_param *ret = (struct __deflate_param *) malloc (sizeof (*ret));
-    if (ret == NULL) {
-        // have not enough free memory
-        DBG_LOG (DBG_ERROR, "__get_repo_obj_by_sign: have not enough free memory");
-        return NULL;
-    }
-
-    fseek (object_file, 0, SEEK_END);
-    int flen = ftell (object_file);
-    fseek (object_file, 0, SEEK_SET);
-
-    unsigned char *buf = malloc (sizeof (*buf) * flen);
-    if (buf == NULL) {
-        // have not enough free memory
-        return NULL;
-    }
-
-    fread (buf, sizeof (unsigned char), flen, object_file);
-
-    ret->buf = buf;
-    ret->len = flen;
-
-    return ret;
-}
-
-// get repository's object file
-struct __deflate_param *__get_repo_obj_by_sign (
-    struct git_repo *repo,
-    const char *signture,
-    const char *obj_file_path) {
-
-    if (obj_file_path == NULL) {
-        DBG_LOG (DBG_ERROR, "__get_repo_obj_by_sign: object file's path is null");
-        return NULL;
-    }
-
-    FILE *object_file = fopen (obj_file_path, "rb");
-    if (object_file == NULL) {
-        DBG_LOG (DBG_ERROR, "__get_repo_obj_by_sign: cannot open object file");
-        return NULL;
-    }
-    else {
-        return __get_repo_obj_by_sign_loose (object_file);
-    }
-}
-
 // inflate object file
 struct __deflate_param *__inflate (struct __deflate_param *zip_buffer, int inflated_buffer_len) {
     if (zip_buffer == NULL) {
@@ -117,16 +52,79 @@ struct __deflate_param *__inflate (struct __deflate_param *zip_buffer, int infla
     return ret;
 }
 
-struct __obj_file_header {
+char *__gitobj_path_get (struct git_repo *repo, const char *signture) {
+    int path_length = strlen (repo->path);
+    char *ret = (char *) malloc (sizeof (char) * (path_length + 50));
+    if (ret == NULL) {
+        // have not enough free memory
+        return NULL;
+    }
+    strcpy (ret, repo->path);
+    strcpy (ret + path_length, "objects/");
+    strncpy (ret + path_length + 8, signture, 2);
+    strcpy (ret + path_length + 10, "/");
+    strcpy (ret + path_length + 11, signture + 2);
+
+    return ret;
+}
+
+
+// object file stored by loose type. get object content
+struct __deflate_param *__gitobj_loose_content (FILE *object_file) {
+    struct __deflate_param *ret = (struct __deflate_param *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        // have not enough free memory
+        DBG_LOG (DBG_ERROR, "__gitobj_loose_content: have not enough free memory");
+        return NULL;
+    }
+
+    fseek (object_file, 0, SEEK_END);
+    int flen = ftell (object_file);
+    fseek (object_file, 0, SEEK_SET);
+
+    unsigned char *buf = malloc (sizeof (*buf) * flen);
+    if (buf == NULL) {
+        // have not enough free memory
+        return NULL;
+    }
+
+    fread (buf, sizeof (unsigned char), flen, object_file);
+
+    ret->buf = buf;
+    ret->len = flen;
+
+    return ret;
+}
+
+// get repository's object file
+struct __deflate_param *__gitobj_get (const char *path) {
+    if (path == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitobj_get: object file's path is null");
+        return NULL;
+    }
+
+    FILE *object_file = fopen (path, "rb");
+    if (object_file == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitobj_get: cannot open object file");
+        return NULL;
+    }
+    struct __deflate_param *ret = __gitobj_loose_content (object_file);
+
+    close (object_file);
+    
+    return ret;
+}
+
+struct __gitobj_header {
     enum git_obj_type type;
     int length;
 };
 
-struct __obj_file_header *__get_git_obj_header (struct __deflate_param *inflated_buffer) {
+struct __gitobj_header *__gitobj_header_get (struct __deflate_param *inflated_buffer) {
     if (inflated_buffer == NULL) {
         return NULL;
     }
-    struct __obj_file_header *ret = (struct __obj_file_header *) malloc (sizeof (*ret));
+    struct __gitobj_header *ret = (struct __gitobj_header *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // not enough free memory
         return NULL;
@@ -162,6 +160,26 @@ struct __obj_file_header *__get_git_obj_header (struct __deflate_param *inflated
     return ret;
 }
 
+struct __deflate_param *__gitobj_get_content (const char *path) {
+    struct __deflate_param *deflated_obj = __gitobj_get (path);
+    if (deflated_obj == NULL) {
+        // cannot get obj file. reason maybe have not enough memory or the object file not exist.
+        DBG_LOG (DBG_ERROR, "git_obj_get: cannot get obj file");
+        return NULL;
+    }
+    // inflate origin object file's content
+    struct __deflate_param *inflated_buffer = __inflate (deflated_obj, deflated_obj->len * 3 + 1024);
+    // clear object file's used memory
+    free (deflated_obj->buf);
+    free (deflated_obj);
+    if (inflated_buffer == NULL) {
+        // cannot inflate buffer. reson maybe have not enough memory
+        // or occur a error when inflating this buffer.
+        DBG_LOG (DBG_ERROR, "git_obj_get: cannot inflate buffer");
+        return NULL;
+    }
+}
+
 struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
     if (repo == NULL) {
         return NULL;
@@ -181,60 +199,41 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
         }
     }
 
-    DBG_LOG (DBG_INFO, "git_obj_get: passed parameters check.");
-
     struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
         DBG_LOG (DBG_ERROR, "git_obj_get: not enough free memory");
         return NULL;
     }
-    char *obj_file_path = __generate_obj_file_path (repo, signture);
-    if (obj_file_path == NULL) {
+    char *obj_path = __gitobj_path_get (repo, signture);
+    if (obj_path == NULL) {
         //have not enough free memory
         DBG_LOG (DBG_ERROR, "git_obj_get: not enough free memory");
         free (ret);
         return NULL;
     }
 
-    struct __deflate_param *obj_buffer = __get_repo_obj_by_sign (repo, signture, obj_file_path);
-    if (obj_buffer == NULL) {
-        // cannot get obj file. reason maybe have not enough memory or the object file not exist.
-        DBG_LOG (DBG_ERROR, "git_obj_get: cannot get obj file");
-        free (obj_file_path);
-        free (ret);
-        return NULL;
-    }
-    // inflate origin object file's content
-    struct __deflate_param *inflated_buffer = __inflate (obj_buffer, obj_buffer->len * 3 + 1024);
-    // clear object file's used memory
-    free (obj_buffer->buf);
-    free (obj_buffer);
+    struct __deflated_param *inflated_buffer = __gitobj_get_content (obj_path);
     if (inflated_buffer == NULL) {
-        // cannot inflate buffer. reson maybe have not enough memory
-        // or occur a error when inflating this buffer.
-        DBG_LOG (DBG_ERROR, "git_obj_get: cannot inflate buffer");
-        free (obj_file_path);
         free (ret);
         return NULL;
     }
+
     // try get object file header, which contains object file's type & length
-    struct __obj_file_header *obj_header = __get_git_obj_header (inflated_buffer);
+    struct __gitobj_header *obj_header = __gitobj_header_get (inflated_buffer);
     if (obj_header == NULL || obj_header->type == GIT_OBJ_TYPE_UNKNOW) {
         // cannot recognize object header
         DBG_LOG (DBG_ERROR, "git_obj_get: cannot recognize object header");
-        free (obj_file_path);
+        free (obj_path);
         free (ret);
         free (inflated_buffer->buf);
         free (inflated_buffer);
-        if (obj_header != NULL) {
-            free (obj_header);
-        }
+        if (obj_header != NULL) free (obj_header);        
         return NULL;
     }
 
     ret->buf = inflated_buffer->buf;
-    ret->path = obj_file_path;
+    ret->path = obj_path;
     ret->sign = strdup (signture);
     ret->type = obj_header->type;
     ret->size = obj_header->length;

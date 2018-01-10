@@ -146,44 +146,6 @@ struct __git_packitem {
     int pack_fd;
 };
 
-enum git_obj_delta_type {
-    GIT_OBJ_DELTA_INSERT,
-    GIT_OBJ_DELTA_COPY
-};
-
-struct __git_obj_delta {
-    enum git_obj_delta_type type;
-    union {
-        struct {
-            size_t len;
-            size_t offset;
-        } copy;
-        struct {
-            size_t len;
-            void *start;
-        } insert;
-    } ctx;
-
-    struct __git_obj_delta* prev;
-    struct __git_obj_delta* next;
-};
-
-struct git_obj_ref_delta {
-    void *base_sign; // ting: this field store what not char-string but byte-string's start address
-
-    struct __git_obj_delta* head;
-    struct __git_obj_delta* tail;
-    struct __git_obj_delta* cursor;
-};
-
-struct git_obj_ofs_delta {
-    int negative_offset;
-
-    struct __git_obj_delta* head;
-    struct __git_obj_delta* tail;
-    struct __git_obj_delta* cursor;
-};
-
 // git object 结构体
 struct git_obj {
     void *buf;
@@ -245,25 +207,7 @@ struct git_obj_tree {
     struct git_obj_tree_item *cursor;
 };
 
-G_KID_EXTERN struct git_packes *git_packes_get (struct git_repo *repo);
-G_KID_EXTERN void git_packes_dispose (struct git_packes *packes);
-G_KID_EXTERN void git_packes_reset (struct git_packes *packes);
-G_KID_EXTERN struct git_pack *git_packes_get_current (struct git_packes *packes);
-G_KID_EXTERN int git_packes_move_next (struct git_packes *packes);
-
-G_KID_EXTERN int git_pack_is_open (struct git_pack *pack);
-G_KID_EXTERN int git_pack_open (struct git_pack *pack);
-
-int __git_pack_count (struct git_pack *pack);
-void __git_pack_build_rdtree (struct git_pack *pack);
-struct git_obj *__git_pack_get_obj (struct git_pack *pack, const char *signture);
-
-struct __obj_file_ret *__git_packitem_inflate (struct __git_packitem *packitem);
-
-void __git_obj_transfer_delta (struct git_obj *obj, struct __git_obj_delta **head_ptr, struct __git_obj_delta **tail_ptr);
-struct git_obj *__git_packitem_transfer_ofs_delta (struct __git_packitem *packitem, const char *signture);
-struct git_obj *__git_packitem_transfer_ref_delta (struct __git_packitem *packitem, const char *signture);
-
+struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo);
 
 // 获取仓库内的git object
 // param <repo>: 仓库指针

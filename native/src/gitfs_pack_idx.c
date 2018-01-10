@@ -11,7 +11,7 @@
 
 DIR *__gitpack_packdir_get (const char *path, size_t path_len) {
     char *pack_path = (char *) malloc (sizeof (char) * (path_len + 14));
-    if (pack_path) {
+    if (pack_path == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_packdir_get: have not enough free memory");
         return NULL;
     }
@@ -26,20 +26,20 @@ DIR *__gitpack_packdir_get (const char *path, size_t path_len) {
     return ret;
 }
 
-struct __gitpack *__gitpack_pack_get (const char *idx_name) {
+struct __gitpack *__gitpack_get (const char *idx_name) {
     struct __gitpack *ret = (struct __gitpack *) malloc (sizeof (*ret));
     if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_pack_get: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "__gitpack_get: have not enough free memory");
         return NULL;
     }
 
-    ret->sign = (char *) malloc (sizeof (char) * 21);
+    ret->sign = (char *) malloc (sizeof (char) * 41);
     if (ret->sign == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_pack_get: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "__gitpack_get: have not enough free memory");
         free (ret);
         return NULL;
     }
-    strncpy (ret->sign, idx_name + 5, 20);
+    strncpy (ret->sign, idx_name + 5, 40);
     ret->count = 0;
     ret->rd_tree = NULL;
     ret->prev = ret->next = NULL;
@@ -78,7 +78,7 @@ struct __opend_mmap_file *__gitpack_idxfile_open (const char *path, size_t path_
         return NULL;
     }
 
-    char *idx_path = (char *) malloc (sizeof (char) * (path_len + 43));
+    char *idx_path = (char *) malloc (sizeof (char) * (path_len + 63));
     if (idx_path == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: have not enough free memory");
         free (ret);
@@ -87,7 +87,7 @@ struct __opend_mmap_file *__gitpack_idxfile_open (const char *path, size_t path_
     strcpy (idx_path, path);
     strcpy (idx_path + path_len, "objects/pack/pack-");
     strcpy (idx_path + path_len + 18, pack->sign);
-    strcpy (idx_path + path_len + 38, ".idx");
+    strcpy (idx_path + path_len + 58, ".idx");
 
     ret->fd = open (idx_path, O_RDONLY);
     free (idx_path);
@@ -97,20 +97,93 @@ struct __opend_mmap_file *__gitpack_idxfile_open (const char *path, size_t path_
         return NULL;
     }
     struct stat idx_st;
-    if (fstat (ret->fd, &st) != 0) {
+    if (fstat (ret->fd, &idx_st) != 0) {
         DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: idx file cannot get st");
         close (ret->fd);
         free (ret);
         return NULL;
     }
-    ret->len = st.st_size;
-    ret->val = mmap (NULL, st.st_size, PROT_READ, MAP_SHARED, ret->fd, 0);
+    ret->len = idx_st.st_size;
+    ret->val = mmap (NULL, idx_st.st_size, PROT_READ, MAP_SHARED, ret->fd, 0);
     if ((void *) ret->val == (void *) -1) {
         DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: idx file cannot mmap");
         close (ret->fd);
         free (ret);
         return NULL;
     }
+
+    return ret;
+}
+
+int __gitpack_item_count_get (struct __opend_mmap_file *mmaped, struct __gitpack *pack) {
+    if (mmaped == NULL) return 0;
+    unsigned int *p = (unsigned int *) (mmaped->val + 8);
+    int count = 0;
+    int i;
+    for (i = 0; i < 256; i++) {
+        int n = ntohl (p[i]);
+        if (n > count) count = n;
+    }
+
+    return count;
+}
+
+#define __GITPACK_NTH_SIGN(val, n) ((val) + 8 + 1024 + 20 * (n))
+#define __GITPACK_NTH_OFF(val, nr, n) ntohl (*(int *) ((val) + 8 + 1024 + 24 * (nr) + 4 * (n)))
+
+void __gitpack_quicksort_indexes (unsigned char *val, struct __gitpack *pack, int *indexes, int start, int end) {
+    if (start >= end) return;
+
+    int i = start;
+    int j = end;
+    int k = indexes[start];
+
+    while (i < j) {
+        while (i < j && __GITPACK_NTH_OFF (val, pack->count, k) < __GITPACK_NTH_OFF (val, pack->count, indexes[j])) j--;
+        indexes[i] = indexes[j];
+        while (i < j && __GITPACK_NTH_OFF (val, pack->count, indexes[i]) < __GITPACK_NTH_OFF (val, pack->count, k)) i++;
+        indexes[j] = indexes[i];
+    }
+    indexes[i] = k;
+
+    __gitpack_quicksort_indexes (val, pack, indexes, start, i - 1);
+    __gitpack_quicksort_indexes (val, pack, indexes, i + 1, end);
+}
+
+int *__gitpack_sortedindexes_get (unsigned char *val, struct __gitpack *pack) {
+    int *ret = (int *) malloc (sizeof (*ret) * pack->count);
+    int i = 0;
+    for (i = 0; i < pack->count; i++) ret[i] = i;
+
+    __gitpack_quicksort_indexes (val, pack, ret, 0, pack->count - 1);
+
+    return ret;
+}
+
+struct rdt *__gitpack_rdt_build (struct __opend_mmap_file *mmaped, struct __gitpack *pack) {
+    if (pack == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: pack is null");
+        return NULL;
+    }
+    if (mmaped == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: mmaped is null");
+        return NULL;
+    }
+    struct rdt *ret = rdt_build ();
+
+    int *indexes = __gitpack_sortedindexes_get (mmaped->val, pack);
+    int i = 0;
+    for (i = 0; i < pack->count; i++) {
+        rdt_insert (
+            ret,
+            __GITPACK_NTH_SIGN (mmaped->val, indexes[i]),
+            __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i]),
+            i + 1 == pack->count
+                ? mmaped->len - 20 - __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i])
+                : __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i + 1]) - __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i])
+        );
+    }
+    free (indexes);
 
     return ret;
 }
@@ -140,104 +213,32 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
         if (ent->d_type == DT_REG) {
             if (strcmp (ent->d_name + 45, ".idx") != 0) continue;
 
-            struct __gitpack *pack = __gitpack_collection_get (ent->d_name);
+            struct __gitpack *pack = __gitpack_get (ent->d_name);
             if (pack == NULL) {
                 __gitpack_collection_dispose (ret);
-                close (dir);
+                closedir (dir);
                 return NULL;
             }
-            struct __opend_mmap_file *mmaped = (repo->path, path_len, pack);
-            if (mmaped == NULL) {
+            struct __opend_mmap_file *idx_mmaped = __gitpack_idxfile_open (repo->path, path_len, pack);
+            if (idx_mmaped == NULL) {
                 __gitpack_collection_dispose (ret);
-                close (dir);
+                closedir (dir);
                 return NULL;
             }
 
             // get count
-            pack->count = __gitpack_item_count_get (mmaped, pack);
+            pack->count = __gitpack_item_count_get (idx_mmaped, pack);
             // build red black tree
-            pack->rd_tree = __gitpack_rdt_build (mmaped, pack);
-            
-            __gitpack_idxfile_close (mmaped);
+            pack->rd_tree = __gitpack_rdt_build (idx_mmaped, pack);
 
-            if (result->head == NULL) result->head = pack;
-            if (result->tail != NULL) result->tail->next = pack;
-            result->tail = pack;
+            __gitpack_idxfile_close (idx_mmaped);
+
+            if (ret->head == NULL) ret->head = pack;
+            if (ret->tail != NULL) ret->tail->next = pack;
+            ret->tail = pack;
         }
     }
     closedir (dir);
-
-    return ret;
-}
-
-int __gitpack_item_count_get (struct __opend_mmap_file *mmaped, struct __gitpack *pack) {
-    if (mmaped == NULL) return 0;
-    unsigned int *p = mmaped->val + 8;
-    int count = 0;
-    int i;
-    for (i = 0; i < 256; i++) {
-        int n = ntohl (p[i]);
-        if (n > count) count = n;
-    }
-
-    return count;
-}
-
-#define __GITPACK_NTH_SIGN (val, n) ((val) + 8 + 1024 + 20 * (n))
-#define __GITPACK_NTH_OFF (val, nr, n) ntohl (*(int *) ((val) + 8 + 1024 + 24 * (nr) + 4 * (n)))
-
-void __gitpack_quicksort_indexes (unsigned char *val, struct __gitpack *pack, int *indexes, int start, int end) {
-    if (start >= end) return;
-
-    int i = start;
-    int j = end;
-    int k = indexes[start];
-
-    while (i < j) {
-        while (i < j && __GITPACK_NTH_OFF (val, pack->count, k) < __GITPACK_NTH_OFF (val, pack->count, indexes[j])) j--;
-        indexes[i] = indexes[j];
-        while (i < j && __GITPACK_NTH_OFF (val, pack->count, indexes[i]) < __GITPACK_NTH_OFF (val, pack->count, k)) i++;
-        indexes[j] = indexes[i];
-    }
-    indexes[i] = k;
-
-    __gitpack_quicksort_indexes (val, pack, start, i - 1);
-    __gitpack_quicksort_indexes (val, pack, i + 1, end);
-}
-
-int *__gitpack_sortedindexes_get (unsigned char *val, struct __gitpack *pack) {
-    int *ret = (int *) malloc (sizeof (*ret) * pack->count);
-    int i = 0;
-    for (i = 0; i < pack->count; i++) ret[i] = i;
-
-    __gitpack_quicksort_indexes (val, ret, 0, pack->count - 1);
-
-    return ret;
-}
-
-struct rdt *__gitpack_rdt_build (struct __opend_mmap_file *mmaped, struct __gitpack *pack) {
-    if (pack == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: pack is null");
-        return NULL;
-    }
-    if (mmaped == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: mmaped is null");
-        return NULL;
-    }
-    struct rdt *ret = rdt_build ();
-
-    int *indexes = __gitpack_sortedindexes_get (mmaped->val, pack);
-    for (i = 0; i < pack->count; i++) {
-        rdt_insert (
-            ret,
-            __GITPACK_NTH_SIGN (mmaped->val, indexes[i]),
-            __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i]),
-            i + 1 == pack->count
-                ? mmaped->len - 20 - __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i])
-                : __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i + 1]) - __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i])
-        );
-    }
-    free (indexes);
 
     return ret;
 }

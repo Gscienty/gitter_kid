@@ -134,23 +134,17 @@ int test_pack () {
     do {
         struct git_repo *repo = git_market_cursor_current (market);
         if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
-            struct git_packes *packes = git_packes_get (repo);
-            git_packes_reset (packes);
-            do {
-                git_pack_open (git_packes_get_current (packes));
-                printf ("%s, %d\n",
-                    git_packes_get_current (packes)->idx_path,
-                    (git_packes_get_current (packes)->count)
-                );
-                __git_pack_get_obj (git_packes_get_current (packes), "0f45d6566321ef72e498d1e289398fab1fd5026f");
-                __git_pack_get_obj (git_packes_get_current (packes), "ca1c10bf904926224e1358910d637320e91945d3");
+            struct __gitpack_collection *pack_coll = __gitpack_collection_get (repo);
 
-                // __git_pack_get_obj (git_packes_get_current (packes), "e53ee7b4ea4576d131fdce313a4c5204bd8d0eec");
-                // __git_pack_get_obj (git_packes_get_current (packes), "c1a37f7eacfbd0c1d6d3250b92e81999e99fb1c7");
+            //     __git_pack_get_obj (git_packes_get_current (packes), "0f45d6566321ef72e498d1e289398fab1fd5026f");
+            //     __git_pack_get_obj (git_packes_get_current (packes), "ca1c10bf904926224e1358910d637320e91945d3");
 
-                // __git_pack_get_obj (git_packes_get_current (packes), "fbfba1e8bf83a2b241e29b93069eb8492e794f50");
-                // __git_pack_get_obj (git_packes_get_current (packes), "d139fedcdb55b4f266db2abecac304cafadc2e29");
-            } while (git_packes_move_next (packes) == 0);
+            //     // __git_pack_get_obj (git_packes_get_current (packes), "e53ee7b4ea4576d131fdce313a4c5204bd8d0eec");
+            //     // __git_pack_get_obj (git_packes_get_current (packes), "c1a37f7eacfbd0c1d6d3250b92e81999e99fb1c7");
+
+            //     // __git_pack_get_obj (git_packes_get_current (packes), "fbfba1e8bf83a2b241e29b93069eb8492e794f50");
+            //     // __git_pack_get_obj (git_packes_get_current (packes), "d139fedcdb55b4f266db2abecac304cafadc2e29");
+
         }
     } while (git_market_cursor_move_next (market) == 0);
     return 0;

@@ -160,6 +160,18 @@ int *__gitpack_sortedindexes_get (unsigned char *val, struct __gitpack *pack) {
     return ret;
 }
 
+void * __sign_dup (void *off) {
+    void *ret = (void *) malloc (20);
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__sign_dup: have not enough free memory");
+        return NULL;
+    }
+    
+    memcpy (ret, off, 20);
+
+    return ret;
+}
+
 struct rdt *__gitpack_rdt_build (struct __opend_mmap_file *mmaped, struct __gitpack *pack) {
     if (pack == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: pack is null");
@@ -176,7 +188,7 @@ struct rdt *__gitpack_rdt_build (struct __opend_mmap_file *mmaped, struct __gitp
     for (i = 0; i < pack->count; i++) {
         rdt_insert (
             ret,
-            __GITPACK_NTH_SIGN (mmaped->val, indexes[i]),
+            __sign_dup (__GITPACK_NTH_SIGN (mmaped->val, indexes[i])),
             __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i]),
             i + 1 == pack->count
                 ? mmaped->len - 20 - __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i])
@@ -199,9 +211,17 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
         DBG_LOG (DBG_ERROR, "__gitpack_collection_get: have not enough free memory");
         return NULL;
     }
-    ret->head = ret->tail = ret->cursor = NULL;
+    ret->head = ret->tail = NULL;
 
+    ret->repo_path = strdup (repo->path);
+    if (ret->repo_path == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_collection_get: have not enough free memory");
+        free (ret);
+        return NULL;
+    }
+    
     int path_len = strlen (repo->path);
+
     DIR *dir = __gitpack_packdir_get (repo->path, path_len);
     if (dir == NULL) {
         free (ret);
@@ -219,6 +239,7 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
                 closedir (dir);
                 return NULL;
             }
+            
             struct __opend_mmap_file *idx_mmaped = __gitpack_idxfile_open (repo->path, path_len, pack);
             if (idx_mmaped == NULL) {
                 __gitpack_collection_dispose (ret);

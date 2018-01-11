@@ -138,7 +138,7 @@ int test_pack () {
             // printf ("TYPE: %d\n", git_obj_get (repo, "1aea93543e697af2f00499c53116bbb3cc8ffcbf")->type);
             // printf ("TYPE: %d\n", git_obj_get (repo, "ec4735f69b5d60b91d95634f511200ad37486ba4")->type);
             // printf ("TYPE: %d\n", git_obj_get (repo, "e87a0306f7cf5ef89dec674bc2ecaba08ef80eb6")->type);
-            printf ("TYPE: %d\n", git_obj_get (repo, "17e9f7a8e93d85d663e15ee27f60f1f5b8baf635"));
+            printf ("TYPE: %d\n", git_obj_get (repo, "1d701d1ac0f0febeb562beedc4f093f27ab2e1bf"));
             //struct __gitpack_collection *pack_coll = __gitpack_collection_get (repo);
 
             //printf ("%d\n", __gitpack_obj_get__char_string (pack_coll, "3b846780303b8994088f884c3dfed48c04e6a2b0"));

@@ -127,12 +127,12 @@ G_KID_EXTERN char *git_branch_get_name (struct git_branch *branch);
 G_KID_EXTERN char *git_branch_get_last_commit_sign (struct git_branch *branch);
 
 
-struct __deflate_param {
+struct __buf {
     unsigned char *buf;
     int len;
 };
 
-struct __deflate_param *__inflate (struct __deflate_param *zip_buffer, int inflated_buffer_len);
+struct __buf *__inflate (struct __buf *zip_buffer, int inflated_buffer_len);
 
 // git object 类型
 enum git_obj_type {

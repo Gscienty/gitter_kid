@@ -135,6 +135,9 @@ int test_pack () {
         struct git_repo *repo = git_market_cursor_current (market);
         if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
             printf ("TYPE: %d\n", git_obj_get (repo, "6074c189b9f709892de2f413f08b1be6b9eab0af")->type);
+            printf ("TYPE: %d\n", git_obj_get (repo, "1aea93543e697af2f00499c53116bbb3cc8ffcbf")->type);
+            printf ("TYPE: %d\n", git_obj_get (repo, "ec4735f69b5d60b91d95634f511200ad37486ba4")->type);
+            printf ("TYPE: %d\n", git_obj_get (repo, "e87a0306f7cf5ef89dec674bc2ecaba08ef80eb6")->type);
             //struct __gitpack_collection *pack_coll = __gitpack_collection_get (repo);
 
             //printf ("%d\n", __gitpack_obj_get__char_string (pack_coll, "3b846780303b8994088f884c3dfed48c04e6a2b0"));

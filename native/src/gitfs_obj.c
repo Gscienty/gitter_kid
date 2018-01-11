@@ -55,19 +55,14 @@ struct __deflate_param *__inflate (struct __deflate_param *zip_buffer, int infla
 
 char *__gitobj_path_get (struct git_repo *repo, const char *signture) {
     size_t path_length = strlen (repo->path);
-    char *ret = (char *) malloc (sizeof (char) * (path_length + 50));
+    char *ret = malloc (path_length + 128);
     if (ret == NULL) {
         // have not enough free memory
         return NULL;
     }
-    strcpy (ret, repo->path);
-    strcpy (ret + path_length, "objects/");
-    strncpy (ret + path_length + 8, signture, 2);
-    strcpy (ret + path_length + 10, "/");
-    strcpy (ret + path_length + 11, signture + 2);
-
+    snprintf (ret, path_length + 50, "%sobjects/%c%c/%s", repo->path, signture[0], signture[1], signture + 2);
+    
     if (access (ret, F_OK) != 0) {
-        // bug: call '__gitpack_collection_get (repo);' after error.
         free (ret);
         return NULL;
     }
@@ -278,11 +273,14 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
     char *obj_path = __gitobj_path_get (repo, signture);
 
     if (obj_path == NULL) {
+        if (repo->packes == NULL) repo->packes = __gitpack_collection_get (repo);
         return __gitpack_obj_get__char_string (repo->packes, signture);
     }
     else{
          // get obj by loose
-        return __gitobj_loose_get (obj_path, signture);
+        struct git_obj *ret = __gitobj_loose_get (obj_path, signture);
+        free (obj_path);
+        return ret;
     }
 }
 

@@ -97,7 +97,6 @@ struct __packfile_mmap *__gitpack_mmap (struct __gitpack_collection *collection,
 
     const size_t MEMORY_PAGESIZE = sysconf (_SC_PAGESIZE);
     int nth_page_start = finded_pack->node->off / MEMORY_PAGESIZE;
-
     ret->off = finded_pack->node->off % MEMORY_PAGESIZE;
     ret->len = finded_pack->node->len;
 
@@ -145,18 +144,36 @@ struct git_obj *__gitpack_wrap_obj (void *base, size_t len) {
     return ret;
 }
 
-#define HEX(v) ((v) < 10 ? '0' + (v) : (v) - 10 + 'a')
+struct git_obj *__gitpack_normalobj_get (packitem_type, ptr, deflate_len, origin_len)
+    unsigned char packitem_type;
+    unsigned char *ptr;
+    size_t deflate_len;
+    size_t origin_len;
+{
+
+    struct __deflate_param deflated_obj = { ptr, deflate_len };
+    struct __deflate_param *inflated_obj = __inflate (&deflated_obj, origin_len);
+
+    struct git_obj *ret = __gitpack_wrap_obj (inflated_obj->buf, inflated_obj->len);
+    if (ret == NULL) {
+        free (inflated_obj->buf);
+        free (inflated_obj);
+
+        return NULL;
+    }
+
+    return ret;
+}
 
 // get git object by pack
-struct git_obj *__gitpack_obj_get (collection, finded_pack)
-    struct __gitpack_collection *collection;
+struct git_obj *__gitpack_obj_get (repo, finded_pack)
+    struct git_repo *repo;
     struct __gitpack_item_findret *finded_pack;
 {
-    struct __packfile_mmap *mmaped = __gitpack_mmap (collection, finded_pack);
+    struct __packfile_mmap *mmaped = __gitpack_mmap (repo->packes, finded_pack);
     if (mmaped == NULL) return NULL;
 
     unsigned char *ptr = mmaped->base + mmaped->off;
-
     unsigned char packitem_type = *ptr & 0x70;
     size_t origin_len = *ptr & 0x0F;
     size_t deflate_len = mmaped->len - 1;
@@ -168,16 +185,42 @@ struct git_obj *__gitpack_obj_get (collection, finded_pack)
     }
     ptr++;
 
-    struct __deflate_param deflated_obj = { ptr, deflate_len };
-    struct __deflate_param *inflated_obj = __inflate (&deflated_obj, origin_len);
-
-    struct git_obj *ret = __gitpack_wrap_obj (inflated_obj->buf, inflated_obj->len);
-    if (ret == NULL) {
-        __gitpack_mmap_dispose (mmaped);
-        free (inflated_obj->buf);
-        free (inflated_obj);
-
-        return NULL;
+    struct git_obj *ret = NULL;
+    if (packitem_type < 0x50) {
+        ret = __gitpack_normalobj_get (packitem_type, ptr, deflate_len, origin_len);
+        if (ret == NULL) {
+            __gitpack_mmap_dispose (mmaped);
+            return NULL;
+        }
+        switch (packitem_type) {
+            case 0x10:
+            ret->type = GIT_OBJ_TYPE_COMMIT;
+            ret->ptr = __git_obj_transfer_commit (ret);
+            break;
+            case 0x20:
+            ret->type = GIT_OBJ_TYPE_TREE;
+            ret->ptr = __git_obj_transfer_tree (ret);
+            break;
+            case 0x30:
+            ret->type = GIT_OBJ_TYPE_BLOB;
+            ret->ptr = __git_obj_transfer_blob (ret);
+            break;
+            case 0x40:
+            DBG_LOG (DBG_INFO, "TAG");
+            break;
+        }
+    }
+    else {
+        switch (packitem_type) {
+            case 0x60:
+            DBG_LOG (DBG_INFO, "OFS_DELTA");
+            __git_ofsdelta_get (finded_pack->pack, finded_pack->node, ptr, origin_len);
+            return NULL;
+            break;
+            case 0x70:
+            DBG_LOG (DBG_INFO, "REF_DELTA");
+            break;
+        }
     }
 
     int i;
@@ -185,45 +228,21 @@ struct git_obj *__gitpack_obj_get (collection, finded_pack)
         ret->sign[i << 1] = HEX ((((unsigned char *) finded_pack->node->key)[i] & 0xF0) >> 4);
         ret->sign[(i << 1) + 1] = HEX (((unsigned char *) finded_pack->node->key)[i] & 0x0F);
     }
-
-    switch (packitem_type) {
-        case 0x10:
-        ret->type = GIT_OBJ_TYPE_COMMIT;
-        ret->ptr = __git_obj_transfer_commit (ret);
-        break;
-        case 0x20:
-        ret->type = GIT_OBJ_TYPE_TREE;
-        ret->ptr = __git_obj_transfer_tree (ret);
-        break;
-        case 0x30:
-        ret->type = GIT_OBJ_TYPE_BLOB;
-        ret->ptr = __git_obj_transfer_blob (ret);
-        break;
-        case 0x40:
-        DBG_LOG (DBG_INFO, "UNDO");
-        break;
-        case 0x60:
-        DBG_LOG (DBG_INFO, "OFS_DELTA");
-        break;
-        case 0x70:
-        DBG_LOG (DBG_INFO, "REF_DELTA");
-        break;
-    }
     __gitpack_mmap_dispose (mmaped);
 
     return ret;
 }
 
-struct git_obj *__gitpack_obj_get__byte_string (struct __gitpack_collection *collection, const void *sign) {
-    struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (collection, sign, rdt_find__byte_string);
+struct git_obj *__gitpack_obj_get__byte_string (struct git_repo *repo, const void *sign) {
+    struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (repo->packes, sign, rdt_find__byte_string);
     if (findret == NULL) return NULL;
 
-    return __gitpack_obj_get (collection, findret);
+    return __gitpack_obj_get (repo, findret);
 }
 
-struct git_obj *__gitpack_obj_get__char_string (struct __gitpack_collection *collection, const char *sign) {
-    struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (collection, (const void *) sign, rdt_find__char_string);
+struct git_obj *__gitpack_obj_get__char_string (struct git_repo *repo, const char *sign) {
+    struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (repo->packes, (const void *) sign, rdt_find__char_string);
     if (findret == NULL) return NULL;
 
-    return __gitpack_obj_get (collection, findret);
+    return __gitpack_obj_get (repo, findret);
 }

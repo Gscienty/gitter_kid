@@ -274,7 +274,7 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
 
     if (obj_path == NULL) {
         if (repo->packes == NULL) repo->packes = __gitpack_collection_get (repo);
-        return __gitpack_obj_get__char_string (repo->packes, signture);
+        return __gitpack_obj_get__char_string (repo, signture);
     }
     else{
          // get obj by loose

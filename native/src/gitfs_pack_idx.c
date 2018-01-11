@@ -127,7 +127,7 @@ int __gitpack_item_count_get (struct __opend_mmap_file *mmaped, struct __gitpack
 }
 
 #define __GITPACK_NTH_SIGN(val, n) ((val) + 8 + 1024 + 20 * (n))
-#define __GITPACK_NTH_OFF(val, nr, n) ntohl (*(int *) ((val) + 8 + 1024 + 24 * (nr) + 4 * (n)))
+#define __GITPACK_NTH_OFF(val, nr, n) ntohl (*((int *) ((val) + 8 + 1024 + 24 * (nr) + 4 * (n))))
 
 void __gitpack_quicksort_indexes (unsigned char *val, struct __gitpack *pack, int *indexes, int start, int end) {
     if (start >= end) return;
@@ -170,7 +170,7 @@ void * __sign_dup (void *off) {
     return ret;
 }
 
-struct rdt *__gitpack_rdt_build (struct __opend_mmap_file *mmaped, struct __gitpack *pack) {
+struct rdt *__gitpack_rdt_build (struct __opend_mmap_file *mmaped, struct __gitpack *pack, size_t packsize) {
     if (pack == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: pack is null");
         return NULL;
@@ -189,13 +189,32 @@ struct rdt *__gitpack_rdt_build (struct __opend_mmap_file *mmaped, struct __gitp
             __sign_dup (__GITPACK_NTH_SIGN (mmaped->val, indexes[i])),
             __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i]),
             i + 1 == pack->count
-                ? mmaped->len - 20 - __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i])
+                ? packsize - 20 - __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i])
                 : __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i + 1]) - __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i])
         );
     }
     free (indexes);
 
     return ret;
+}
+
+size_t __gitpack_size_get (const char *repo_path, size_t repo_path_len, const char *sign) {
+    char *path = (char *) malloc (repo_path_len + 64);
+    if (path == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_packfile_path_get: have not enough free memory");
+        return 0;
+    }
+    strcpy (path, repo_path);
+    strcpy (path + repo_path_len, "objects/pack/pack-");
+    strncpy (path + repo_path_len + 18, sign, 40);
+    strcpy (path + repo_path_len + 58, ".pack");
+    
+    struct stat st;
+    if (stat (path, &st) != 0) {
+        free (path);
+        return 0;
+    }
+    return st.st_size;
 }
 
 struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
@@ -248,7 +267,7 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
             // get count
             pack->count = __gitpack_item_count_get (idx_mmaped, pack);
             // build red black tree
-            pack->rd_tree = __gitpack_rdt_build (idx_mmaped, pack);
+            pack->rd_tree = __gitpack_rdt_build (idx_mmaped, pack, __gitpack_size_get (repo->path, ret->repo_path_len, pack->sign));
 
             __gitpack_idxfile_close (idx_mmaped);
 

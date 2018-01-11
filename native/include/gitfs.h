@@ -4,6 +4,8 @@
 #include "define.h"
 #include "rbtree.h"
 
+#define HEX(v) ((v) < 10 ? '0' + (v) : (v) - 10 + 'a')
+
 int __access_file_readable (const char* filepath);
 int __access_file_writable (const char* filepath);
 int __access_file_executable (const char* filepath);
@@ -29,9 +31,6 @@ struct __gitpack_collection {
     struct __gitpack *tail;
 };
 
-struct git_obj *__gitpack_obj_get__char_string (struct __gitpack_collection *collection, const char *sign);
-struct git_obj *__gitpack_obj_get__byte_string (struct __gitpack_collection *collection, const void *sign);
-
 
 // 仓库结构体
 struct git_repo {
@@ -42,6 +41,9 @@ struct git_repo {
     struct git_repo *next;                  // 上一个仓库
 };
 
+
+struct git_obj *__gitpack_obj_get__char_string (struct git_repo *repo, const char *sign);
+struct git_obj *__gitpack_obj_get__byte_string (struct git_repo *repo, const void *sign);
 struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo);
 
 // 仓库市场结构体
@@ -203,6 +205,9 @@ struct git_obj_tree {
     struct git_obj_tree_item *tail;
     struct git_obj_tree_item *cursor;
 };
+
+
+struct git_obj *__git_ofsdelta_get (struct __gitpack *pack, struct rdt_node *packitem_meta, unsigned char *ptr, size_t origin_len);
 
 // 获取仓库内的git object
 // param <repo>: 仓库指针

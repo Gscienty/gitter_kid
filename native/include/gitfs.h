@@ -17,6 +17,9 @@ struct __gitpack {
     char *sign;
     int count;
 
+    char *idx_path;
+    char *pack_path;
+
     struct rdt *rd_tree;
 
     struct __gitpack *prev;
@@ -24,9 +27,6 @@ struct __gitpack {
 };
 
 struct __gitpack_collection {
-    char *repo_path;
-    size_t repo_path_len;
-
     struct __gitpack *head;
     struct __gitpack *tail;
 };
@@ -206,9 +206,6 @@ struct git_obj_tree {
     struct git_obj_tree_item *cursor;
 };
 
-
-struct git_obj *__git_ofsdelta_get (struct __gitpack *pack, struct rdt_node *packitem_meta, unsigned char *ptr, size_t origin_len);
-
 // 获取仓库内的git object
 // param <repo>: 仓库指针
 // param <signture>: git object 签名
@@ -241,11 +238,11 @@ G_KID_EXTERN struct git_obj_commit *git_obj_get_commit (struct git_obj *obj);
 G_KID_EXTERN struct git_obj_tree *git_obj_get_tree (struct git_obj *obj);
 
 
-struct git_obj_blob *__git_obj_transfer_blob (struct git_obj *obj);
+struct git_obj_blob *__git_obj_transfer_blob (char *body, size_t size);
 void __git_obj_blob_dispose (struct git_obj_blob *obj);
-struct git_obj_commit *__git_obj_transfer_commit (struct git_obj *obj);
+struct git_obj_commit *__git_obj_transfer_commit (char *body, size_t size);
 void __git_obj_commit_dispose (struct git_obj_commit *obj);
-struct git_obj_tree *__git_obj_transfer_tree (struct git_obj *obj);
+struct git_obj_tree *__git_obj_transfer_tree (char *body, size_t size);
 void __git_obj_tree_dispose (struct git_obj_tree *obj);
 
 

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 
-struct git_obj_tree *__git_obj_transfer_tree (struct git_obj *obj) {
+struct git_obj_tree *__git_obj_transfer_tree (char *body, size_t size) {
     struct git_obj_tree *ret = (struct git_obj_tree *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
@@ -13,8 +13,8 @@ struct git_obj_tree *__git_obj_transfer_tree (struct git_obj *obj) {
     }
     ret->head = ret->tail = ret->cursor = NULL;
 
-    register char *ch = obj->body;
-    while (ch < obj->body + obj->size) {
+    register char *ch = body;
+    while (ch < body + size) {
         struct git_obj_tree_item *tree_item = (struct git_obj_tree_item *) malloc (sizeof (*tree_item));
         if (tree_item == NULL) {
             DBG_LOG (DBG_ERROR, "git_obj_get_tree: have not enough free memory");

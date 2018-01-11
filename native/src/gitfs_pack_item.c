@@ -51,73 +51,62 @@ struct __gitpack_item_findret *__gitpack_collection_rdtnode_find (collection, si
     return NULL;
 }
 
-
-// build .pack file's path
-char *__gitpack_packfile_path_get (const char *repo_path, size_t repo_path_len, const char *sign) {
-    size_t len = repo_path_len + 64;
-    char *ret = (char *) malloc (sizeof (char) * len);
-    if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_packfile_path_get: have not enough free memory");
-        return NULL;
-    }
-    strcpy (ret, repo_path);
-    strcpy (ret + repo_path_len, "objects/pack/pack-");
-    strncpy (ret + repo_path_len + 18, sign, 40);
-    strcpy (ret + repo_path_len + 58, ".pack");
-
-    return ret;
-}
-
-struct __packfile_mmap {
+struct __gitpack_file {
     int fd;
-
-    void *base;
-    size_t off;
     size_t len;
 };
 
-// map .pack file's segment which the off & len descript to main memory.
-struct __packfile_mmap *__gitpack_mmap (struct __gitpack_collection *collection, struct __gitpack_item_findret *finded_pack) {
-    char *path = __gitpack_packfile_path_get (collection->repo_path, collection->repo_path_len, finded_pack->pack->sign);
-    if (path == NULL) return NULL;
-
-    struct __packfile_mmap *ret = (struct __packfile_mmap *) malloc (sizeof (*ret));
+struct __gitpack_file *__gitpack_file_get (struct __gitpack *pack) {
+    struct __gitpack_file *ret = (struct __gitpack_file *) malloc (sizeof (*ret));
     if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_mmap: have not enough free memory");
-        free (path);
+        DBG_LOG (DBG_ERROR, "__gitpack_file_get: have not enough free memory");
         return NULL;
     }
-    ret->fd = open (path, O_RDONLY);
-    free (path);
+    ret->fd = open (pack->pack_path, O_RDONLY);
     if (ret->fd == -1) {
-        DBG_LOG (DBG_ERROR, "__gitpack_mmap: cannot open fd");
+        DBG_LOG (DBG_ERROR, "__gitpack_file_get: cannot open fd");
         free (ret);
         return NULL;
     }
 
-    const size_t MEMORY_PAGESIZE = sysconf (_SC_PAGESIZE);
-    int nth_page_start = finded_pack->node->off / MEMORY_PAGESIZE;
-    ret->off = finded_pack->node->off % MEMORY_PAGESIZE;
-    ret->len = finded_pack->node->len;
-
-    ret->base = mmap (NULL, ret->len + ret->off, PROT_READ, MAP_SHARED, ret->fd, nth_page_start * MEMORY_PAGESIZE);
-    if (ret->base == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_mmap: pack file cannot mapped to memory");
+    struct stat st;
+    if (fstat (ret->fd, &st) != 0) {
         close (ret->fd);
         free (ret);
         return NULL;
     }
+    ret->len = st.st_size;
+
     return ret;
 }
 
-// dispose __packfile_mmap
-void __gitpack_mmap_dispose (struct __packfile_mmap *mmaped) {
-    if (mmaped == NULL) return;
-    const size_t MEMORY_PAGESIZE = sysconf (_SC_PAGESIZE);
+void __gitpack_file_dispose (struct __gitpack_file *obj) {
+    if (obj == NULL) return;
+    if (obj->fd != -1) close (obj->fd);
+    free (obj);
+}
 
-    if (mmaped->base != NULL) munmap (mmaped->base, mmaped->len + mmaped->off);
-    if (mmaped->fd != -1) close (mmaped->fd);
-    free (mmaped);
+void __gitpack_file_off (struct __gitpack_file *obj, size_t off) {
+    if (obj == NULL) return;
+    if (obj->fd == -1) return;
+
+    lseek (obj->fd, off, SEEK_SET);
+}
+
+void *__gitpack_file_readbytes (struct __gitpack_file *obj, size_t size) {
+    unsigned char *ret = (unsigned char *) malloc (size);
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_file_readbytes: have not enough free memory");
+        return NULL;
+    }
+    read (obj->fd, ret, size);
+    return ret;
+}
+
+unsigned char __gitpack_file_readbyte(struct __gitpack_file *obj) {
+    char buf[1];
+    read (obj->fd, buf, 1);
+    return buf[0];
 }
 
 struct git_obj *__gitpack_wrap_obj (void *base, size_t len) {
@@ -144,105 +133,39 @@ struct git_obj *__gitpack_wrap_obj (void *base, size_t len) {
     return ret;
 }
 
-struct git_obj *__gitpack_normalobj_get (packitem_type, ptr, deflate_len, origin_len)
-    unsigned char packitem_type;
-    unsigned char *ptr;
-    size_t deflate_len;
-    size_t origin_len;
-{
-
-    struct __deflate_param deflated_obj = { ptr, deflate_len };
-    struct __deflate_param *inflated_obj = __inflate (&deflated_obj, origin_len);
-
-    struct git_obj *ret = __gitpack_wrap_obj (inflated_obj->buf, inflated_obj->len);
-    if (ret == NULL) {
-        free (inflated_obj->buf);
-        free (inflated_obj);
-
-        return NULL;
-    }
-
-    return ret;
-}
-
 // get git object by pack
-struct git_obj *__gitpack_obj_get (repo, finded_pack)
-    struct git_repo *repo;
-    struct __gitpack_item_findret *finded_pack;
-{
-    struct __packfile_mmap *mmaped = __gitpack_mmap (repo->packes, finded_pack);
-    if (mmaped == NULL) return NULL;
+struct git_obj *__git_obj_get__pack (struct __gitpack *pack, size_t off, size_t len) {
+    struct __gitpack_file *packfile = __gitpack_file_get (pack);
+    if (packfile == NULL) return NULL;
 
-    unsigned char *ptr = mmaped->base + mmaped->off;
-    unsigned char packitem_type = *ptr & 0x70;
-    size_t origin_len = *ptr & 0x0F;
-    size_t deflate_len = mmaped->len - 1;
-    while (*ptr & 0x80) {
-        ptr++;
-        origin_len <<= 7;
-        origin_len |= *ptr & 0x7F;
-        deflate_len--;
-    }
-    ptr++;
+    __gitpack_file_off (packfile, off);
 
-    struct git_obj *ret = NULL;
-    if (packitem_type < 0x50) {
-        ret = __gitpack_normalobj_get (packitem_type, ptr, deflate_len, origin_len);
-        if (ret == NULL) {
-            __gitpack_mmap_dispose (mmaped);
-            return NULL;
-        }
-        switch (packitem_type) {
-            case 0x10:
-            ret->type = GIT_OBJ_TYPE_COMMIT;
-            ret->ptr = __git_obj_transfer_commit (ret);
-            break;
-            case 0x20:
-            ret->type = GIT_OBJ_TYPE_TREE;
-            ret->ptr = __git_obj_transfer_tree (ret);
-            break;
-            case 0x30:
-            ret->type = GIT_OBJ_TYPE_BLOB;
-            ret->ptr = __git_obj_transfer_blob (ret);
-            break;
-            case 0x40:
-            DBG_LOG (DBG_INFO, "TAG");
-            break;
-        }
-    }
-    else {
-        switch (packitem_type) {
-            case 0x60:
-            DBG_LOG (DBG_INFO, "OFS_DELTA");
-            __git_ofsdelta_get (finded_pack->pack, finded_pack->node, ptr, origin_len);
-            return NULL;
-            break;
-            case 0x70:
-            DBG_LOG (DBG_INFO, "REF_DELTA");
-            break;
-        }
+    unsigned char byte = __gitpack_file_readbyte (packfile);
+    unsigned char type = (byte >> 4) & 0x07;
+
+    int size = byte & 0x0F;
+    int shift = 4;
+    while (byte & 0x80) {
+        byte = __gitpack_file_readbyte (packfile);
+        size += ((int) (byte & 0x7F)) << shift;
+        shift += 7;
     }
 
-    int i;
-    for (i = 0; i < 20; i++) {
-        ret->sign[i << 1] = HEX ((((unsigned char *) finded_pack->node->key)[i] & 0xF0) >> 4);
-        ret->sign[(i << 1) + 1] = HEX (((unsigned char *) finded_pack->node->key)[i] & 0x0F);
+    if (type < 5) {
+        void *content = __gitpack_file_readbytes (packfile, size);
     }
-    __gitpack_mmap_dispose (mmaped);
-
-    return ret;
 }
 
 struct git_obj *__gitpack_obj_get__byte_string (struct git_repo *repo, const void *sign) {
     struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (repo->packes, sign, rdt_find__byte_string);
     if (findret == NULL) return NULL;
 
-    return __gitpack_obj_get (repo, findret);
+    return __git_obj_get__pack (findret->pack, findret->node->off, findret->node->len);
 }
 
 struct git_obj *__gitpack_obj_get__char_string (struct git_repo *repo, const char *sign) {
     struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (repo->packes, (const void *) sign, rdt_find__char_string);
     if (findret == NULL) return NULL;
 
-    return __gitpack_obj_get (repo, findret);
+    return __git_obj_get__pack (findret->pack, findret->node->off, findret->node->len);
 }

@@ -26,7 +26,7 @@ DIR *__gitpack_packdir_get (const char *path, size_t path_len) {
     return ret;
 }
 
-struct __gitpack *__gitpack_get (const char *idx_name) {
+struct __gitpack *__gitpack_get (const char *path, size_t path_len, const char *idx_name) {
     struct __gitpack *ret = (struct __gitpack *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_get: have not enough free memory");
@@ -40,6 +40,32 @@ struct __gitpack *__gitpack_get (const char *idx_name) {
         return NULL;
     }
     strncpy (ret->sign, idx_name + 5, 40);
+    
+    ret->idx_path = (char *) malloc (sizeof (char) * (path_len + 63));
+    if (ret->idx_path == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_get: have not enough free memory");
+        free (ret->sign);
+        free (ret);
+        return NULL;
+    }
+    strcpy (ret->idx_path, path);
+    strcpy (ret->idx_path + path_len, "objects/pack/pack-");
+    strcpy (ret->idx_path + path_len + 18, ret->sign);
+    strcpy (ret->idx_path + path_len + 58, ".idx");
+
+    ret->pack_path = (char *) malloc (path_len + 64);
+    if (path == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_packfile_path_get: have not enough free memory");
+        free (ret->sign);
+        free (ret->idx_path);
+        free (ret);
+        return NULL;
+    }
+    strcpy (ret->pack_path, path);
+    strcpy (ret->pack_path + path_len, "objects/pack/pack-");
+    strncpy (ret->pack_path + path_len + 18, ret->sign, 40);
+    strcpy (ret->pack_path + path_len + 58, ".pack");
+
     ret->count = 0;
     ret->rd_tree = NULL;
     ret->prev = ret->next = NULL;
@@ -66,37 +92,26 @@ void __gitpack_idxfile_close (struct __opend_mmap_file *mmaped) {
     close (mmaped->fd);
 }
 
-struct __opend_mmap_file *__gitpack_idxfile_open (const char *path, size_t path_len, struct __gitpack *pack) {
+struct __opend_mmap_file *__gitpack_idxfile_open (struct __gitpack *pack) {
     if (pack == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: pack is null");
+        DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: pack is null");
         return NULL;
     }
     struct __opend_mmap_file *ret = (struct __opend_mmap_file *) malloc (sizeof (ret));
     if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: have not enough free memory");
         return NULL;
     }
-    char *idx_path = (char *) malloc (sizeof (char) * (path_len + 63));
-    if (idx_path == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: have not enough free memory");
-        free (ret);
-        return NULL;
-    }
-    strcpy (idx_path, path);
-    strcpy (idx_path + path_len, "objects/pack/pack-");
-    strcpy (idx_path + path_len + 18, pack->sign);
-    strcpy (idx_path + path_len + 58, ".idx");
 
-    ret->fd = open (idx_path, O_RDONLY);
-    free (idx_path);
+    ret->fd = open (pack->idx_path, O_RDONLY);
     if (ret->fd == -1) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: idx file cannot opend");
+        DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: idx file cannot opend");
         free (ret);
         return NULL;
     }
     struct stat idx_st;
     if (fstat (ret->fd, &idx_st) != 0) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: idx file cannot get st");
+        DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: idx file cannot get st");
         close (ret->fd);
         free (ret);
         return NULL;
@@ -104,7 +119,7 @@ struct __opend_mmap_file *__gitpack_idxfile_open (const char *path, size_t path_
     ret->len = idx_st.st_size;
     ret->val = mmap (NULL, idx_st.st_size, PROT_READ, MAP_SHARED, ret->fd, 0);
     if ((void *) ret->val == (void *) -1) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: idx file cannot mmap");
+        DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: idx file cannot mmap");
         close (ret->fd);
         free (ret);
         return NULL;
@@ -113,7 +128,7 @@ struct __opend_mmap_file *__gitpack_idxfile_open (const char *path, size_t path_
     return ret;
 }
 
-int __gitpack_item_count_get (struct __opend_mmap_file *mmaped, struct __gitpack *pack) {
+int __gitpack_item_count_get (struct __opend_mmap_file *mmaped) {
     if (mmaped == NULL) return 0;
     unsigned int *p = (unsigned int *) (mmaped->val + 8);
     int count = 0;
@@ -172,11 +187,11 @@ void * __sign_dup (void *off) {
 
 struct rdt *__gitpack_rdt_build (struct __opend_mmap_file *mmaped, struct __gitpack *pack, size_t packsize) {
     if (pack == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: pack is null");
+        DBG_LOG (DBG_ERROR, "__gitpack_rdt_build: pack is null");
         return NULL;
     }
     if (mmaped == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_count_get: mmaped is null");
+        DBG_LOG (DBG_ERROR, "__gitpack_rdt_build: mmaped is null");
         return NULL;
     }
     struct rdt *ret = rdt_build ();
@@ -198,20 +213,9 @@ struct rdt *__gitpack_rdt_build (struct __opend_mmap_file *mmaped, struct __gitp
     return ret;
 }
 
-size_t __gitpack_size_get (const char *repo_path, size_t repo_path_len, const char *sign) {
-    char *path = (char *) malloc (repo_path_len + 64);
-    if (path == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_packfile_path_get: have not enough free memory");
-        return 0;
-    }
-    strcpy (path, repo_path);
-    strcpy (path + repo_path_len, "objects/pack/pack-");
-    strncpy (path + repo_path_len + 18, sign, 40);
-    strcpy (path + repo_path_len + 58, ".pack");
-    
+size_t __gitpack_size_get (struct __gitpack *pack) {
     struct stat st;
-    if (stat (path, &st) != 0) {
-        free (path);
+    if (stat (pack->pack_path, &st) != 0) {
         return 0;
     }
     return st.st_size;
@@ -229,16 +233,9 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
     }
     ret->head = ret->tail = NULL;
 
-    ret->repo_path = strdup (repo->path);
-    if (ret->repo_path == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_collection_get: have not enough free memory");
-        free (ret);
-        return NULL;
-    }
-    
-    ret->repo_path_len = strlen (repo->path);
+    size_t path_len = strlen (repo->path);
 
-    DIR *dir = __gitpack_packdir_get (repo->path, ret->repo_path_len);
+    DIR *dir = __gitpack_packdir_get (repo->path, path_len);
     if (dir == NULL) {
         free (ret);
         return NULL;
@@ -249,7 +246,7 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
         if (ent->d_type == DT_REG) {
             if (strcmp (ent->d_name + 45, ".idx") != 0) continue;
 
-            struct __gitpack *pack = __gitpack_get (ent->d_name);
+            struct __gitpack *pack = __gitpack_get (repo->path, path_len, ent->d_name);
             if (pack == NULL) {
                 __gitpack_collection_dispose (ret);
                 closedir (dir);
@@ -257,7 +254,7 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
             }
             
 
-            struct __opend_mmap_file *idx_mmaped = __gitpack_idxfile_open (repo->path, ret->repo_path_len, pack);
+            struct __opend_mmap_file *idx_mmaped = __gitpack_idxfile_open (pack);
             if (idx_mmaped == NULL) {
                 __gitpack_collection_dispose (ret);
                 closedir (dir);
@@ -265,9 +262,9 @@ struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
             }
 
             // get count
-            pack->count = __gitpack_item_count_get (idx_mmaped, pack);
+            pack->count = __gitpack_item_count_get (idx_mmaped);
             // build red black tree
-            pack->rd_tree = __gitpack_rdt_build (idx_mmaped, pack, __gitpack_size_get (repo->path, ret->repo_path_len, pack->sign));
+            pack->rd_tree = __gitpack_rdt_build (idx_mmaped, pack, __gitpack_size_get (pack));
 
             __gitpack_idxfile_close (idx_mmaped);
 

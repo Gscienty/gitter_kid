@@ -243,6 +243,60 @@ struct __gitpack_item *__gitpack_item_get (struct __gitpack_segment segment) {
     return NULL;
 }
 
+struct git_obj *__gitpack_item_transfer_commit (struct __gitpack_item item) {
+    struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_item_transfer_commit: have not enough free memory");
+        return NULL;
+    }
+
+    ret->buf = item.buf.buf;
+    ret->path = NULL;
+    ret->sign = NULL;
+    ret->type = GIT_OBJ_TYPE_COMMIT;
+    ret->size = item.buf.len;
+    ret->body = item.buf.buf;
+    ret->ptr = __git_obj_transfer_commit (item.buf.buf, item.buf.len);
+
+    return ret;
+}
+
+struct git_obj *__gitpack_item_transfer_blob (struct __gitpack_item item) {
+    struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_item_transfer_blob: have not enough free memory");
+        return NULL;
+    }
+
+    ret->buf = item.buf.buf;
+    ret->path = NULL;
+    ret->sign = NULL;
+    ret->type = GIT_OBJ_TYPE_BLOB;
+    ret->size = item.buf.len;
+    ret->body = item.buf.buf;
+    ret->ptr = __git_obj_transfer_blob (item.buf.buf, item.buf.len);
+
+    return ret;
+}
+
+struct git_obj *__gitpack_item_transfer_tree (struct __gitpack_item item) {
+    struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_item_transfer_tree: have not enough free memory");
+        return NULL;
+    }
+
+    ret->buf = item.buf.buf;
+    ret->path = NULL;
+    ret->sign = NULL;
+    ret->type = GIT_OBJ_TYPE_TREE;
+    ret->size = item.buf.len;
+    ret->body = item.buf.buf;
+    ret->ptr = __git_obj_transfer_tree (item.buf.buf, item.buf.len);
+
+    return ret;
+}
+
 struct git_obj *__gitpack_obj_get__common (struct git_repo *repo, struct __gitpack_item_findret *findret) {
     struct __gitpack_file *packfile = __gitpack_fileopen (findret->pack);
     if (packfile == NULL) return NULL;
@@ -250,7 +304,11 @@ struct git_obj *__gitpack_obj_get__common (struct git_repo *repo, struct __gitpa
     struct __gitpack_item *pack_item = __gitpack_item_get (*segment);
     __gitpack_segment_dispose (segment);
 
-    return pack_item;
+    switch (pack_item->type) {
+        case 0x01: return __gitpack_item_transfer_commit (*pack_item);
+        case 0x02: return __gitpack_item_transfer_tree (*pack_item);
+        case 0x03: return __gitpack_item_transfer_blob (*pack_item);
+    }
 }
 
 struct git_obj *__gitpack_obj_get__byte_string (struct git_repo *repo, const void *sign) {

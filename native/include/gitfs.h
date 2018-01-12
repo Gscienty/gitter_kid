@@ -151,7 +151,7 @@ struct git_obj {
     char *path;
     char *sign;
     enum git_obj_type type;
-    int size;
+    size_t size;
     char *body;
     void *ptr;
 };

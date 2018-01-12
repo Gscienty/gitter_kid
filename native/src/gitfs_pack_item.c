@@ -134,8 +134,11 @@ struct git_obj *__gitpack_wrap_obj (void *base, size_t len) {
 }
 
 struct __gitpack_segment {
-    struct __buf *buf;
+    struct __buf buf;
     unsigned char type;
+
+    size_t item_len;
+    size_t off;
 };
 
 // get git object by pack
@@ -152,30 +155,114 @@ struct __gitpack_segment *__gitpack_segment_get (struct __gitpack_file *packfile
         size += ((int) (byte & 0x7F)) << shift;
         shift += 7;
     }
-    if (type < 5) {
-        struct __buf deflate_buf = { __gitpack_file_readbytes (packfile, size), len };
-        struct __buf *inflated_buf = __inflate (&deflate_buf, size);
-        free (deflate_buf.buf);
-        
+    struct __gitpack_segment *ret = (struct __gitpack_segment *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_segment_get: have not enough free memory");
+        return NULL;
     }
 
+    ret->buf.buf = __gitpack_file_readbytes (packfile, len);
+    ret->buf.len = len;
+    ret->off = off;
+    ret->item_len = size;
+    ret->type = type;
+
+    return ret;
+}
+
+void __gitpack_segment_dispose (struct __gitpack_segment *segment) {
+    if (segment == NULL) return;
+    if (segment->buf.buf != NULL) free (segment->buf.buf);
+    free (segment);
+}
+
+struct __gitpack_item {
+    struct __buf buf;
+    unsigned char type;
+
+    void *base_sign;
+    size_t negative_off;
+    size_t off;
+};
+
+struct __gitpack_item *__gitpack_item_get (struct __gitpack_segment segment) {
+    struct __gitpack_item *ret = (struct __gitpack_item *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_item_get: have not enough free memory");
+        return NULL;
+    }
+    ret->off = segment.off;
+    ret->negative_off = 0;
+    ret->base_sign = NULL;
+
+    if (segment.type < 5) {
+        struct __buf deflate_obj = { segment.buf.buf, segment.buf.len };
+        ret->buf = *__inflate (&deflate_obj, segment.item_len);
+        ret->type = segment.type;
+        return ret;
+    }
+    else if (segment.type == 6) {
+        // ofs delta
+        unsigned char *ptr = segment.buf.buf;
+
+        int nbytes = 1;
+        ret->negative_off = *ptr & 0x7F;
+        while (*ptr & 0x80) {
+            ptr++;
+            nbytes++;
+            ret->negative_off = (ret->negative_off << 7) + (size_t) (*ptr & 0x7F);
+        }
+
+        if (nbytes >= 2) {
+            ret->negative_off += (1 << (7 * (nbytes - 1)));
+        }
+
+        struct __buf deflate_obj = { ptr + 1, segment.buf.len - nbytes };
+        ret->buf = *__inflate (&deflate_obj, segment.item_len);
+        ret->type = segment.type;
+
+        return ret;
+    }
+    else if (segment.type == 7) {
+        ret->base_sign = malloc (20);
+        if (ret->base_sign == NULL) {
+            DBG_LOG (DBG_ERROR, "__gitpack_item_get: have not enough free memory");
+            free (ret);
+            return NULL;
+        }
+        memcpy (ret->base_sign, segment.buf.buf, 20);
+
+        struct __buf deflate_obj = { segment.buf.buf + 20, segment.buf.len - 20 };
+        ret->buf = *__inflate (&deflate_obj, segment.item_len);
+        ret->type = segment.type;
+
+        return ret;
+    }
+    
+    DBG_LOG (DBG_ERROR, "__gitpack_item_get: cannot parse");
     return NULL;
+}
+
+struct git_obj *__gitpack_obj_get__common (struct git_repo *repo, struct __gitpack_item_findret *findret) {
+    struct __gitpack_file *packfile = __gitpack_fileopen (findret->pack);
+    if (packfile == NULL) return NULL;
+    struct __gitpack_segment *segment = __gitpack_segment_get (packfile, findret->node->off, findret->node->len);
+    struct __gitpack_item *pack_item = __gitpack_item_get (*segment);
+    __gitpack_segment_dispose (segment);
+
+    return pack_item;
 }
 
 struct git_obj *__gitpack_obj_get__byte_string (struct git_repo *repo, const void *sign) {
     struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (repo->packes, sign, rdt_find__byte_string);
     if (findret == NULL) return NULL;
 
-    struct __gitpack_file *packfile = __gitpack_fileopen (pack);
-    if (packfile == NULL) return NULL;
-    return __gitpack_segment_get (packfile, findret->node->off, findret->node->len);
+    return __gitpack_obj_get__common (repo, findret);
 }
 
 struct git_obj *__gitpack_obj_get__char_string (struct git_repo *repo, const char *sign) {
     struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (repo->packes, (const void *) sign, rdt_find__char_string);
     if (findret == NULL) return NULL;
 
-    struct __gitpack_file *packfile = __gitpack_fileopen (pack);
-    if (packfile == NULL) return NULL;
-    return __gitpack_segment_get (packfile, findret->node->off, findret->node->len);
+    return __gitpack_obj_get__common (repo, findret);
 }

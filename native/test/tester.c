@@ -113,13 +113,13 @@ int test_commits_parent () {
         
         if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
             struct gitobj *obj = git_obj_get (repo, "54415a12532e7e77dfc4037962e870abe72e0300");
-            struct git_obj_commit *commit = git_obj_get_commit (obj);
+            struct gitobj_commit *commit = git_obj_get_commit (obj);
 
-            git_obj_commit_parent_reset (commit);
+            gitobj_commit_patent_reset (commit);
             do {
-                struct git_obj_commit_parent *parent = git_obj_commit_parent_current (commit);
-                printf ("%s\n", git_obj_commit_parent_sign (parent));
-            } while (git_obj_commit_parent_move_next (commit) == 0);
+                struct gitobj_commit_patent *parent = gitobj_commit_patent_current (commit);
+                printf ("%s\n", gitobj_commit_patent_sign (parent));
+            } while (gitobj_commit_patent_move_next (commit) == 0);
 
             break;
         }
@@ -141,7 +141,7 @@ int test_pack () {
             git_obj_get (repo, "1d701d1ac0f0febeb562beedc4f093f27ab2e1bf");
             //struct __gitpack_collection *pack_coll = __gitpack_collection_get (repo);
 
-            //printf ("%d\n", __gitpack_obj_get__char_string (pack_coll, "3b846780303b8994088f884c3dfed48c04e6a2b0"));
+            //printf ("%d\n", __gitpack_getobj__charstring (pack_coll, "3b846780303b8994088f884c3dfed48c04e6a2b0"));
 
             //     __git_pack_get_obj (git_packes_get_current (packes), "0f45d6566321ef72e498d1e289398fab1fd5026f");
             //     __git_pack_get_obj (git_packes_get_current (packes), "ca1c10bf904926224e1358910d637320e91945d3");

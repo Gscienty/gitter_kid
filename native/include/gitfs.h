@@ -154,18 +154,18 @@ struct git_repo {
 };
 
 
-struct gitobj *__gitpack_obj_get__char_string (struct git_repo *repo, const char *sign);
-struct gitobj *__gitpack_obj_get__byte_string (struct git_repo *repo, const void *sign);
+struct gitobj *__gitpack_getobj__charstring (struct git_repo *repo, const char *sign);
+struct gitobj *__gitpack_getobj__bytestring (struct git_repo *repo, const void *sign);
 struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo);
 
 // blob 结构体
-struct git_obj_blob {
+struct gitobj_blob {
     void *content; // blob 文件内容
     int len;    // blob 文件内容长度
 };
 
 // person log 结构体
-struct git_person_log {
+struct gitperson {
     char *name;               // person log 姓名
     char *mail;               // person log 邮箱
     unsigned long timestamp;  // person log 时间戳
@@ -173,39 +173,39 @@ struct git_person_log {
 };
 
 // git commit 上游节点结构体
-struct git_obj_commit_parent {
+struct gitobj_commit_patent {
     char *sign; // 上游节点签名
-    struct git_obj_commit_parent *prev;
-    struct git_obj_commit_parent *next;
+    struct gitobj_commit_patent *prev;
+    struct gitobj_commit_patent *next;
 };
 
 // git commit 结构体
-struct git_obj_commit {
-    struct git_obj_commit_parent *parent_head; //上游commit节点列表头部
-    struct git_obj_commit_parent *parent_tail; //上游commit节点列表尾部
-    struct git_obj_commit_parent *parent_cursor;
+struct gitobj_commit {
+    struct gitobj_commit_patent *parent_head; //上游commit节点列表头部
+    struct gitobj_commit_patent *parent_tail; //上游commit节点列表尾部
+    struct gitobj_commit_patent *parent_cursor;
 
     char *tree_sign; // commit关联tree的签名
     char *message;   // commit 消息部分
-    struct git_person_log *author; // commit 作者信息
-    struct git_person_log *committer; //commit 提交者信息
+    struct gitperson *author; // commit 作者信息
+    struct gitperson *committer; //commit 提交者信息
 };
 
 // tree 成员结构体
-struct git_obj_tree_item {
+struct gitobj_treeitem {
     char *sign; // 成员签名
     char *name; // 成员名称
     int type;   // 成员类型 (blob | tree)
 
-    struct git_obj_tree_item *prev;
-    struct git_obj_tree_item *next;
+    struct gitobj_treeitem *prev;
+    struct gitobj_treeitem *next;
 };
 
 // tree 结构体
-struct git_obj_tree {
-    struct git_obj_tree_item *head;
-    struct git_obj_tree_item *tail;
-    struct git_obj_tree_item *cursor;
+struct gitobj_tree {
+    struct gitobj_treeitem *head;
+    struct gitobj_treeitem *tail;
+    struct gitobj_treeitem *cursor;
 };
 
 // 获取仓库内的git object
@@ -227,126 +227,126 @@ G_KID_EXTERN enum git_obj_type git_obj_type (struct gitobj *obj);
 // 通过 git object 获取 blob
 // param <obj>: git object
 // return: blob object
-G_KID_EXTERN struct git_obj_blob *git_obj_get_blob (struct gitobj *obj);
+G_KID_EXTERN struct gitobj_blob *git_obj_get_blob (struct gitobj *obj);
 
 // 通过 git object 获取 commit
 // param <obj>: git object
 // return: commit object
-G_KID_EXTERN struct git_obj_commit *git_obj_get_commit (struct gitobj *obj);
+G_KID_EXTERN struct gitobj_commit *git_obj_get_commit (struct gitobj *obj);
 
 // 通过 git object 获取 tree
 // param <obj>: git object
 // return: tree object
-G_KID_EXTERN struct git_obj_tree *git_obj_get_tree (struct gitobj *obj);
+G_KID_EXTERN struct gitobj_tree *git_obj_get_tree (struct gitobj *obj);
 
 
-struct git_obj_blob *__git_obj_transfer_blob (char *body, size_t size);
-void __git_obj_blob_dispose (struct git_obj_blob *obj);
-struct git_obj_commit *__git_obj_transfer_commit (char *body, size_t size);
-void __git_obj_commit_dispose (struct git_obj_commit *obj);
-struct git_obj_tree *__git_obj_transfer_tree (char *body, size_t size);
-void __git_obj_tree_dispose (struct git_obj_tree *obj);
+struct gitobj_blob *__git_obj_transfer_blob (char *body, size_t size);
+void __gitobj_blob_dispose (struct gitobj_blob *obj);
+struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size);
+void __gitobj_commit_dispose (struct gitobj_commit *obj);
+struct gitobj_tree *__git_obj_transfer_tree (char *body, size_t size);
+void __gitobj_tree_dispose (struct gitobj_tree *obj);
 
 
 // 获取 blob 内容的长度
 // param <blob_obj>: blob object
 // return: blob 内容的长度
-G_KID_EXTERN int git_obj_blob_length (struct git_obj_blob *blob_obj);
+G_KID_EXTERN int gitobj_blob_length (struct gitobj_blob *blob_obj);
 
 // 获取 blob 内容
 // param <blob_obj>: blob object
 // return: blob 内容
-G_KID_EXTERN void *git_obj_blob_content (struct git_obj_blob *blob_obj);
+G_KID_EXTERN void *gitobj_blob_content (struct gitobj_blob *blob_obj);
 
 
 // 获取与 commit 关联的 tree 的签名
 // param <commit_obj>: commit object
 // return: tree 的签名
-G_KID_EXTERN char *git_obj_commit_tree_sign (struct git_obj_commit *commit_obj);
+G_KID_EXTERN char *gitobj_commit_treesign (struct gitobj_commit *commit_obj);
 
 // 获取 commit 的作者信息
 // param <commit_obj>: commit object
 // return: 作者信息
-G_KID_EXTERN struct git_person_log *git_obj_commit_author (struct git_obj_commit *commit_obj);
+G_KID_EXTERN struct gitperson *gitobj_commit_author (struct gitobj_commit *commit_obj);
 
 // 获取 commit 的提交者信息
 // param <commit_obj>: commit object
 // return: 提交者信息
-G_KID_EXTERN struct git_person_log *git_obj_commit_committer (struct git_obj_commit *commit_obj);
+G_KID_EXTERN struct gitperson *gitobj_commit_committer (struct gitobj_commit *commit_obj);
 
 // 获取 commit 的提交消息
 // param <commit_obj>: commit object
 // return: 提交消息
-G_KID_EXTERN char *git_obj_commit_message (struct git_obj_commit *commit_obj);
+G_KID_EXTERN char *gitobj_commit_message (struct gitobj_commit *commit_obj);
 
 // 重置 commit 的上游 commit 签名列表的游标
 // param <commit_obj>: commit object
-G_KID_EXTERN void git_obj_commit_parent_reset (struct git_obj_commit *commit_obj);
+G_KID_EXTERN void gitobj_commit_patent_reset (struct gitobj_commit *commit_obj);
 
 // 将 commit 的上游 commit 签名列表的游标移动到下一签名
 // param <commit_obj>: commit object
 // return: 成功移动到下一个签名时，返回0，否则返回-1
-G_KID_EXTERN int git_obj_commit_parent_move_next (struct git_obj_commit *commit_obj);
+G_KID_EXTERN int gitobj_commit_patent_move_next (struct gitobj_commit *commit_obj);
 
 // 获取当前 commit 的上游 commit 签名列表游标所指向的上游 commit 签名结构体
 // param <commit_obj>: commit object
 // return: 上游 commit 签名结构体
-G_KID_EXTERN struct git_obj_commit_parent *git_obj_commit_parent_current (struct git_obj_commit *commit_obj);
+G_KID_EXTERN struct gitobj_commit_patent *gitobj_commit_patent_current (struct gitobj_commit *commit_obj);
 
 // 获取上游 commit 签名结构体中的签名
 // param <commit_parent_obj>: 上游 commit 签名结构体
 // return: 上游 commit 签名
-G_KID_EXTERN char *git_obj_commit_parent_sign (struct git_obj_commit_parent *commit_parent_obj);
+G_KID_EXTERN char *gitobj_commit_patent_sign (struct gitobj_commit_patent *commit_parent_obj);
 
 
 // 通过 person log 获取名称
 // param <person_log>: person log
 // return: 名称
-G_KID_EXTERN char *git_person_log_name (struct git_person_log *person_log);
+G_KID_EXTERN char *gitperson_name (struct gitperson *person_log);
 
 // 通过 person log 获取 mail
 // param <person_log>: person log
 // return: mail
-G_KID_EXTERN char *git_person_log_mail (struct git_person_log *person_log);
+G_KID_EXTERN char *gitperson_mail (struct gitperson *person_log);
 
 // 通过 person log 获取时间戳
 // param <person_log>: person log
 // return: 时间戳
-G_KID_EXTERN unsigned long git_person_log_timestamp (struct git_person_log *person_log);
+G_KID_EXTERN unsigned long gitperson_timestamp (struct gitperson *person_log);
 
 // 通过 person log 获取时区
 // param <person_log>: person log
 // return 时区
-G_KID_EXTERN char *git_person_timezone (struct git_person_log *person_log);
+G_KID_EXTERN char *git_person_timezone (struct gitperson *person_log);
 
 
 // 重置 tree 游标
 // param <tree_obj>: tree object
-G_KID_EXTERN void git_obj_tree_reset (struct git_obj_tree *tree_obj);
+G_KID_EXTERN void gitobj_tree_reset (struct gitobj_tree *tree_obj);
 
 // 移动 tree 游标指向下一个item
 // param <tree_obj>: tree object
 // return: 成功移动到下一个item时，返回0，否则返回-1
-G_KID_EXTERN int git_obj_tree_move_next (struct git_obj_tree *tree_obj);
+G_KID_EXTERN int gitobj_tree_move_next (struct gitobj_tree *tree_obj);
 
 // 获取当前 tree 游标所指向的 item
 // param <tree_obj>: tree object
 // return: item
-G_KID_EXTERN struct git_obj_tree_item *git_obj_tree_current (struct git_obj_tree *tree_obj);
+G_KID_EXTERN struct gitobj_treeitem *gitobj_tree_current (struct gitobj_tree *tree_obj);
 
 
 // 获取 tree item 中的签名
 // param <tree_item_obj>: tree item object
 // return: item 的签名
-G_KID_EXTERN char *git_obj_tree_item_sign (struct git_obj_tree_item *tree_item_obj);
+G_KID_EXTERN char *gitobj_treeitem_sign (struct gitobj_treeitem *tree_item_obj);
 
 // 获取 tree item 中的名称
 // param <tree_item_obj>: tree item object
 // return: item 的名称
-G_KID_EXTERN char *git_obj_tree_item_name (struct git_obj_tree_item *tree_item_obj);
+G_KID_EXTERN char *gitobj_treeitem_name (struct gitobj_treeitem *tree_item_obj);
 
 // 获取 tree item 中的类型
 // param <tree_item_obj>: tree item object
 // return: item 的类型
-G_KID_EXTERN enum git_obj_type git_obj_tree_item_type (struct git_obj_tree_item *tree_item_obj);
+G_KID_EXTERN enum git_obj_type gitobj_treeitem_type (struct gitobj_treeitem *tree_item_obj);
 #endif

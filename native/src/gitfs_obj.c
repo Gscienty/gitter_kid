@@ -274,7 +274,7 @@ struct gitobj *git_obj_get (struct git_repo *repo, const char* signture) {
 
     if (obj_path == NULL) {
         if (repo->packes == NULL) repo->packes = __gitpack_collection_get (repo);
-        return __gitpack_obj_get__char_string (repo, signture);
+        return __gitpack_getobj__charstring (repo, signture);
     }
     else{
          // get obj by loose
@@ -294,13 +294,13 @@ void git_obj_dispose (struct gitobj *obj) {
     }
     switch (obj->type) {
         case GIT_OBJ_TYPE_BLOB:
-            __git_obj_blob_dispose ((struct git_obj_blob *) obj->ptr);
+            __gitobj_blob_dispose ((struct gitobj_blob *) obj->ptr);
             break;
         case GIT_OBJ_TYPE_COMMIT:
-            __git_obj_commit_dispose ((struct git_obj_commit *) obj->ptr);
+            __gitobj_commit_dispose ((struct gitobj_commit *) obj->ptr);
             break;
         case GIT_OBJ_TYPE_TREE:
-            __git_obj_tree_dispose ((struct git_obj_tree *) obj->ptr);
+            __gitobj_tree_dispose ((struct gitobj_tree *) obj->ptr);
             break;
     }
 

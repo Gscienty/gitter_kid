@@ -311,14 +311,14 @@ struct gitobj *__gitpack_obj_get__common (struct git_repo *repo, struct __gitpac
     }
 }
 
-struct gitobj *__gitpack_obj_get__byte_string (struct git_repo *repo, const void *sign) {
+struct gitobj *__gitpack_getobj__bytestring (struct git_repo *repo, const void *sign) {
     struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (repo->packes, sign, rdt_find__byte_string);
     if (findret == NULL) return NULL;
 
     return __gitpack_obj_get__common (repo, findret);
 }
 
-struct gitobj *__gitpack_obj_get__char_string (struct git_repo *repo, const char *sign) {
+struct gitobj *__gitpack_getobj__charstring (struct git_repo *repo, const char *sign) {
     struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (repo->packes, (const void *) sign, rdt_find__char_string);
     if (findret == NULL) return NULL;
 

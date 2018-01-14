@@ -4,7 +4,7 @@
 #include <string.h>
 #include <malloc.h>
 
-struct git_person_log *__transfer_person_log (const char *ch) {
+struct gitperson *__transfer_person_log (const char *ch) {
         char *fields[4];
         register int i;
         for (i = 0; ch && i < 4; i++) {
@@ -24,7 +24,7 @@ struct git_person_log *__transfer_person_log (const char *ch) {
             return NULL;
         }
 
-        struct git_person_log *ret = (struct git_person_log *) malloc (sizeof (*ret));
+        struct gitperson *ret = (struct gitperson *) malloc (sizeof (*ret));
         ret->name = fields[0];
         ret->mail = fields[1];
         char *ep;
@@ -40,8 +40,8 @@ struct git_person_log *__transfer_person_log (const char *ch) {
         return ret;
 }
 
-struct git_obj_commit *__git_obj_transfer_commit (char *body, size_t size) {
-    struct git_obj_commit *ret = (struct git_obj_commit *) malloc (sizeof (*ret));
+struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size) {
+    struct gitobj_commit *ret = (struct gitobj_commit *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
         DBG_LOG (DBG_ERROR, "git_obj_get_commit: have not enough free memory");
@@ -69,32 +69,32 @@ struct git_obj_commit *__git_obj_transfer_commit (char *body, size_t size) {
             ret->tree_sign = ch;
         }
         else if (strcmp (ch, "author") == 0) {
-            struct git_person_log *author = __transfer_person_log (space_ptr + 1);
+            struct gitperson *author = __transfer_person_log (space_ptr + 1);
             if (author == NULL) {
                 // cannnot transfer author
                 DBG_LOG (DBG_ERROR, "git_obj_get_commit: author format error");
-                __git_obj_commit_dispose (ret);
+                __gitobj_commit_dispose (ret);
                 return NULL;
             }
             ret->author = author;
         }
         else if (strcmp (ch, "committer") == 0) {
-            struct git_person_log *committer = __transfer_person_log (space_ptr + 1);
+            struct gitperson *committer = __transfer_person_log (space_ptr + 1);
             if (committer == NULL) {
                 // cannnot transfer committer
                 DBG_LOG (DBG_ERROR, "git_obj_get_commit: committer format error");
-                __git_obj_commit_dispose (ret);
+                __gitobj_commit_dispose (ret);
                 return NULL;
             }
             ret->committer = committer;
         }
         else if (strcmp (ch, "parent") == 0) {
             ch = space_ptr + 1;
-            struct git_obj_commit_parent *parent = (struct git_obj_commit_parent *) malloc (sizeof (*parent));
+            struct gitobj_commit_patent *parent = (struct gitobj_commit_patent *) malloc (sizeof (*parent));
             if (parent == NULL) {
                 // not enough free memory
                 DBG_LOG (DBG_ERROR, "git_obj_get_commit: not enough free memory");
-                __git_obj_commit_dispose (ret);
+                __gitobj_commit_dispose (ret);
                 return NULL;
             }
             parent->sign = ch;
@@ -114,7 +114,7 @@ struct git_obj_commit *__git_obj_transfer_commit (char *body, size_t size) {
     return ret;
 }
 
-void __git_obj_commit_dispose (struct git_obj_commit *obj) {
+void __gitobj_commit_dispose (struct gitobj_commit *obj) {
     if (obj == NULL) {
         return ;
     }
@@ -127,7 +127,7 @@ void __git_obj_commit_dispose (struct git_obj_commit *obj) {
     }
     if (obj->parent_head != NULL) {
         while (obj->parent_head) {
-            struct git_obj_commit_parent *next = obj->parent_head->next;
+            struct gitobj_commit_patent *next = obj->parent_head->next;
             free (obj->parent_head);
             obj->parent_head = next;
         }
@@ -136,14 +136,14 @@ void __git_obj_commit_dispose (struct git_obj_commit *obj) {
     free (obj);
 }
 
-struct git_obj_commit *git_obj_get_commit (struct gitobj *obj) {
+struct gitobj_commit *git_obj_get_commit (struct gitobj *obj) {
     if (obj == NULL) {
         DBG_LOG (DBG_ERROR, "git_obj_get_commit: object is null");
         return NULL;
     }
 
     if (obj->type == GIT_OBJ_TYPE_COMMIT) {
-        return (struct git_obj_commit *) obj->ptr;
+        return (struct gitobj_commit *) obj->ptr;
     }
     else {
         DBG_LOG (DBG_ERROR, "git_obj_get_commit: object's type error");
@@ -151,53 +151,53 @@ struct git_obj_commit *git_obj_get_commit (struct gitobj *obj) {
     }
 }
 
-char *git_obj_commit_tree_sign (struct git_obj_commit *commit_obj) {
+char *gitobj_commit_treesign (struct gitobj_commit *commit_obj) {
     if (commit_obj == NULL) {
-        DBG_LOG (DBG_ERROR, "git_obj_commit_tree_sign: commit object is null");
+        DBG_LOG (DBG_ERROR, "gitobj_commit_treesign: commit object is null");
         return NULL;
     }
     return commit_obj->tree_sign;
 }
 
-struct git_person_log *git_obj_commit_author (struct git_obj_commit *commit_obj) {
+struct gitperson *gitobj_commit_author (struct gitobj_commit *commit_obj) {
     if (commit_obj == NULL) {
-        DBG_LOG (DBG_ERROR, "git_obj_commit_author: commit object is null");
+        DBG_LOG (DBG_ERROR, "gitobj_commit_author: commit object is null");
         return NULL;
     }
     return commit_obj->author;
 }
 
-struct git_person_log *git_obj_commit_committer (struct git_obj_commit *commit_obj) {
+struct gitperson *gitobj_commit_committer (struct gitobj_commit *commit_obj) {
     if (commit_obj == NULL) {
-        DBG_LOG (DBG_ERROR, "git_obj_commit_committer: commit object is null");
+        DBG_LOG (DBG_ERROR, "gitobj_commit_committer: commit object is null");
         return NULL;
     }
     return commit_obj->committer;
 }
 
-char *git_obj_commit_message (struct git_obj_commit *commit_obj) {
+char *gitobj_commit_message (struct gitobj_commit *commit_obj) {
     if (commit_obj == NULL) {
-        DBG_LOG (DBG_ERROR, "git_obj_commit_message: commit object is null");
+        DBG_LOG (DBG_ERROR, "gitobj_commit_message: commit object is null");
         return NULL;
     }
     return commit_obj->message;
 }
 
-void git_obj_commit_parent_reset (struct git_obj_commit *commit_obj) {
+void gitobj_commit_patent_reset (struct gitobj_commit *commit_obj) {
     if (commit_obj == NULL) {
-        DBG_LOG (DBG_ERROR, "git_obj_commit_parent_reset: commit object is null");
+        DBG_LOG (DBG_ERROR, "gitobj_commit_patent_reset: commit object is null");
         return;
     }
     commit_obj->parent_cursor = commit_obj->parent_head;
 }
 
-int git_obj_commit_parent_move_next (struct git_obj_commit *commit_obj) {
+int gitobj_commit_patent_move_next (struct gitobj_commit *commit_obj) {
     if (commit_obj == NULL) {
-        DBG_LOG (DBG_ERROR, "git_obj_commit_parent_move_next: commit object is null");
+        DBG_LOG (DBG_ERROR, "gitobj_commit_patent_move_next: commit object is null");
         return -1;
     }
     if (commit_obj->parent_cursor == NULL) {
-        DBG_LOG (DBG_ERROR, "git_obj_commit_parent_move_next: commit object's parent cursor is null");
+        DBG_LOG (DBG_ERROR, "gitobj_commit_patent_move_next: commit object's parent cursor is null");
         return -2;
     }
 
@@ -205,47 +205,47 @@ int git_obj_commit_parent_move_next (struct git_obj_commit *commit_obj) {
     return commit_obj->parent_cursor != NULL ? 0 : -3;
 }
 
-struct git_obj_commit_parent *git_obj_commit_parent_current (struct git_obj_commit *commit_obj) {
+struct gitobj_commit_patent *gitobj_commit_patent_current (struct gitobj_commit *commit_obj) {
     if (commit_obj == NULL) {
-        DBG_LOG (DBG_ERROR, "git_obj_commit_parent_current: commit object is null");
+        DBG_LOG (DBG_ERROR, "gitobj_commit_patent_current: commit object is null");
         return NULL;
     }
     return commit_obj->parent_cursor;
 }
 
-char *git_obj_commit_parent_sign (struct git_obj_commit_parent *commit_parent_obj) {
+char *gitobj_commit_patent_sign (struct gitobj_commit_patent *commit_parent_obj) {
     if (commit_parent_obj == NULL) {
-        DBG_LOG (DBG_ERROR, "git_obj_commit_parent_sign: commit's parent object is null");
+        DBG_LOG (DBG_ERROR, "gitobj_commit_patent_sign: commit's parent object is null");
         return NULL;
     }
     return commit_parent_obj->sign;
 }
 
-char *git_person_log_name (struct git_person_log *person_log) {
+char *gitperson_name (struct gitperson *person_log) {
     if (person_log == NULL) {
-        DBG_LOG (DBG_ERROR, "git_person_log_name: person log object is null");
+        DBG_LOG (DBG_ERROR, "gitperson_name: person log object is null");
         return NULL;
     }
     return person_log->name;
 }
 
-char *git_person_log_mail (struct git_person_log *person_log) {
+char *gitperson_mail (struct gitperson *person_log) {
     if (person_log == NULL) {
-        DBG_LOG (DBG_ERROR, "git_person_log_mail: person log object is null");
+        DBG_LOG (DBG_ERROR, "gitperson_mail: person log object is null");
         return NULL;
     }
     return person_log->mail;
 }
 
-unsigned long git_person_log_timestamp (struct git_person_log *person_log) {
+unsigned long gitperson_timestamp (struct gitperson *person_log) {
     if (person_log == NULL) {
-        DBG_LOG (DBG_ERROR, "git_person_log_timestamp: person log object is null");
+        DBG_LOG (DBG_ERROR, "gitperson_timestamp: person log object is null");
         return 0;
     }
     return person_log->timestamp;
 }
 
-char *git_person_timezone (struct git_person_log *person_log) {
+char *git_person_timezone (struct gitperson *person_log) {
     if (person_log == NULL) {
         DBG_LOG (DBG_ERROR, "git_person_timezone: person log object is null");
         return NULL;

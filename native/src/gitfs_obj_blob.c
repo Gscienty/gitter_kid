@@ -15,6 +15,24 @@ struct gitobj_blob *__git_obj_transfer_blob (char *body, size_t size) {
     return ret;
 }
 
+struct gitobj *__gitpack_item_transfer_blob (struct __gitpack_item item) {
+    struct gitobj *ret = (struct gitobj *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_item_transfer_blob: have not enough free memory");
+        return NULL;
+    }
+
+    ret->buf = item.buf.buf;
+    ret->path = NULL;
+    ret->sign = NULL;
+    ret->type = GIT_OBJ_TYPE_BLOB;
+    ret->size = item.buf.len;
+    ret->body = item.buf.buf;
+    ret->ptr = __git_obj_transfer_blob (item.buf.buf, item.buf.len);
+
+    return ret;
+}
+
 struct gitobj_blob *get_gitobj_blob (struct gitobj *obj) {
     if (obj == NULL) {
         return NULL;

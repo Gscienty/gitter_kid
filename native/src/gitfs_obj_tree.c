@@ -63,6 +63,24 @@ struct gitobj_tree *__git_obj_transfer_tree (char *body, size_t size) {
     return ret;
 }
 
+struct gitobj *__gitpack_item_transfer_tree (struct __gitpack_item item) {
+    struct gitobj *ret = (struct gitobj *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_item_transfer_tree: have not enough free memory");
+        return NULL;
+    }
+
+    ret->buf = item.buf.buf;
+    ret->path = NULL;
+    ret->sign = NULL;
+    ret->type = GIT_OBJ_TYPE_TREE;
+    ret->size = item.buf.len;
+    ret->body = item.buf.buf;
+    ret->ptr = __git_obj_transfer_tree (item.buf.buf, item.buf.len);
+
+    return ret;
+}
+
 void __gitobj_tree_dispose (struct gitobj_tree *obj) {
     if (obj == NULL) {
         return ;

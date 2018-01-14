@@ -138,6 +138,15 @@ struct __gitpack {
     struct __gitpack *next;
 };
 
+struct __gitpack_item {
+    struct __buf buf;
+    unsigned char type;
+
+    void *base_sign;
+    size_t negative_off;
+    size_t off;
+};
+
 struct __gitpack_collection {
     struct __gitpack *head;
     struct __gitpack *tail;
@@ -241,10 +250,13 @@ G_KID_EXTERN struct gitobj_tree *get_gitobj_tree (struct gitobj *obj);
 
 
 struct gitobj_blob *__git_obj_transfer_blob (char *body, size_t size);
+struct gitobj *__gitpack_item_transfer_blob (struct __gitpack_item item);
 void __gitobj_blob_dispose (struct gitobj_blob *obj);
 struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size);
+struct gitobj *__gitpack_item_transfer_commit (struct __gitpack_item item);
 void __gitobj_commit_dispose (struct gitobj_commit *obj);
 struct gitobj_tree *__git_obj_transfer_tree (char *body, size_t size);
+struct gitobj *__gitpack_item_transfer_tree (struct __gitpack_item item);
 void __gitobj_tree_dispose (struct gitobj_tree *obj);
 
 

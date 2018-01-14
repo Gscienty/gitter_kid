@@ -44,7 +44,7 @@ struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size) {
     struct gitobj_commit *ret = (struct gitobj_commit *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
-        DBG_LOG (DBG_ERROR, "git_obj_get_commit: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "get_gitobj_commit: have not enough free memory");
         return NULL;
     }
     ret->parent_head = ret->parent_tail = ret->parent_cursor = NULL;
@@ -72,7 +72,7 @@ struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size) {
             struct gitperson *author = __transfer_person_log (space_ptr + 1);
             if (author == NULL) {
                 // cannnot transfer author
-                DBG_LOG (DBG_ERROR, "git_obj_get_commit: author format error");
+                DBG_LOG (DBG_ERROR, "get_gitobj_commit: author format error");
                 __gitobj_commit_dispose (ret);
                 return NULL;
             }
@@ -82,7 +82,7 @@ struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size) {
             struct gitperson *committer = __transfer_person_log (space_ptr + 1);
             if (committer == NULL) {
                 // cannnot transfer committer
-                DBG_LOG (DBG_ERROR, "git_obj_get_commit: committer format error");
+                DBG_LOG (DBG_ERROR, "get_gitobj_commit: committer format error");
                 __gitobj_commit_dispose (ret);
                 return NULL;
             }
@@ -93,7 +93,7 @@ struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size) {
             struct gitobj_commit_patent *parent = (struct gitobj_commit_patent *) malloc (sizeof (*parent));
             if (parent == NULL) {
                 // not enough free memory
-                DBG_LOG (DBG_ERROR, "git_obj_get_commit: not enough free memory");
+                DBG_LOG (DBG_ERROR, "get_gitobj_commit: not enough free memory");
                 __gitobj_commit_dispose (ret);
                 return NULL;
             }
@@ -136,9 +136,9 @@ void __gitobj_commit_dispose (struct gitobj_commit *obj) {
     free (obj);
 }
 
-struct gitobj_commit *git_obj_get_commit (struct gitobj *obj) {
+struct gitobj_commit *get_gitobj_commit (struct gitobj *obj) {
     if (obj == NULL) {
-        DBG_LOG (DBG_ERROR, "git_obj_get_commit: object is null");
+        DBG_LOG (DBG_ERROR, "get_gitobj_commit: object is null");
         return NULL;
     }
 
@@ -146,7 +146,7 @@ struct gitobj_commit *git_obj_get_commit (struct gitobj *obj) {
         return (struct gitobj_commit *) obj->ptr;
     }
     else {
-        DBG_LOG (DBG_ERROR, "git_obj_get_commit: object's type error");
+        DBG_LOG (DBG_ERROR, "get_gitobj_commit: object's type error");
         return NULL;
     }
 }
@@ -191,13 +191,13 @@ void gitobj_commit_patent_reset (struct gitobj_commit *commit_obj) {
     commit_obj->parent_cursor = commit_obj->parent_head;
 }
 
-int gitobj_commit_patent_move_next (struct gitobj_commit *commit_obj) {
+int gitobj_commit_patent_movenext (struct gitobj_commit *commit_obj) {
     if (commit_obj == NULL) {
-        DBG_LOG (DBG_ERROR, "gitobj_commit_patent_move_next: commit object is null");
+        DBG_LOG (DBG_ERROR, "gitobj_commit_patent_movenext: commit object is null");
         return -1;
     }
     if (commit_obj->parent_cursor == NULL) {
-        DBG_LOG (DBG_ERROR, "gitobj_commit_patent_move_next: commit object's parent cursor is null");
+        DBG_LOG (DBG_ERROR, "gitobj_commit_patent_movenext: commit object's parent cursor is null");
         return -2;
     }
 

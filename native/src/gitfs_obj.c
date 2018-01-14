@@ -118,7 +118,7 @@ struct __buf *__gitobj_get (const char *path) {
 }
 
 struct __gitobj_header {
-    enum git_obj_type type;
+    enum gitobj_type type;
     int length;
 };
 
@@ -166,7 +166,7 @@ struct __buf *__gitobj_get_content (const char *path) {
     struct __buf *deflated_obj = __gitobj_get (path);
     if (deflated_obj == NULL) {
         // cannot get obj file. reason maybe have not enough memory or the object file not exist.
-        DBG_LOG (DBG_ERROR, "git_obj_get: cannot get obj file");
+        DBG_LOG (DBG_ERROR, "get_gitobj: cannot get obj file");
         return NULL;
     }
     // inflate origin object file's content
@@ -177,7 +177,7 @@ struct __buf *__gitobj_get_content (const char *path) {
     if (inflated_buffer == NULL) {
         // cannot inflate buffer. reson maybe have not enough memory
         // or occur a error when inflating this buffer.
-        DBG_LOG (DBG_ERROR, "git_obj_get: cannot inflate buffer");
+        DBG_LOG (DBG_ERROR, "get_gitobj: cannot inflate buffer");
         return NULL;
     }
 }
@@ -186,7 +186,7 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
     struct gitobj *ret = (struct gitobj *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
-        DBG_LOG (DBG_ERROR, "git_obj_get: not enough free memory");
+        DBG_LOG (DBG_ERROR, "get_gitobj: not enough free memory");
         return NULL;
     }
 
@@ -197,7 +197,7 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
     struct __gitobj_header *obj_header = __gitobj_header_get (inflated_buffer->buf);
     if (obj_header == NULL || obj_header->type == GIT_OBJ_TYPE_UNKNOW) {
         // cannot recognize object header
-        DBG_LOG (DBG_ERROR, "git_obj_get: cannot recognize object header");
+        DBG_LOG (DBG_ERROR, "get_gitobj: cannot recognize object header");
         free (ret);
         free (inflated_buffer->buf);
         free (inflated_buffer);
@@ -218,21 +218,21 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
 
     switch (ret->type) {
         case GIT_OBJ_TYPE_BLOB:
-            DBG_LOG (DBG_INFO, "git_obj_get: transfer to blob");
+            DBG_LOG (DBG_INFO, "get_gitobj: transfer to blob");
             ret->ptr = (void *) __git_obj_transfer_blob (ret->body, ret->size);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
             break;
         case GIT_OBJ_TYPE_COMMIT:
-            DBG_LOG (DBG_INFO, "git_obj_get: transfer to commit");
+            DBG_LOG (DBG_INFO, "get_gitobj: transfer to commit");
             ret->ptr = (void *) __git_obj_transfer_commit (ret->body, ret->size);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
             break;
         case GIT_OBJ_TYPE_TREE:
-            DBG_LOG (DBG_INFO, "git_obj_get: transfer to tree");
+            DBG_LOG (DBG_INFO, "get_gitobj: transfer to tree");
             ret->ptr = (void *) __git_obj_transfer_tree (ret->body, ret->size);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
@@ -240,7 +240,7 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
             break;
         default:
             obj_type_occur_error:
-            DBG_LOG (DBG_ERROR, "git_obj_get: cannot transfer special object");
+            DBG_LOG (DBG_ERROR, "get_gitobj: cannot transfer special object");
             // occur error.
             free (ret->buf);
             free (ret->path);
@@ -251,7 +251,7 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
     return ret;
 }
 
-struct gitobj *git_obj_get (struct git_repo *repo, const char* signture) {
+struct gitobj *get_gitobj (struct git_repo *repo, const char* signture) {
     if (repo == NULL) {
         return NULL;
     }
@@ -284,11 +284,11 @@ struct gitobj *git_obj_get (struct git_repo *repo, const char* signture) {
     }
 }
 
-enum git_obj_type git_obj_type (struct gitobj *obj) {
+enum gitobj_type get_gitobj_type (struct gitobj *obj) {
     return obj->type;
 }
 
-void git_obj_dispose (struct gitobj *obj) {
+void dispose_gitobj (struct gitobj *obj) {
     if (obj == NULL) {
         return ;
     }

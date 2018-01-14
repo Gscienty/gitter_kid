@@ -252,7 +252,7 @@ char *get_current_group_member_name (struct group_member *grp_mem) {
     }
 }
 
-int group_member_move_next (struct group_member *grp_mem) {
+int group_member_movenext (struct group_member *grp_mem) {
     if (grp_mem->base[grp_mem->cursor] == NULL) {
         // cursor point to end of list
         return -1;

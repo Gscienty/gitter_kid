@@ -120,13 +120,13 @@ void git_branches_reset (struct git_branches *branches) {
     branches->cursor = branches->head;
 }
 
-int git_branches_move_next (struct git_branches *branches) {
+int git_branches_movenext (struct git_branches *branches) {
     if (branches == NULL) {
-        DBG_LOG (DBG_ERROR, "git_branches_move_next: branches is null");
+        DBG_LOG (DBG_ERROR, "git_branches_movenext: branches is null");
         return -1;
     }
     if (branches->cursor == NULL) {
-        DBG_LOG (DBG_INFO, "git_branches_move_next: branches's cursor is null");
+        DBG_LOG (DBG_INFO, "git_branches_movenext: branches's cursor is null");
         return -1;
     }
 

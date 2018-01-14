@@ -95,9 +95,9 @@ void git_market_dispose (struct git_market *market) {
     free (market);
 }
 
-int git_market_cursor_move_next (struct git_market *market) {
+int git_market_cursor_movenext (struct git_market *market) {
     if (market == NULL) {
-        DBG_LOG (DBG_ERROR, "git_market_cursor_move_next: market is null");
+        DBG_LOG (DBG_ERROR, "git_market_cursor_movenext: market is null");
         return -1;
     }
     if (market->cursor == NULL) {

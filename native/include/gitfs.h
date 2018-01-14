@@ -51,7 +51,7 @@ G_KID_EXTERN void git_market_dispose (struct git_market *market);
 // 将仓库市场的游标移动指向到下一个仓库
 // param <market>: 仓库市场指针
 // return: 成功移动到下一个仓库时，返回0，否则返回-1
-G_KID_EXTERN int git_market_cursor_move_next (struct git_market *market);
+G_KID_EXTERN int git_market_cursor_movenext (struct git_market *market);
 
 // 获取仓库市场的游标当前指向的仓库
 // param <market>: 仓库市场指针
@@ -89,7 +89,7 @@ struct git_branches {
 G_KID_EXTERN struct git_branches *git_branches_get (struct git_repo *repo);
 G_KID_EXTERN void git_branches_dispose (struct git_branches *branches);
 G_KID_EXTERN void git_branches_reset (struct git_branches *branches);
-G_KID_EXTERN int git_branches_move_next (struct git_branches *branches);
+G_KID_EXTERN int git_branches_movenext (struct git_branches *branches);
 G_KID_EXTERN struct git_branch *git_branches_get_current (struct git_branches *branches);
 G_KID_EXTERN char *git_branch_get_name (struct git_branch *branch);
 G_KID_EXTERN char *git_branch_get_last_commit_sign (struct git_branch *branch);
@@ -103,7 +103,7 @@ struct __buf {
 struct __buf *__inflate (struct __buf *zip_buffer, int inflated_buffer_len);
 
 // git object 类型
-enum git_obj_type {
+enum gitobj_type {
     GIT_OBJ_TYPE_UNKNOW,    // 未知类型
     GIT_OBJ_TYPE_BLOB,      // blob
     GIT_OBJ_TYPE_COMMIT,    // commit
@@ -118,7 +118,7 @@ struct gitobj {
     void *buf;
     char *path;
     char *sign;
-    enum git_obj_type type;
+    enum gitobj_type type;
     size_t size;
     char *body;
     void *ptr;
@@ -212,32 +212,32 @@ struct gitobj_tree {
 // param <repo>: 仓库指针
 // param <signture>: git object 签名
 // return: git object
-G_KID_EXTERN struct gitobj *git_obj_get (struct git_repo *repo, const char* signture);
+G_KID_EXTERN struct gitobj *get_gitobj (struct git_repo *repo, const char* signture);
 
 // 析构git object
 // param <obj>: git object
-G_KID_EXTERN void git_obj_dispose (struct gitobj *obj);
+G_KID_EXTERN void dispose_gitobj (struct gitobj *obj);
 
 // 获取当前git object 的类型
 // param <obj>: git object
 // return: 0-Unknow | 1-blob | 2-commit | 3-tree
-G_KID_EXTERN enum git_obj_type git_obj_type (struct gitobj *obj);
+G_KID_EXTERN enum gitobj_type get_gitobj_type (struct gitobj *obj);
 
 
 // 通过 git object 获取 blob
 // param <obj>: git object
 // return: blob object
-G_KID_EXTERN struct gitobj_blob *git_obj_get_blob (struct gitobj *obj);
+G_KID_EXTERN struct gitobj_blob *get_gitobj_blob (struct gitobj *obj);
 
 // 通过 git object 获取 commit
 // param <obj>: git object
 // return: commit object
-G_KID_EXTERN struct gitobj_commit *git_obj_get_commit (struct gitobj *obj);
+G_KID_EXTERN struct gitobj_commit *get_gitobj_commit (struct gitobj *obj);
 
 // 通过 git object 获取 tree
 // param <obj>: git object
 // return: tree object
-G_KID_EXTERN struct gitobj_tree *git_obj_get_tree (struct gitobj *obj);
+G_KID_EXTERN struct gitobj_tree *get_gitobj_tree (struct gitobj *obj);
 
 
 struct gitobj_blob *__git_obj_transfer_blob (char *body, size_t size);
@@ -286,7 +286,7 @@ G_KID_EXTERN void gitobj_commit_patent_reset (struct gitobj_commit *commit_obj);
 // 将 commit 的上游 commit 签名列表的游标移动到下一签名
 // param <commit_obj>: commit object
 // return: 成功移动到下一个签名时，返回0，否则返回-1
-G_KID_EXTERN int gitobj_commit_patent_move_next (struct gitobj_commit *commit_obj);
+G_KID_EXTERN int gitobj_commit_patent_movenext (struct gitobj_commit *commit_obj);
 
 // 获取当前 commit 的上游 commit 签名列表游标所指向的上游 commit 签名结构体
 // param <commit_obj>: commit object
@@ -327,7 +327,7 @@ G_KID_EXTERN void gitobj_tree_reset (struct gitobj_tree *tree_obj);
 // 移动 tree 游标指向下一个item
 // param <tree_obj>: tree object
 // return: 成功移动到下一个item时，返回0，否则返回-1
-G_KID_EXTERN int gitobj_tree_move_next (struct gitobj_tree *tree_obj);
+G_KID_EXTERN int gitobj_tree_movenext (struct gitobj_tree *tree_obj);
 
 // 获取当前 tree 游标所指向的 item
 // param <tree_obj>: tree object
@@ -348,5 +348,5 @@ G_KID_EXTERN char *gitobj_treeitem_name (struct gitobj_treeitem *tree_item_obj);
 // 获取 tree item 中的类型
 // param <tree_item_obj>: tree item object
 // return: item 的类型
-G_KID_EXTERN enum git_obj_type gitobj_treeitem_type (struct gitobj_treeitem *tree_item_obj);
+G_KID_EXTERN enum gitobj_type gitobj_treeitem_type (struct gitobj_treeitem *tree_item_obj);
 #endif

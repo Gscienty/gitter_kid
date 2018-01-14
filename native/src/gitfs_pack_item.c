@@ -109,8 +109,8 @@ unsigned char __gitpack_file_readbyte(struct __gitpack_file *obj) {
     return buf[0];
 }
 
-struct git_obj *__gitpack_wrap_obj (void *base, size_t len) {
-    struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
+struct gitobj *__gitpack_wrap_obj (void *base, size_t len) {
+    struct gitobj *ret = (struct gitobj *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_wrap_obj: have not enough free memory");
         return NULL;
@@ -243,8 +243,8 @@ struct __gitpack_item *__gitpack_item_get (struct __gitpack_segment segment) {
     return NULL;
 }
 
-struct git_obj *__gitpack_item_transfer_commit (struct __gitpack_item item) {
-    struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
+struct gitobj *__gitpack_item_transfer_commit (struct __gitpack_item item) {
+    struct gitobj *ret = (struct gitobj *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_item_transfer_commit: have not enough free memory");
         return NULL;
@@ -261,8 +261,8 @@ struct git_obj *__gitpack_item_transfer_commit (struct __gitpack_item item) {
     return ret;
 }
 
-struct git_obj *__gitpack_item_transfer_blob (struct __gitpack_item item) {
-    struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
+struct gitobj *__gitpack_item_transfer_blob (struct __gitpack_item item) {
+    struct gitobj *ret = (struct gitobj *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_item_transfer_blob: have not enough free memory");
         return NULL;
@@ -279,8 +279,8 @@ struct git_obj *__gitpack_item_transfer_blob (struct __gitpack_item item) {
     return ret;
 }
 
-struct git_obj *__gitpack_item_transfer_tree (struct __gitpack_item item) {
-    struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
+struct gitobj *__gitpack_item_transfer_tree (struct __gitpack_item item) {
+    struct gitobj *ret = (struct gitobj *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_item_transfer_tree: have not enough free memory");
         return NULL;
@@ -297,7 +297,7 @@ struct git_obj *__gitpack_item_transfer_tree (struct __gitpack_item item) {
     return ret;
 }
 
-struct git_obj *__gitpack_obj_get__common (struct git_repo *repo, struct __gitpack_item_findret *findret) {
+struct gitobj *__gitpack_obj_get__common (struct git_repo *repo, struct __gitpack_item_findret *findret) {
     struct __gitpack_file *packfile = __gitpack_fileopen (findret->pack);
     if (packfile == NULL) return NULL;
     struct __gitpack_segment *segment = __gitpack_segment_get (packfile, findret->node->off, findret->node->len);
@@ -311,14 +311,14 @@ struct git_obj *__gitpack_obj_get__common (struct git_repo *repo, struct __gitpa
     }
 }
 
-struct git_obj *__gitpack_obj_get__byte_string (struct git_repo *repo, const void *sign) {
+struct gitobj *__gitpack_obj_get__byte_string (struct git_repo *repo, const void *sign) {
     struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (repo->packes, sign, rdt_find__byte_string);
     if (findret == NULL) return NULL;
 
     return __gitpack_obj_get__common (repo, findret);
 }
 
-struct git_obj *__gitpack_obj_get__char_string (struct git_repo *repo, const char *sign) {
+struct gitobj *__gitpack_obj_get__char_string (struct git_repo *repo, const char *sign) {
     struct __gitpack_item_findret *findret = __gitpack_collection_rdtnode_find (repo->packes, (const void *) sign, rdt_find__char_string);
     if (findret == NULL) return NULL;
 

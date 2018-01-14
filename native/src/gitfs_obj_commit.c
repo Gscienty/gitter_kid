@@ -136,7 +136,7 @@ void __git_obj_commit_dispose (struct git_obj_commit *obj) {
     free (obj);
 }
 
-struct git_obj_commit *git_obj_get_commit (struct git_obj *obj) {
+struct git_obj_commit *git_obj_get_commit (struct gitobj *obj) {
     if (obj == NULL) {
         DBG_LOG (DBG_ERROR, "git_obj_get_commit: object is null");
         return NULL;

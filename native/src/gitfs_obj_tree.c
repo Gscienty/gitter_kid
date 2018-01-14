@@ -79,7 +79,7 @@ void __git_obj_tree_dispose (struct git_obj_tree *obj) {
     free (obj);
 }
 
-struct git_obj_tree *git_obj_get_tree (struct git_obj *obj) {
+struct git_obj_tree *git_obj_get_tree (struct gitobj *obj) {
     if (obj == NULL) {
         return NULL;
     }

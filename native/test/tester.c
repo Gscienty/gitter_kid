@@ -63,7 +63,7 @@ int test_market_init () {
         struct git_repo *repo = git_market_cursor_current (market);
         
         if (strcmp (git_repo_name (repo), "repo") == 0) {
-            struct git_obj *obj = git_obj_get (repo, "ce013625030ba8dba906f756967f9e9ca394464a");
+            struct gitobj *obj = git_obj_get (repo, "ce013625030ba8dba906f756967f9e9ca394464a");
         }
     } while (git_market_cursor_move_next (market) == 0);
     return 0;
@@ -112,7 +112,7 @@ int test_commits_parent () {
         struct git_repo *repo = git_market_cursor_current (market);
         
         if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
-            struct git_obj *obj = git_obj_get (repo, "54415a12532e7e77dfc4037962e870abe72e0300");
+            struct gitobj *obj = git_obj_get (repo, "54415a12532e7e77dfc4037962e870abe72e0300");
             struct git_obj_commit *commit = git_obj_get_commit (obj);
 
             git_obj_commit_parent_reset (commit);
@@ -138,7 +138,7 @@ int test_pack () {
             // printf ("TYPE: %d\n", git_obj_get (repo, "1aea93543e697af2f00499c53116bbb3cc8ffcbf")->type);
             // printf ("TYPE: %d\n", git_obj_get (repo, "ec4735f69b5d60b91d95634f511200ad37486ba4")->type);
             // printf ("TYPE: %d\n", git_obj_get (repo, "e87a0306f7cf5ef89dec674bc2ecaba08ef80eb6")->type);
-            printf ("TYPE: %d\n", git_obj_get (repo, "1d701d1ac0f0febeb562beedc4f093f27ab2e1bf"));
+            git_obj_get (repo, "1d701d1ac0f0febeb562beedc4f093f27ab2e1bf");
             //struct __gitpack_collection *pack_coll = __gitpack_collection_get (repo);
 
             //printf ("%d\n", __gitpack_obj_get__char_string (pack_coll, "3b846780303b8994088f884c3dfed48c04e6a2b0"));

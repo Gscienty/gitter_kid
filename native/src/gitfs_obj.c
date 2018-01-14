@@ -182,8 +182,8 @@ struct __buf *__gitobj_get_content (const char *path) {
     }
 }
 
-struct git_obj *__gitobj_loose_get (const char *obj_path, const char *signture) {
-    struct git_obj *ret = (struct git_obj *) malloc (sizeof (*ret));
+struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
+    struct gitobj *ret = (struct gitobj *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
         DBG_LOG (DBG_ERROR, "git_obj_get: not enough free memory");
@@ -251,7 +251,7 @@ struct git_obj *__gitobj_loose_get (const char *obj_path, const char *signture) 
     return ret;
 }
 
-struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
+struct gitobj *git_obj_get (struct git_repo *repo, const char* signture) {
     if (repo == NULL) {
         return NULL;
     }
@@ -278,17 +278,17 @@ struct git_obj *git_obj_get (struct git_repo *repo, const char* signture) {
     }
     else{
          // get obj by loose
-        struct git_obj *ret = __gitobj_loose_get (obj_path, signture);
+        struct gitobj *ret = __gitobj_loose_get (obj_path, signture);
         free (obj_path);
         return ret;
     }
 }
 
-enum git_obj_type git_obj_type (struct git_obj *obj) {
+enum git_obj_type git_obj_type (struct gitobj *obj) {
     return obj->type;
 }
 
-void git_obj_dispose (struct git_obj *obj) {
+void git_obj_dispose (struct gitobj *obj) {
     if (obj == NULL) {
         return ;
     }

@@ -13,38 +13,6 @@ int __access_file_exist (const char* filepath);
 int __access_chmod (const char* path, unsigned int mode);
 int __access_chown (const char* path, unsigned int owner, unsigned int group);
 
-struct __gitpack {
-    char *sign;
-    int count;
-
-    char *idx_path;
-    char *pack_path;
-
-    struct rdt *rd_tree;
-
-    struct __gitpack *prev;
-    struct __gitpack *next;
-};
-
-struct __gitpack_collection {
-    struct __gitpack *head;
-    struct __gitpack *tail;
-};
-
-
-// 仓库结构体
-struct git_repo {
-    char *path;                             // 仓库路径
-    char *name;                             // 仓库名称
-    struct __gitpack_collection *packes;    // 压缩包集合
-    struct git_repo *prev;                  // 下一个仓库
-    struct git_repo *next;                  // 上一个仓库
-};
-
-
-struct git_obj *__gitpack_obj_get__char_string (struct git_repo *repo, const char *sign);
-struct git_obj *__gitpack_obj_get__byte_string (struct git_repo *repo, const void *sign);
-struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo);
 
 // 仓库市场结构体
 struct git_market {
@@ -146,7 +114,7 @@ enum git_obj_type {
 };
 
 // git object 结构体
-struct git_obj {
+struct gitobj {
     void *buf;
     char *path;
     char *sign;
@@ -155,6 +123,40 @@ struct git_obj {
     char *body;
     void *ptr;
 };
+
+
+struct __gitpack {
+    char *sign;
+    int count;
+
+    char *idx_path;
+    char *pack_path;
+
+    struct rdt *rd_tree;
+
+    struct __gitpack *prev;
+    struct __gitpack *next;
+};
+
+struct __gitpack_collection {
+    struct __gitpack *head;
+    struct __gitpack *tail;
+};
+
+
+// 仓库结构体
+struct git_repo {
+    char *path;                             // 仓库路径
+    char *name;                             // 仓库名称
+    struct __gitpack_collection *packes;    // 压缩包集合
+    struct git_repo *prev;                  // 下一个仓库
+    struct git_repo *next;                  // 上一个仓库
+};
+
+
+struct gitobj *__gitpack_obj_get__char_string (struct git_repo *repo, const char *sign);
+struct gitobj *__gitpack_obj_get__byte_string (struct git_repo *repo, const void *sign);
+struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo);
 
 // blob 结构体
 struct git_obj_blob {
@@ -210,32 +212,32 @@ struct git_obj_tree {
 // param <repo>: 仓库指针
 // param <signture>: git object 签名
 // return: git object
-G_KID_EXTERN struct git_obj *git_obj_get (struct git_repo *repo, const char* signture);
+G_KID_EXTERN struct gitobj *git_obj_get (struct git_repo *repo, const char* signture);
 
 // 析构git object
 // param <obj>: git object
-G_KID_EXTERN void git_obj_dispose (struct git_obj *obj);
+G_KID_EXTERN void git_obj_dispose (struct gitobj *obj);
 
 // 获取当前git object 的类型
 // param <obj>: git object
 // return: 0-Unknow | 1-blob | 2-commit | 3-tree
-G_KID_EXTERN enum git_obj_type git_obj_type (struct git_obj *obj);
+G_KID_EXTERN enum git_obj_type git_obj_type (struct gitobj *obj);
 
 
 // 通过 git object 获取 blob
 // param <obj>: git object
 // return: blob object
-G_KID_EXTERN struct git_obj_blob *git_obj_get_blob (struct git_obj *obj);
+G_KID_EXTERN struct git_obj_blob *git_obj_get_blob (struct gitobj *obj);
 
 // 通过 git object 获取 commit
 // param <obj>: git object
 // return: commit object
-G_KID_EXTERN struct git_obj_commit *git_obj_get_commit (struct git_obj *obj);
+G_KID_EXTERN struct git_obj_commit *git_obj_get_commit (struct gitobj *obj);
 
 // 通过 git object 获取 tree
 // param <obj>: git object
 // return: tree object
-G_KID_EXTERN struct git_obj_tree *git_obj_get_tree (struct git_obj *obj);
+G_KID_EXTERN struct git_obj_tree *git_obj_get_tree (struct gitobj *obj);
 
 
 struct git_obj_blob *__git_obj_transfer_blob (char *body, size_t size);

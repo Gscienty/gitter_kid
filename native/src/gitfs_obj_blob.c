@@ -15,7 +15,7 @@ struct git_obj_blob *__git_obj_transfer_blob (char *body, size_t size) {
     return ret;
 }
 
-struct git_obj_blob *git_obj_get_blob (struct git_obj *obj) {
+struct git_obj_blob *git_obj_get_blob (struct gitobj *obj) {
     if (obj == NULL) {
         return NULL;
     }

@@ -177,10 +177,7 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
         while (*ptr & 0x80) {
             ptr++;
             nbytes++;
-            ret->negative_off = (ret->negative_off << 7) + (size_t) (*ptr & 0x7F);
-        }
-
-        if (nbytes >= 2) {
+            ret->negative_off = (ret->negative_off << 7) | (size_t) (*ptr & 0x7F);
             ret->negative_off += (1 << (7 * (nbytes - 1)));
         }
 
@@ -210,20 +207,44 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
     return NULL;
 }
 
+struct gitobj *__gitpack_refdelta_patch (struct __gitpack_file *packfile, struct __gitpack_item packitem) {
+    struct __gitpack_segment *segment = __gitpack_get_segment (packfile, packitem.off - packitem.negative_off, packitem.buf.len);
+    struct __gitpack_item *base_packitem = __gitpack_get_item (*segment);
+    __gitpack_dispose_segment (segment);
+
+    struct __buf *patched_buf = __gitpack_delta_patch (*base_packitem, packitem);
+
+    printf ("%s\n", patched_buf->buf);
+}
+
 struct gitobj *__gitpack_get_obj__common (struct git_repo *repo, struct __gitpack_item_findret *findret) {
     struct __gitpack_file *packfile = __gitpack_fileopen (findret->pack);
     if (packfile == NULL) return NULL;
     struct __gitpack_segment *segment = __gitpack_get_segment (packfile, findret->node->off, findret->node->len);
-    struct __gitpack_item *pack_item = __gitpack_get_item (*segment);
+    struct __gitpack_item *packitem = __gitpack_get_item (*segment);
     __gitpack_dispose_segment (segment);
 
-    switch (pack_item->type) {
-        case 0x01: return __gitpack_item_transfer_commit (*pack_item);
-        case 0x02: return __gitpack_item_transfer_tree (*pack_item);
-        case 0x03: return __gitpack_item_transfer_blob (*pack_item);
+    struct gitobj *ret = NULL;
+    switch (packitem->type) {
+        case 0x01:
+            ret = __gitpack_item_transfer_commit (*packitem);
+            break;
+        case 0x02:
+            ret = __gitpack_item_transfer_tree (*packitem);
+            break;
+        case 0x03:
+            ret = __gitpack_item_transfer_blob (*packitem);
+            break;
+
+        case 0x06:
+            __gitpack_refdelta_patch (packfile, *packitem);
+            break;
+
     }
 
     __gitpack_dispose_file (packfile);
+    
+    return ret;
 }
 
 struct gitobj *__gitpack_getobj__bytestring (struct git_repo *repo, const void *sign) {

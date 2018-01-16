@@ -4,108 +4,120 @@
 #include <dirent.h>
 #include <stdio.h>
 
-struct git_branches *git_branches_get (struct git_repo *repo) {
-    if (repo == NULL) {
-        DBG_LOG (DBG_ERROR, "git_branches_get: repo is null");
+DIR *__gitrepo_get_branchesdir (const char *repopath, const size_t len) {
+    char *refs_path = (char *) malloc (sizeof (char) * (len + 12));
+    if (refs_path == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitrepo_get_branchesdir: have not enough free memory");
         return NULL;
     }
-    struct git_branches *branches = (struct git_branches *) malloc (sizeof (*branches));
+    strcpy (refs_path, repopath);
+    strcpy (refs_path + len, "refs/heads/");
+    
+    DIR *ret = opendir (refs_path);
+    free (refs_path);
+
+    return ret;
+}
+
+char *__gitbranch_get_branchpath (const char *repopath, size_t repopath_len, const char *branchname, size_t branchname_len) {
+    
+    char *ret = (char *) malloc (sizeof (char) * (repopath_len + 12 + branchname_len));
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitbranch_get_branchpath: have not enough free memory");
+        return NULL;
+    }
+    
+    strcpy (ret, repopath);
+    strcpy (ret + repopath_len, "refs/heads/");
+    strcpy (ret + repopath_len + 11, branchname);
+
+    return ret;
+}
+
+void __gitbranches_append (struct gitbranches *branches, struct gitbranch *branch) {
+    if (branches == NULL || branch == NULL) return;
+    
+    branch->prev = branches->tail;
+    branch->next = NULL;
+    if (branches->head == NULL) {
+        branches->head = branch;
+    }
+    if (branches->tail) {
+        branches->tail->next = branch;
+    }
+    branches->tail = branch;
+}
+
+struct gitbranches *gitrepo_get_branches (struct git_repo *repo) {
+    if (repo == NULL) {
+        DBG_LOG (DBG_ERROR, "gitrepo_get_branches: repo is null");
+        return NULL;
+    }
+
+    size_t repopath_len = sizeof (repo->path);
+
+    // get branches's path
+    DIR *dir = __gitrepo_get_branchesdir (repo->path, repopath_len);
+    if (dir == NULL) {
+        DBG_LOG (DBG_ERROR, "gitrepo_get_branches: cannnot open dir");
+        return NULL;
+    }
+
+    // init branches collection
+    struct gitbranches *branches = (struct gitbranches *) malloc (sizeof (*branches));
     if (branches == NULL) {
-        DBG_LOG (DBG_ERROR, "git_branches_get: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "gitrepo_get_branches: have not enough free memory");
         return NULL;
     }
     branches->head = branches->tail = branches->cursor = NULL;
 
-    int basepath_length = strlen (repo->path);
-    char *refs_path = (char *) malloc (sizeof (char) * (basepath_length + 12));
-    if (refs_path == NULL) {
-        DBG_LOG (DBG_ERROR, "git_branches_get: have not enough free memory");
-        free (branches);
-        return NULL;
-    }
-    strcpy (refs_path, repo->path);
-    strcpy (refs_path + basepath_length, "refs/heads/");
-    
-    DIR *dir = opendir (refs_path);
-    if (dir == NULL) {
-        DBG_LOG (DBG_ERROR, "git_branches_get: cannnot open dir");
-        free (branches);
-        free (refs_path);
-        return NULL;
-    }
-
     struct dirent *ent = NULL;
     while ((ent = readdir (dir))) {
         if (ent->d_type == DT_REG) {
-            struct git_branch *branch = (struct git_branch *) malloc (sizeof (*branch));
+            struct gitbranch *branch = (struct gitbranch *) malloc (sizeof (*branch));
             if (branch == NULL) {
-                DBG_LOG (DBG_ERROR, "git_branches_get: have not enough free memory");
-                free (refs_path);
-                git_branches_dispose (branches);
+                DBG_LOG (DBG_ERROR, "gitrepo_get_branches: have not enough free memory");
+                gitbranches_dispose (branches);
                 return NULL;
             }
 
             branch->name = strdup (ent->d_name);
             if (branch->name == NULL) {
-                DBG_LOG (DBG_ERROR, "git_branches_get: have not enough free memory");
+                DBG_LOG (DBG_ERROR, "git_brangitrepo_get_branchesches_get: have not enough free memory");
                 free (branch);
-                free (refs_path);
-                git_branches_dispose (branches);
+                gitbranches_dispose (branches);
                 return NULL;
             }
 
-            int name_length = strlen (branch->name);
-            char *ref_path = (char *) malloc (sizeof (char) * (basepath_length + 12 + name_length));
-            if (ref_path == NULL) {
-                DBG_LOG (DBG_ERROR, "git_branches_get: have not enough free memory");
-                free (branch->name);
-                free (branch);
-                free (refs_path);
-                git_branches_dispose (branches);
-                return NULL;
-            }
-            strcpy (ref_path, refs_path);
-            strcpy (ref_path + basepath_length + 11, branch->name);
-            ref_path[basepath_length + 11 + name_length] = 0;
-
+            char *ref_path = __gitbranch_get_branchpath (repo->path, repopath_len, branch->name, strlen (branch->name));
             branch->last_commit_sign = (char *) malloc (sizeof (char) * 41);
-            if (branch->last_commit_sign == NULL) {
-                DBG_LOG (DBG_ERROR, "git_branches_get: have not enough free memory");
+            if (ref_path == NULL || branch->last_commit_sign == NULL) {
+                DBG_LOG (DBG_ERROR, "gitrepo_get_branches: have not enough free memory");
                 free (branch->name);
                 free (branch);
-                free (ref_path);
-                free (refs_path);
-                git_branches_dispose (branches);
+                gitbranches_dispose (branches);
             }
+            
             FILE *head = fopen (ref_path, "r");
             fread(branch->last_commit_sign, sizeof (char), 40, head);
             branch->last_commit_sign[40] = 0;
             fclose (head);
             free (ref_path);
 
-            branch->prev = branches->tail;
-            branch->next = NULL;
-            if (branches->head == NULL) {
-                branches->head = branch;
-            }
-            if (branches->tail) {
-                branches->tail->next = branch;
-            }
-            branches->tail = branch;
+            __gitbranches_append (branches, branch);
         }
     }
-    free (refs_path);
     closedir (dir);
     return branches;
 }
 
-void git_branches_dispose (struct git_branches *branches) {
+void gitbranches_dispose (struct gitbranches *branches) {
     if (branches == NULL) {
         return;
     }
 
     while (branches->head) {
-        struct git_branch *next_branch = branches->head->next;
+        struct gitbranch *next_branch = branches->head->next;
         free (branches->head->name);
         free (branches->head->last_commit_sign);
         free (branches->head);
@@ -113,46 +125,48 @@ void git_branches_dispose (struct git_branches *branches) {
     }
 }
 
-void git_branches_reset (struct git_branches *branches) {
-    if (branches == NULL) {
-        return;
-    }
-    branches->cursor = branches->head;
-}
-
-int git_branches_movenext (struct git_branches *branches) {
-    if (branches == NULL) {
-        DBG_LOG (DBG_ERROR, "git_branches_movenext: branches is null");
-        return -1;
-    }
-    if (branches->cursor == NULL) {
-        DBG_LOG (DBG_INFO, "git_branches_movenext: branches's cursor is null");
-        return -1;
-    }
-
-    return (branches->cursor = branches->cursor->next) == NULL ? -1 : 0;
-}
-
-struct git_branch *git_branches_get_current (struct git_branches *branches) {
-    if (branches == NULL) {
-        DBG_LOG (DBG_ERROR, "git_branches_get_current: branches is null");
-        return NULL;
-    }
-    return branches->cursor;
-}
-
-char *git_branch_get_name (struct git_branch *branch) {
+char *gitbranch_get_name (struct gitbranch *branch) {
     if (branch == NULL) {
-        DBG_LOG (DBG_ERROR, "git_branch_get_name: branch is null");
-        return NULL;
-    }
-    return branch->name;
-}
-
-char *git_branch_get_last_commit_sign (struct git_branch *branch) {
-    if (branch == NULL) {
-        DBG_LOG (DBG_ERROR, "git_branch_get_last_commit_sign: branch is null");
+        DBG_LOG (DBG_ERROR, "gitbranch_get_name: branch is null");
         return NULL;
     }
     return branch->last_commit_sign;
+}
+
+char *gitbranch_get_lastcommit_sign (struct gitbranch *branch) {
+    if (branch == NULL) {
+        DBG_LOG (DBG_ERROR, "gitbranch_get_lastcommit_sign: branch is null");
+        return NULL;
+    }
+    return branch->last_commit_sign;
+}
+
+void gitbranches_reset (struct gitbranches *branches) {
+    if (branches == NULL) {
+        DBG_LOG (DBG_ERROR, "gitbranches_reset: branches is null");
+        return;
+    }
+
+    branches->cursor = NULL;
+}
+
+int gitbranches_hasnext (struct gitbranches *branches) {
+    if (branches == NULL) {
+        DBG_LOG (DBG_ERROR, "gitbranches_reset: branches is null");
+        return 0;
+    }
+
+    if (branches->cursor == NULL) return branches->head != NULL;
+    return branches->cursor->next != NULL;
+}
+
+struct gitbranch *gitbranches_next (struct gitbranches *branches) {
+    if (branches == NULL) {
+        DBG_LOG (DBG_ERROR, "gitbranches_reset: branches is null");
+        return NULL;
+    }
+    if (branches->cursor == NULL) branches->cursor = branches->head;
+    else branches->cursor = branches->cursor->next;
+
+    return branches->cursor;
 }

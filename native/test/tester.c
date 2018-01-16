@@ -86,16 +86,16 @@ int test_branches () {
         struct git_repo *repo = git_market_cursor_current (market);
         
         if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
-            struct git_branches *branches = git_branches_get (repo);
-            git_branches_reset (branches);
+            struct gitbranches *branches = gitrepo_get_branches (repo);
+            gitbranches_reset (branches);
 
-            do {
-                struct git_branch *branch = git_branches_get_current (branches);
+            while (gitbranches_hasnext (branches)) {
+                struct gitbranch *branch = gitbranches_next (branches);
                 printf ("%s\t%s\n", 
-                    git_branch_get_name (branch),
-                    git_branch_get_last_commit_sign (branch)
+                    gitbranch_get_name (branch),
+                    gitbranch_get_lastcommit_sign (branch)
                 );
-            } while (git_branches_movenext (branches) == 0);
+            }
             break;
         }
     } while (git_market_cursor_movenext (market) == 0);

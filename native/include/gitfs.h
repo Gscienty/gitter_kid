@@ -39,6 +39,34 @@ int __repository_init (const char* path, const char* description);
 int __repository_remove (const char* path);
 
 
+struct __gitpack {
+    char *sign;
+    int count;
+
+    char *idx_path;
+    char *pack_path;
+
+    struct rdt *rd_tree;
+
+    struct __gitpack *prev;
+    struct __gitpack *next;
+};
+
+struct __gitpack_collection {
+    struct __gitpack *head;
+    struct __gitpack *tail;
+};
+
+
+// 仓库结构体
+struct git_repo {
+    char *path;                             // 仓库路径
+    char *name;                             // 仓库名称
+    struct __gitpack_collection *packes;    // 压缩包集合
+    struct git_repo *prev;                  // 下一个仓库
+    struct git_repo *next;                  // 上一个仓库
+};
+
 // 通过指定的路径构造仓库市场
 // param <basepath>: 指定的路径
 // return: 返回仓库市场指针
@@ -72,28 +100,28 @@ G_KID_EXTERN char *git_repo_path (struct git_repo *repo);
 // return: 仓库名称
 G_KID_EXTERN char *git_repo_name (struct git_repo *repo);
 
-struct git_branch {
+struct gitbranch {
     char *name;
     char *last_commit_sign;
 
-    struct git_branch *prev;
-    struct git_branch *next;
+    struct gitbranch *prev;
+    struct gitbranch *next;
 };
 
-struct git_branches {
-    struct git_branch *head;
-    struct git_branch *tail;
-    struct git_branch *cursor;
+struct gitbranches {
+    struct gitbranch *head;
+    struct gitbranch *tail;
+    struct gitbranch *cursor;
 };
 
-G_KID_EXTERN struct git_branches *git_branches_get (struct git_repo *repo);
-G_KID_EXTERN void git_branches_dispose (struct git_branches *branches);
-G_KID_EXTERN void git_branches_reset (struct git_branches *branches);
-G_KID_EXTERN int git_branches_movenext (struct git_branches *branches);
-G_KID_EXTERN struct git_branch *git_branches_get_current (struct git_branches *branches);
-G_KID_EXTERN char *git_branch_get_name (struct git_branch *branch);
-G_KID_EXTERN char *git_branch_get_last_commit_sign (struct git_branch *branch);
+G_KID_EXTERN struct gitbranches *gitrepo_get_branches (struct git_repo *repo);
+G_KID_EXTERN void gitbranches_dispose (struct gitbranches *branches);
+G_KID_EXTERN char *gitbranch_get_name (struct gitbranch *branch);
+G_KID_EXTERN char *gitbranch_get_lastcommit_sign (struct gitbranch *branch);
 
+G_KID_EXTERN void gitbranches_reset (struct gitbranches *branches);
+G_KID_EXTERN int gitbranches_hasnext (struct gitbranches *branches);
+G_KID_EXTERN struct gitbranch *gitbranches_next (struct gitbranches *branches);
 
 struct __buf {
     unsigned char *buf;
@@ -125,19 +153,6 @@ struct gitobj {
 };
 
 
-struct __gitpack {
-    char *sign;
-    int count;
-
-    char *idx_path;
-    char *pack_path;
-
-    struct rdt *rd_tree;
-
-    struct __gitpack *prev;
-    struct __gitpack *next;
-};
-
 struct __gitpack_file {
     int fd;
     size_t len;
@@ -151,21 +166,6 @@ struct __gitpack_item {
     size_t negative_off;
     size_t off;
     size_t origin_len;
-};
-
-struct __gitpack_collection {
-    struct __gitpack *head;
-    struct __gitpack *tail;
-};
-
-
-// 仓库结构体
-struct git_repo {
-    char *path;                             // 仓库路径
-    char *name;                             // 仓库名称
-    struct __gitpack_collection *packes;    // 压缩包集合
-    struct git_repo *prev;                  // 下一个仓库
-    struct git_repo *next;                  // 上一个仓库
 };
 
 struct __gitpack_item *__gitpack_ofsdelta_patch (struct git_repo *repo, struct __gitpack_file *packfile, struct __gitpack_item packitem);

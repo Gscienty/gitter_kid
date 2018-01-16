@@ -2,7 +2,7 @@
 #include <malloc.h>
 #include <string.h>
 
-struct __buf *__gitpack_delta_patch (struct __gitpack_item base, struct __gitpack_item delta) {
+struct __buf *__gitpack_delta_patch (struct __buf base, struct __gitpack_item delta) {
     // printf ("%02x %02x\n", delta.buf.buf[0], delta.buf.buf[1]);
     unsigned char *data = delta.buf.buf + 2;
     const unsigned char *top = (const unsigned char *) delta.buf.buf + delta.buf.len;
@@ -50,7 +50,7 @@ struct __buf *__gitpack_delta_patch (struct __gitpack_item base, struct __gitpac
             // for (i = 0; i < cp_size; i++) printf ("%c", *(char *) (base.buf.buf + cp_off + i));
             // printf ("\n");
 
-            memcpy (out, (char *) base.buf.buf + cp_off, cp_size);
+            memcpy (out, (char *) base.buf + cp_off, cp_size);
             out += cp_size;
             size -= cp_size;
         }

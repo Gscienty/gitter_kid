@@ -163,7 +163,7 @@ struct git_repo {
     struct git_repo *next;                  // 上一个仓库
 };
 
-struct __buf *__gitpack_delta_patch (struct __gitpack_item base, struct __gitpack_item delta);
+struct __buf *__gitpack_delta_patch (struct __buf base, struct __gitpack_item delta);
 
 struct gitobj *__gitpack_getobj__charstring (struct git_repo *repo, const char *sign);
 struct gitobj *__gitpack_getobj__bytestring (struct git_repo *repo, const void *sign);

@@ -166,7 +166,9 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
 
     if (segment.type < 5) {
         struct __buf deflate_obj = { segment.buf.buf, segment.buf.len };
-        ret->buf = *__inflate (&deflate_obj, segment.item_len);
+        struct __buf *tmp_store = __inflate (&deflate_obj, segment.item_len);
+        ret->buf = *tmp_store;
+        free (tmp_store);
         ret->type = segment.type;
         return ret;
     }
@@ -184,7 +186,9 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
         }
 
         struct __buf deflate_obj = { ptr + 1, segment.buf.len - nbytes };
-        ret->buf = *__inflate (&deflate_obj, segment.item_len);
+        struct __buf *tmp_store = __inflate (&deflate_obj, segment.item_len);
+        ret->buf = *tmp_store;
+        free (tmp_store);
         ret->type = segment.type;
         ret->origin_len = segment.item_len;
 
@@ -200,7 +204,9 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
         memcpy (ret->base_sign, segment.buf.buf, 20);
 
         struct __buf deflate_obj = { segment.buf.buf + 20, segment.buf.len - 20 };
-        ret->buf = *__inflate (&deflate_obj, segment.item_len);
+        struct __buf *tmp_store = __inflate (&deflate_obj, segment.item_len);
+        ret->buf = *tmp_store;
+        free (tmp_store);
         ret->type = segment.type;
         ret->origin_len = segment.item_len;
 
@@ -211,15 +217,41 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
     return NULL;
 }
 
-struct gitobj *__gitpack_refdelta_patch (struct __gitpack_file *packfile, struct __gitpack_item packitem) {
-    struct __gitpack_segment *segment = __gitpack_get_segment (packfile, packitem.off - packitem.negative_off, 0);
-    struct __gitpack_item *base_packitem = __gitpack_get_item (*segment);
-    __gitpack_dispose_segment (segment);
+void __gitpack_dispose_item (struct __gitpack_item *item) {
+    if (item == NULL) return;
+    if (item->base_sign != NULL) free (item->base_sign);
+    if (item->buf.buf != NULL) free (item->buf.buf);
+    free (item);
+}
 
-    struct __buf *patched_buf = __gitpack_delta_patch (*base_packitem, packitem);
+struct __gitpack_item *__gitpack_refdelta_patch (struct __gitpack_file *packfile, struct __gitpack_item packitem) {
+    if (packfile == NULL) return NULL;
+    // get base packitem
+    struct __gitpack_segment *base_segment = __gitpack_get_segment (packfile, packitem.off - packitem.negative_off, 0);
+    struct __gitpack_item *base_packitem = __gitpack_get_item (*base_segment);
+    __gitpack_dispose_segment (base_segment);
+    
+    if (base_packitem == NULL) return NULL;
+    if (base_packitem->type == 6) {
+        // if base item is delta then find continue
+        struct __gitpack_item *tmp_packitem = __gitpack_refdelta_patch (packfile, *base_packitem);
+        // exchange base packitem
+        free (base_packitem);
+        base_packitem = tmp_packitem;
+    }
 
-    int i = 0;
-    for (i = 0; i < patched_buf->len; i++) putchar (patched_buf->buf[i]);
+    struct __gitpack_item *ret = (struct __gitpack_item *) malloc (sizeof (*ret));
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_get_item: have not enough free memory");
+        return NULL;
+    }
+
+    struct __buf *patched_buf = __gitpack_delta_patch (base_packitem->buf, packitem);
+    ret->buf = *patched_buf;
+    free (patched_buf);
+
+    printf ("%s\n", ret->buf.buf);
+    return ret;
 }
 
 struct gitobj *__gitpack_get_obj__common (struct git_repo *repo, struct __gitpack_item_findret *findret) {

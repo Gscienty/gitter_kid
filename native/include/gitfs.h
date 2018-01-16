@@ -145,6 +145,7 @@ struct __gitpack_item {
     void *base_sign;
     size_t negative_off;
     size_t off;
+    size_t origin_len;
 };
 
 struct __gitpack_collection {

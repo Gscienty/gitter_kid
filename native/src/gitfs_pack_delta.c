@@ -3,67 +3,74 @@
 #include <string.h>
 
 struct __buf *__gitpack_delta_patch (struct __gitpack_item base, struct __gitpack_item delta) {
+    // printf ("%02x %02x\n", delta.buf.buf[0], delta.buf.buf[1]);
+    unsigned char *data = delta.buf.buf + 2;
+    const unsigned char *top = (const unsigned char *) delta.buf.buf + delta.buf.len;
+
+    size_t size = 0;
+
+    int i = 0;
+    unsigned long tmp;
+    do {
+        tmp = *data++;
+        size |= (tmp & 0x7f) << i;
+        i += 7;
+    } while (tmp & 0x80 && data < top);
+
     struct __buf *ret = (struct __buf *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: have not enough free memory");
         return NULL;
     }
-    ret->len = 0;
-    ret->buf = NULL;
+    ret->len = size;
+    ret->buf = (unsigned char *) malloc (size);
+    if (ret->buf == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: have not enough free memory");
+        free (ret);
+        return NULL;
+    }
 
-    size_t delta_cur = 0;
+    char *out = ret->buf;
+    while (data < top) {
+        unsigned char cmd = *data++;
+        if (cmd & 0x80) {
+            unsigned long cp_off = 0;
+            unsigned long cp_size = 0;
+            if (cmd & 0x01) cp_off = *data++;
+            if (cmd & 0x02) cp_off |= (*data++ << 8);
+            if (cmd & 0x04) cp_off |= (*data++ << 16);
+            if (cmd & 0x08) cp_off |= ((unsigned) *data++ << 24);
+            if (cmd & 0x10) cp_size = *data++;
+            if (cmd & 0x20) cp_size |= (*data++ << 8);
+            if (cmd & 0x40) cp_size |= (*data++ << 16);
+            if (cp_size == 0) cp_size = 0x10000;
 
-    int i;
-    for (i = 0; i < delta.buf.len; i++) printf ("%02x ", delta.buf.buf[i]); 
-    printf ("\n");
+            // printf ("COPY basesize:%d\toff:%d\tsize:%d:\n", base.origin_len, cp_off, cp_size);
+            // int i;
+            // for (i = 0; i < cp_size; i++) printf ("%c", *(char *) (base.buf.buf + cp_off + i));
+            // printf ("\n");
 
-    while (delta_cur < delta.buf.len) {
-        unsigned char b = delta.buf.buf[delta_cur++];
-
-        if (b & 0x80) {
-            size_t base_off = 0;
-            if (b & 0x01) base_off = base_off | ((unsigned int) delta.buf.buf[delta_cur++]);
-            if (b & 0x02) base_off = base_off | (((unsigned int) delta.buf.buf[delta_cur++]) << 8);
-            if (b & 0x04) base_off = base_off | (((unsigned int) delta.buf.buf[delta_cur++]) << 16);
-            if (b & 0x08) base_off = base_off | (((unsigned int) delta.buf.buf[delta_cur++]) << 24);
-            printf ("%08x\n", base_off);
-            size_t bytes = 0;
-            if (b & 0x10) bytes = bytes | ((unsigned int) delta.buf.buf[delta_cur++]);
-            if (b & 0x20) bytes = bytes | (((unsigned int) delta.buf.buf[delta_cur++]) << 8);
-            if (b & 0x40) bytes = bytes | (((unsigned int) delta.buf.buf[delta_cur++]) << 16);
-
-            if (bytes == 0) bytes = 0x10000;
+            memcpy (out, (char *) base.buf.buf + cp_off, cp_size);
+            out += cp_size;
+            size -= cp_size;
+        }
+        else if (cmd) {
+            if (cmd > size) break;
             
-            if (ret->buf == NULL) ret->buf = malloc (bytes);
-            else ret->buf = realloc (ret->buf, ret->len + bytes);
-            if (ret->buf == NULL) {
-                DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: have not enough free memory");
-                free (ret);
-                return NULL;
-            }
+            // printf ("INSERT:\n");
+            // int i;
+            // for (i = 0; i < cmd; i++) printf ("%c", *(char *) (data + i));
+            // printf ("\n");
 
-            memcpy (ret->buf + ret->len, base.buf.buf + base_off, bytes);
-            ret->len += bytes;
+            memcpy (out, data, cmd);
+            out += cmd;
+            data += cmd;
+            size -= cmd;
         }
         else {
-            if (b == 0) return NULL;
 
-            size_t bytes = b;
-
-            if (ret->buf == NULL) ret->buf = malloc (bytes);
-            else ret->buf = realloc (ret->buf, ret->len + bytes);
-            if (ret->buf == NULL) {
-                DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: have not enough free memory");
-                free (ret);
-                return NULL;
-            }
-
-            memcpy (ret->buf + ret->len, delta.buf.buf + delta_cur, bytes);
-
-            ret->len += bytes;
-            delta_cur += bytes;
         }
-
-        return ret;
     }
+
+    return ret;
 }

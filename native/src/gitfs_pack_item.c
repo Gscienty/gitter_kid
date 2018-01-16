@@ -137,6 +137,8 @@ struct __gitpack_segment *__gitpack_get_segment (struct __gitpack_file *packfile
         return NULL;
     }
 
+    if (len == 0) len = size;
+
     ret->buf.buf = __gitpack_file_readbytes (packfile, len);
     ret->buf.len = len;
     ret->off = off;
@@ -184,6 +186,7 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
         struct __buf deflate_obj = { ptr + 1, segment.buf.len - nbytes };
         ret->buf = *__inflate (&deflate_obj, segment.item_len);
         ret->type = segment.type;
+        ret->origin_len = segment.item_len;
 
         return ret;
     }
@@ -199,6 +202,7 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
         struct __buf deflate_obj = { segment.buf.buf + 20, segment.buf.len - 20 };
         ret->buf = *__inflate (&deflate_obj, segment.item_len);
         ret->type = segment.type;
+        ret->origin_len = segment.item_len;
 
         return ret;
     }
@@ -208,13 +212,14 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
 }
 
 struct gitobj *__gitpack_refdelta_patch (struct __gitpack_file *packfile, struct __gitpack_item packitem) {
-    struct __gitpack_segment *segment = __gitpack_get_segment (packfile, packitem.off - packitem.negative_off, packitem.buf.len);
+    struct __gitpack_segment *segment = __gitpack_get_segment (packfile, packitem.off - packitem.negative_off, 0);
     struct __gitpack_item *base_packitem = __gitpack_get_item (*segment);
     __gitpack_dispose_segment (segment);
 
     struct __buf *patched_buf = __gitpack_delta_patch (*base_packitem, packitem);
 
-    printf ("%s\n", patched_buf->buf);
+    int i = 0;
+    for (i = 0; i < patched_buf->len; i++) putchar (patched_buf->buf[i]);
 }
 
 struct gitobj *__gitpack_get_obj__common (struct git_repo *repo, struct __gitpack_item_findret *findret) {

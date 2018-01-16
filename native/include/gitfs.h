@@ -138,6 +138,11 @@ struct __gitpack {
     struct __gitpack *next;
 };
 
+struct __gitpack_file {
+    int fd;
+    size_t len;
+};
+
 struct __gitpack_item {
     struct __buf buf;
     unsigned char type;
@@ -162,6 +167,9 @@ struct git_repo {
     struct git_repo *prev;                  // 下一个仓库
     struct git_repo *next;                  // 上一个仓库
 };
+
+struct __gitpack_item *__gitpack_ofsdelta_patch (struct git_repo *repo, struct __gitpack_file *packfile, struct __gitpack_item packitem);
+struct __gitpack_item *__gitpack_refdelta_patch (struct git_repo *repo, struct __gitpack_item packitem);
 
 struct __buf *__gitpack_delta_patch (struct __buf base, struct __gitpack_item delta);
 

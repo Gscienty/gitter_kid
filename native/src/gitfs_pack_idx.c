@@ -199,6 +199,7 @@ struct rdt *__gitpack_rdt_build (struct __opend_mmap_file *mmaped, struct __gitp
     int *indexes = __gitpack_sortedindexes_get (mmaped->val, pack);
     int i = 0;
     for (i = 0; i < pack->count; i++) {
+        // if (__GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i]) <= 85338) printf ("%d\n", __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i]));
         rdt_insert (
             ret,
             __sign_dup (__GITPACK_NTH_SIGN (mmaped->val, indexes[i])),

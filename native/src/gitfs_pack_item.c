@@ -182,7 +182,7 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
             int i;
             for (i = 1; i < nbytes; i++) ret->negative_off += (1 << (7 * i));
         }
-        printf ("[NBYTES] %d\n", nbytes);
+        // printf ("[NBYTES] %d\n", nbytes);
 
         struct __buf deflate_obj = { ptr + 1, segment.buf.len - nbytes };
         struct __buf *tmp_store = __inflate (&deflate_obj, segment.item_len);
@@ -270,7 +270,7 @@ struct __gitpack_item *__gitpack_ofsdelta_patch (struct git_repo *repo, struct _
     // get base packitem1
     struct __gitpack_segment *base_segment = __gitpack_get_segment (packfile, packitem.off - packitem.negative_off, 0);
     struct __gitpack_item *base_packitem = __gitpack_get_item (*base_segment);
-    printf ("%d %d %d\n", packitem.off - packitem.negative_off, packitem.off, packitem.negative_off);
+    // printf ("%d %d %d\n", packitem.off - packitem.negative_off, packitem.off, packitem.negative_off);
     __gitpack_dispose_segment (base_segment);
     
     if (base_packitem == NULL) return NULL;
@@ -346,9 +346,9 @@ struct gitobj *__gitpack_get_obj__common (struct git_repo *repo, struct __gitpac
     __gitpack_dispose_file (packfile);
     free (packitem);
 
-    int i;
-    for (i = 0; i < ret->size; i++) printf ("%c", ret->body[i]);
-    fflush (stdout);
+    // int i;
+    // for (i = 0; i < ret->size; i++) printf ("%c", ret->body[i]);
+    // fflush (stdout);
 
     return ret;
 }

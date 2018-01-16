@@ -15,9 +15,9 @@ struct __buf *__gitpack_delta_patch (struct __buf base, struct __gitpack_item de
         size |= (tmp & 0x7f) << i;
         i += 7;
     } while (tmp & 0x80 && data < top);
-    printf ("[RESULT] size: %d\n", size);
-    printf ("[BASE] size: %d\n", base.len);
-    printf ("%s\n", base.buf);
+    // printf ("[RESULT] size: %d\n", size);
+    // printf ("[BASE] size: %d\n", base.len);
+    // printf ("%s\n", base.buf);
     struct __buf *ret = (struct __buf *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: have not enough free memory");
@@ -46,7 +46,7 @@ struct __buf *__gitpack_delta_patch (struct __buf base, struct __gitpack_item de
             if (cmd & 0x40) cp_size |= (*data++ << 16);
             if (cp_size == 0) cp_size = 0x10000;
 
-            printf ("[COPY] off: %ld,\tsize: %ld\n", cp_off, cp_size);
+            // printf ("[COPY] off: %ld,\tsize: %ld\n", cp_off, cp_size);
 
             memcpy (out, (char *) base.buf + cp_off, cp_size);
             out += cp_size;
@@ -54,9 +54,9 @@ struct __buf *__gitpack_delta_patch (struct __buf base, struct __gitpack_item de
         }
         else if (cmd) {
             if (cmd > size) break;
-            printf ("[INSERT] size:%d\n", cmd);
-            for (i = 0; i < cmd; i++) printf ("%c", data[i]);
-            printf ("\n");
+            // printf ("[INSERT] size:%d\n", cmd);
+            // for (i = 0; i < cmd; i++) printf ("%c", data[i]);
+            // printf ("\n");
             memcpy (out, data, cmd);
             out += cmd;
             data += cmd;
@@ -69,11 +69,11 @@ struct __buf *__gitpack_delta_patch (struct __buf base, struct __gitpack_item de
 
     if (data != top || size != 0) {
         DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: format error");
-        printf ("[INNER] top - data: %d\t size: %d\n", top - data, size);
+        // printf ("[INNER] top - data: %d\t size: %d\n", top - data, size);
     }
 
-    for (i = 0; i < ret->len; i++) printf ("%c", ret->buf[i]);
-    printf ("\n");
+    // for (i = 0; i < ret->len; i++) printf ("%c", ret->buf[i]);
+    // printf ("\n");
 
     return ret;
 }

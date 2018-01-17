@@ -223,11 +223,9 @@ struct gitobj *gitrepo_get_gitobj (struct gitrepo *repo, const char* signture) {
     }
 }
 
-enum gitobj_type gitobj_get_type (struct gitobj *obj) {
-    return obj->type;
-}
+enum gitobj_type gitobj_get_type (struct gitobj *obj) { return obj->type; }
 
-void dtor_gitobj (struct gitobj *obj) {
+void gitobj_dtor (struct gitobj *obj) {
     if (obj == NULL) {
         return ;
     }
@@ -244,9 +242,7 @@ void dtor_gitobj (struct gitobj *obj) {
     }
 
     free (obj->buf);
-    if (obj->path != NULL) {
-        free (obj->path);
-    }
-    free (obj->sign);
+    if (obj->path != NULL) free (obj->path);
+    if (obj->sign != NULL) free (obj->sign);
     free (obj);
 }

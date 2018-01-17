@@ -95,6 +95,7 @@ void gitmarket_dtor (struct gitmarket *market) {
     while (repo) {
         free (repo->path);
         free (repo->name);
+        __gitpack_collection_dtor (repo->packes);
 
         struct gitrepo *next_repo = repo->next;
         free (repo);

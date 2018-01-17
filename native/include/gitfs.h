@@ -77,8 +77,18 @@ G_KID_EXTERN struct gitmarket *get_gitmarket (const char *basepath);
 // param <market>: 仓库市场指针
 G_KID_EXTERN void gitmarket_dtor (struct gitmarket *market);
 
+// 重置仓库市场游标
+// param <market>: 仓库市场指针
 G_KID_EXTERN void gitmarket_reset (struct gitmarket *market);
+
+// 仓库市场是否存在下一个仓库
+// param <market>: 仓库市场指针
+// return: 返回是否存在下一个仓库
 G_KID_EXTERN int gitmarket_hasnext (struct gitmarket *market);
+
+// 获取仓库市场下一个仓库
+// param <market>: 仓库市场指针
+// return: 返回下一个仓库指针
 G_KID_EXTERN struct gitrepo *gitmarket_next (struct gitmarket *market);
 
 // 获取仓库路径
@@ -105,13 +115,38 @@ struct gitbranches {
     struct gitbranch *cursor;
 };
 
+// 从仓库中获取分支集合
+// param <repo>: 仓库指针
+// return: 分支集合
 G_KID_EXTERN struct gitbranches *gitrepo_get_branches (struct gitrepo *repo);
+
+// 析构分支集合
+// param <branches>: 分支集合指针
 G_KID_EXTERN void gitbranches_dtor (struct gitbranches *branches);
+
+
+// 获取分支名称
+// param <branch>: 分支指针
+// return: 分支名称
 G_KID_EXTERN char *gitbranch_get_name (struct gitbranch *branch);
+// 获取分支最后提交的 commit 签名
+// param <branch>: 分支指针
+// return: commit 签名
 G_KID_EXTERN char *gitbranch_get_lastcommit_sign (struct gitbranch *branch);
 
+
+// 重置分支集合游标
+// param <branches>: 分支集合
 G_KID_EXTERN void gitbranches_reset (struct gitbranches *branches);
+
+// 分支集合是否具有下一个分支
+// param <branches>: 分支集合
+// return: 分支集合是否具有下一分支
 G_KID_EXTERN int gitbranches_hasnext (struct gitbranches *branches);
+
+// 获取下一个分支
+// param <branches>: 分支集合
+// return: 下一个分支
 G_KID_EXTERN struct gitbranch *gitbranches_next (struct gitbranches *branches);
 
 // git object 类型
@@ -160,6 +195,7 @@ struct __bytes *__gitpack_delta_patch (struct __bytes base, struct __gitpack_ite
 struct gitobj *__gitpack_getobj__charstring (struct gitrepo *repo, const char *sign);
 struct gitobj *__gitpack_getobj__bytestring (struct gitrepo *repo, const void *sign);
 struct __gitpack_collection *__gitpack_collection_get (struct gitrepo *repo);
+void __gitpack_collection_dtor (struct __gitpack_collection *collection);
 
 // blob 结构体
 struct gitobj_blob {
@@ -176,17 +212,17 @@ struct gitperson {
 };
 
 // git commit 上游节点结构体
-struct gitobj_commit_patent {
+struct gitobj_commitpatent {
     char *sign; // 上游节点签名
-    struct gitobj_commit_patent *prev;
-    struct gitobj_commit_patent *next;
+    struct gitobj_commitpatent *prev;
+    struct gitobj_commitpatent *next;
 };
 
 // git commit 结构体
 struct gitobj_commit {
-    struct gitobj_commit_patent *parent_head; //上游commit节点列表头部
-    struct gitobj_commit_patent *parent_tail; //上游commit节点列表尾部
-    struct gitobj_commit_patent *parent_cursor;
+    struct gitobj_commitpatent *parent_head; //上游commit节点列表头部
+    struct gitobj_commitpatent *parent_tail; //上游commit节点列表尾部
+    struct gitobj_commitpatent *parent_cursor;
 
     char *tree_sign; // commit关联tree的签名
     char *message;   // commit 消息部分
@@ -270,62 +306,63 @@ G_KID_EXTERN void *gitobj_blob_content (struct gitobj_blob *blob_obj);
 // 获取与 commit 关联的 tree 的签名
 // param <commit_obj>: commit object
 // return: tree 的签名
-G_KID_EXTERN char *gitobj_commit_treesign (struct gitobj_commit *commit_obj);
+G_KID_EXTERN char *gitobj_commit_get_treesign (struct gitobj_commit *commit_obj);
 
 // 获取 commit 的作者信息
 // param <commit_obj>: commit object
 // return: 作者信息
-G_KID_EXTERN struct gitperson *gitobj_commit_author (struct gitobj_commit *commit_obj);
+G_KID_EXTERN struct gitperson *gitobj_commit_get_author (struct gitobj_commit *commit_obj);
 
 // 获取 commit 的提交者信息
 // param <commit_obj>: commit object
 // return: 提交者信息
-G_KID_EXTERN struct gitperson *gitobj_commit_committer (struct gitobj_commit *commit_obj);
+G_KID_EXTERN struct gitperson *gitobj_commit_get_committer (struct gitobj_commit *commit_obj);
 
 // 获取 commit 的提交消息
 // param <commit_obj>: commit object
 // return: 提交消息
-G_KID_EXTERN char *gitobj_commit_message (struct gitobj_commit *commit_obj);
+G_KID_EXTERN char *gitobj_commit_get_message (struct gitobj_commit *commit_obj);
+
 
 // 重置 commit 的上游 commit 签名列表的游标
 // param <commit_obj>: commit object
-G_KID_EXTERN void gitobj_commit_patent_reset (struct gitobj_commit *commit_obj);
+G_KID_EXTERN void gitobj_commitparents_reset (struct gitobj_commit *commit_obj);
 
-// 将 commit 的上游 commit 签名列表的游标移动到下一签名
+// 将 commit 的上游 commit 签名列表是否存在下一个元素
 // param <commit_obj>: commit object
-// return: 成功移动到下一个签名时，返回0，否则返回-1
-G_KID_EXTERN int gitobj_commit_patent_movenext (struct gitobj_commit *commit_obj);
+// return: 是否存在下一个元素
+G_KID_EXTERN int gitobj_commitparents_hasnext (struct gitobj_commit *commit_obj);
 
 // 获取当前 commit 的上游 commit 签名列表游标所指向的上游 commit 签名结构体
 // param <commit_obj>: commit object
 // return: 上游 commit 签名结构体
-G_KID_EXTERN struct gitobj_commit_patent *gitobj_commit_patent_current (struct gitobj_commit *commit_obj);
+G_KID_EXTERN struct gitobj_commitpatent *gitobj_commitparents_next (struct gitobj_commit *commit_obj);
 
 // 获取上游 commit 签名结构体中的签名
 // param <commit_parent_obj>: 上游 commit 签名结构体
 // return: 上游 commit 签名
-G_KID_EXTERN char *gitobj_commit_patent_sign (struct gitobj_commit_patent *commit_parent_obj);
+G_KID_EXTERN char *gitobj_commitpatent_get_sign (struct gitobj_commitpatent *commitparent_obj);
 
 
 // 通过 person log 获取名称
 // param <person_log>: person log
 // return: 名称
-G_KID_EXTERN char *gitperson_name (struct gitperson *person_log);
+G_KID_EXTERN char *gitperson_get_name (struct gitperson *person_log);
 
 // 通过 person log 获取 mail
 // param <person_log>: person log
 // return: mail
-G_KID_EXTERN char *gitperson_mail (struct gitperson *person_log);
+G_KID_EXTERN char *gitperson_get_mail (struct gitperson *person_log);
 
 // 通过 person log 获取时间戳
 // param <person_log>: person log
 // return: 时间戳
-G_KID_EXTERN unsigned long gitperson_timestamp (struct gitperson *person_log);
+G_KID_EXTERN unsigned long gitperson_get_timestamp (struct gitperson *person_log);
 
 // 通过 person log 获取时区
 // param <person_log>: person log
 // return 时区
-G_KID_EXTERN char *git_person_timezone (struct gitperson *person_log);
+G_KID_EXTERN char *gitperson_get_timezone (struct gitperson *person_log);
 
 
 // 重置 tree 游标

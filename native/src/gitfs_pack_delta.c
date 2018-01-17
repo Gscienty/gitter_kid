@@ -3,7 +3,9 @@
 #include <string.h>
 
 struct __bytes *__gitpack_delta_patch (struct __bytes base, struct __gitpack_item delta) {
-    unsigned char *data = delta.bytes.buf + 2;
+    unsigned char *data = delta.bytes.buf;
+    while (*data & 0x80) data++;
+    data++;
     const unsigned char *top = (const unsigned char *) delta.bytes.buf + delta.bytes.len;
 
     size_t size = 0;
@@ -51,9 +53,6 @@ struct __bytes *__gitpack_delta_patch (struct __bytes base, struct __gitpack_ite
             out += cmd;
             data += cmd;
             size -= cmd;
-        }
-        else {
-
         }
     }
 

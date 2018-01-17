@@ -115,11 +115,11 @@ int test_commits_parent () {
             struct gitobj *obj = gitrepo_get_gitobj (repo, "54415a12532e7e77dfc4037962e870abe72e0300");
             struct gitobj_commit *commit = gitobj_get_commit (obj);
 
-            gitobj_commit_patent_reset (commit);
-            do {
-                struct gitobj_commit_patent *parent = gitobj_commit_patent_current (commit);
-                printf ("%s\n", gitobj_commit_patent_sign (parent));
-            } while (gitobj_commit_patent_movenext (commit) == 0);
+            gitobj_commitparents_reset (commit);
+            while (gitobj_commitparents_hasnext (commit)) {
+                struct gitobj_commitpatent *parent = gitobj_commitparents_next (commit);
+                printf ("%s\n", gitobj_commitpatent_get_sign (parent));
+            }
 
             break;
         }
@@ -134,26 +134,21 @@ int test_pack () {
     while (gitmarket_hasnext (market)) {
         struct gitrepo *repo = gitmarket_next (market);
         if (strcmp (gitrepo_get_name (repo), "gitterRepo") == 0) {
-            // printf ("TYPE: %d\n", get_gitobj (repo, "6074c189b9f709892de2f413f08b1be6b9eab0af")->type);
-            // printf ("TYPE: %d\n", get_gitobj (repo, "1aea93543e697af2f00499c53116bbb3cc8ffcbf")->type);
-            // printf ("TYPE: %d\n", get_gitobj (repo, "ec4735f69b5d60b91d95634f511200ad37486ba4")->type);
-            // printf ("TYPE: %d\n", get_gitobj (repo, "e87a0306f7cf5ef89dec674bc2ecaba08ef80eb6")->type);
-            struct gitobj *ret = gitrepo_get_gitobj (repo, "997cc5e85aff5cc35e317cd993f9979c858b17fa");
-            // int i;
-            // for (i = 0; i < ret->size; i++) putchar (ret->body[i]);
-            //struct __gitpack_collection *pack_coll = __gitpack_collection_get (repo);
-
-            //printf ("%d\n", __gitpack_getobj__charstring (pack_coll, "3b846780303b8994088f884c3dfed48c04e6a2b0"));
-
-            //     __git_pack_get_obj (git_packes_get_current (packes), "0f45d6566321ef72e498d1e289398fab1fd5026f");
-            //     __git_pack_get_obj (git_packes_get_current (packes), "ca1c10bf904926224e1358910d637320e91945d3");
-
-            //     // __git_pack_get_obj (git_packes_get_current (packes), "e53ee7b4ea4576d131fdce313a4c5204bd8d0eec");
-            //     // __git_pack_get_obj (git_packes_get_current (packes), "c1a37f7eacfbd0c1d6d3250b92e81999e99fb1c7");
-
-            //     // __git_pack_get_obj (git_packes_get_current (packes), "fbfba1e8bf83a2b241e29b93069eb8492e794f50");
-            //     // __git_pack_get_obj (git_packes_get_current (packes), "d139fedcdb55b4f266db2abecac304cafadc2e29");
-
+            gitrepo_get_gitobj (repo, "997cc5e85aff5cc35e317cd993f9979c858b17fa");
+            gitrepo_get_gitobj (repo, "3ff1e8785454b32f7dcadf3335bbd786ffa46d9c");
+            gitrepo_get_gitobj (repo, "c49860eeec92d4477a57a7c58135a9b69b360f32");
+            gitrepo_get_gitobj (repo, "582a103bd9ed07676ebda0020ffe8ce97c0159e3");
+            gitrepo_get_gitobj (repo, "1dbadf22f5d1f0b534071dfbc16d47dda1941be1");
+            gitrepo_get_gitobj (repo, "f516d431df61f028aaa377c72bd42facc65ed1dc");
+            gitrepo_get_gitobj (repo, "7e9c8b75c9d5157b4d8bcc3e90ad8ea53a943863");
+            gitrepo_get_gitobj (repo, "7e9c8b75c9d5157b4d8bcc3e90ad8ea53a943863");
+            gitrepo_get_gitobj (repo, "cae768c7cec368a47f82ae09f6579ca274a57d73");
+            gitrepo_get_gitobj (repo, "ba5897fa37124e65d71424036163cc1f70b959bd");
+            gitrepo_get_gitobj (repo, "1a8c597789f3376f72d59e726b45873fb982afad");
+            gitrepo_get_gitobj (repo, "d3043090193f43eb5330b83f17c3e667ce9a3a40");
+            gitrepo_get_gitobj (repo, "7b55b69c2a5b77e36b10377bc5d313e1091ea099");
+            gitrepo_get_gitobj (repo, "cf395c1d48a5832d1a62041863d05e05c2045681");
+            gitrepo_get_gitobj (repo, "3edb19b739762ea5fb1fa677e68e0b045e5748c2");
         }
     }
     return 0;

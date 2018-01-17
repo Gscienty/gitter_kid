@@ -3,6 +3,38 @@
 #include <string.h>
 #include <dirent.h>
 
+char *__gitrepo_get_path (const char *basepath, size_t basepath_len, const char *reponame, size_t reponame_len) {
+    char *ret = (char *) malloc (basepath_len + reponame_len + 3);
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitrepo_get_path: have not enough free memory");
+        return NULL;
+    }
+
+    strcpy (ret, basepath);
+    if (basepath[basepath_len - 1] != '/') {
+        strcpy (ret + basepath_len, "/");
+        basepath_len++;
+    }
+    strcpy (ret + basepath_len, reponame);
+    strcpy (ret + basepath_len + reponame_len, "/");
+
+    return ret;
+}
+
+void __gitmarket_append (struct gitmarket *market, struct git_repo* repo) {
+    repo->packes = NULL;
+    repo->prev = market->tail;
+    repo->next = NULL;
+
+    if (market->head == NULL) {
+        market->head = repo;
+    }
+    if (market->tail != NULL) {
+        market->tail->next = repo;
+    }
+    market->tail = repo;
+}
+
 struct gitmarket *get_gitmarket (const char *basepath) {
     if (__access_file_exist (basepath) != 0) {
         // path not exist
@@ -27,56 +59,34 @@ struct gitmarket *get_gitmarket (const char *basepath) {
         free (ret);
         return NULL;
     }
-    int basepath_length = strlen (basepath);
+    int basepath_len = strlen (basepath);
     while ((ent = readdir (dir))) {
         if (ent->d_type == DT_DIR && ent->d_name[0] != '.') {
             struct git_repo *repo = (struct git_repo *) malloc (sizeof (*repo));
             if (repo == NULL) {
-                goto free_repo_list;
+                gitmarket_dispose (ret);
+                return NULL;
             }
             repo->name = strdup (ent->d_name);
             if (repo->name == NULL) {
-                free (repo->name);
                 free (repo);
-                goto free_repo_list;
+                gitmarket_dispose (ret);
+                return NULL;
             }
-            int repo_name_length = strlen (ent->d_name);
-            repo->path = (char *) malloc (sizeof (char) * (basepath_length + repo_name_length + 3));
+            int reponame_len = strlen (ent->d_name);
+            repo->path = __gitrepo_get_path (basepath, basepath_len, ent->d_name, reponame_len);
             if (repo->path == NULL) {
                 free (repo->name);
-                free (repo->path);
                 free (repo);
-                goto free_repo_list;
+                gitmarket_dispose (ret);
+                return NULL;
             }
-            strcpy (repo->path, basepath);
-            if (repo->path[basepath_length - 1] != '/') {
-                strcpy (repo->path + basepath_length, "/");
-                strcpy (repo->path + basepath_length + 1, ent->d_name);
-                strcpy (repo->path + basepath_length + repo_name_length + 1, "/");
-            }
-            else {
-                strcpy (repo->path + basepath_length, ent->d_name);
-                strcpy (repo->path + basepath_length + repo_name_length, "/");
-            }
-            repo->packes = NULL;
-            repo->prev = ret->tail;
-            repo->next = NULL;
 
-            if (ret->head == NULL) {
-                ret->head = repo;
-            }
-            if (ret->tail != NULL) {
-                ret->tail->next = repo;
-            }
-            ret->tail = repo;
+            __gitmarket_append (ret, repo);
         }
     }
 
     return ret;
-    // free repo list
-    free_repo_list:
-    gitmarket_dispose (ret);
-    return NULL;
 }
 
 void gitmarket_dispose (struct gitmarket *market) {

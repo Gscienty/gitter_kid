@@ -92,7 +92,7 @@ G_KID_EXTERN char *git_repo_name (struct git_repo *repo);
 
 struct gitbranch {
     char *name;
-    char *last_commit_sign;
+    char *lastcommit_sign;
 
     struct gitbranch *prev;
     struct gitbranch *next;

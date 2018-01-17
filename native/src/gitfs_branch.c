@@ -90,8 +90,8 @@ struct gitbranches *gitrepo_get_branches (struct git_repo *repo) {
             }
 
             char *ref_path = __gitbranch_get_branchpath (repo->path, repopath_len, branch->name, strlen (branch->name));
-            branch->last_commit_sign = (char *) malloc (sizeof (char) * 41);
-            if (ref_path == NULL || branch->last_commit_sign == NULL) {
+            branch->lastcommit_sign = (char *) malloc (sizeof (char) * 41);
+            if (ref_path == NULL || branch->lastcommit_sign == NULL) {
                 DBG_LOG (DBG_ERROR, "gitrepo_get_branches: have not enough free memory");
                 free (branch->name);
                 free (branch);
@@ -99,8 +99,8 @@ struct gitbranches *gitrepo_get_branches (struct git_repo *repo) {
             }
             
             FILE *head = fopen (ref_path, "r");
-            fread(branch->last_commit_sign, sizeof (char), 40, head);
-            branch->last_commit_sign[40] = 0;
+            fread(branch->lastcommit_sign, sizeof (char), 40, head);
+            branch->lastcommit_sign[40] = 0;
             fclose (head);
             free (ref_path);
 
@@ -119,7 +119,7 @@ void gitbranches_dispose (struct gitbranches *branches) {
     while (branches->head) {
         struct gitbranch *next_branch = branches->head->next;
         free (branches->head->name);
-        free (branches->head->last_commit_sign);
+        free (branches->head->lastcommit_sign);
         free (branches->head);
         branches->head = next_branch;
     }
@@ -130,7 +130,7 @@ char *gitbranch_get_name (struct gitbranch *branch) {
         DBG_LOG (DBG_ERROR, "gitbranch_get_name: branch is null");
         return NULL;
     }
-    return branch->last_commit_sign;
+    return branch->lastcommit_sign;
 }
 
 char *gitbranch_get_lastcommit_sign (struct gitbranch *branch) {
@@ -138,7 +138,7 @@ char *gitbranch_get_lastcommit_sign (struct gitbranch *branch) {
         DBG_LOG (DBG_ERROR, "gitbranch_get_lastcommit_sign: branch is null");
         return NULL;
     }
-    return branch->last_commit_sign;
+    return branch->lastcommit_sign;
 }
 
 void gitbranches_reset (struct gitbranches *branches) {

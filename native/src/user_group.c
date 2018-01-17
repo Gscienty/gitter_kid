@@ -151,8 +151,8 @@ int open_group (struct db *db) {
     return __open_db (db, O_RDONLY);
 }
 
-void dispose_group (struct db *db) {
-    __dispose_db (db);
+void dtor_group (struct db *db) {
+    __dtor_db (db);
 }
 
 int reset_group_cursor (struct db *db) {
@@ -270,7 +270,7 @@ int group_member_movenext (struct group_member *grp_mem) {
     }
 }
 
-int dispose_group_member (struct group_member *grp_mem) {
+int dtor_group_member (struct group_member *grp_mem) {
     if (grp_mem == NULL) {
         return -1;
     }

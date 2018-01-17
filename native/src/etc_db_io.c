@@ -121,7 +121,7 @@ int __open_db (struct db *db, int mode) {
     return 0;
 }
 
-void __dispose_db (struct db *db) {
+void __dtor_db (struct db *db) {
     if (db == NULL) {
         return ;
     }

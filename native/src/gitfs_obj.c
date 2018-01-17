@@ -2,56 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
-#include <zlib.h>
 #include <unistd.h>
-
-void *__zalloc (void *q, unsigned int n, unsigned int m) {
-    q = NULL;
-
-    return calloc (n, m);
-}
-
-void __zfree (void *q, void *p) {
-    q = NULL;
-
-    free (p);
-}
-
-// inflate object file
-struct __bytes *__inflate (struct __bytes *zip_buffer, int inflated_buffer_len) {
-    if (zip_buffer == NULL) {
-        return NULL;
-    }
-    struct __bytes *ret = (struct __bytes *) malloc (sizeof (*ret));
-    if (ret == NULL) {
-        return NULL;
-    }
-
-    ret->buf = (unsigned char *) malloc (sizeof (unsigned char) * inflated_buffer_len);
-    if (ret->buf == NULL) {
-        // have not enough free memory
-        DBG_LOG (DBG_ERROR, "__inflate: have not enough free memory");
-        free (ret);
-        return NULL;
-    }
-    
-    z_stream d_stream;
-    d_stream.zalloc = __zalloc;
-    d_stream.zfree = __zfree;
-    d_stream.opaque = (voidpf) 0;
-    d_stream.next_in = zip_buffer->buf;
-    d_stream.avail_in = (unsigned int) zip_buffer->len;
-
-    int err = inflateInit (&d_stream);
-    d_stream.next_out = ret->buf;
-    d_stream.avail_out = (unsigned int) inflated_buffer_len;
-    inflate (&d_stream, Z_NO_FLUSH);
-    inflateEnd (&d_stream);
-
-    ret->len = inflated_buffer_len - d_stream.avail_out;
-
-    return ret;
-}
 
 char *__gitobj_path_get (struct gitrepo *repo, const char *signture) {
     size_t path_length = strlen (repo->path);
@@ -73,27 +24,14 @@ char *__gitobj_path_get (struct gitrepo *repo, const char *signture) {
 
 // object file stored by loose type. get object content
 struct __bytes *__gitobj_loose_content (FILE *object_file) {
-    struct __bytes *ret = (struct __bytes *) malloc (sizeof (*ret));
-    if (ret == NULL) {
-        // have not enough free memory
-        DBG_LOG (DBG_ERROR, "__gitobj_loose_content: have not enough free memory");
-        return NULL;
-    }
-
     fseek (object_file, 0, SEEK_END);
     int flen = ftell (object_file);
     fseek (object_file, 0, SEEK_SET);
 
-    unsigned char *buf = malloc (sizeof (*buf) * flen);
-    if (buf == NULL) {
-        // have not enough free memory
-        return NULL;
-    }
+    struct __bytes *ret = __bytes_ctor (flen);
+    if (ret == NULL) return NULL;
 
-    fread (buf, sizeof (unsigned char), flen, object_file);
-
-    ret->buf = buf;
-    ret->len = flen;
+    fread (ret->buf, sizeof (unsigned char), flen, object_file);
 
     return ret;
 }
@@ -288,19 +226,19 @@ enum gitobj_type get_gitobj_type (struct gitobj *obj) {
     return obj->type;
 }
 
-void dispose_gitobj (struct gitobj *obj) {
+void dtor_gitobj (struct gitobj *obj) {
     if (obj == NULL) {
         return ;
     }
     switch (obj->type) {
         case GIT_OBJ_TYPE_BLOB:
-            __gitobj_blob_dispose ((struct gitobj_blob *) obj->ptr);
+            __gitobj_blob_dtor ((struct gitobj_blob *) obj->ptr);
             break;
         case GIT_OBJ_TYPE_COMMIT:
-            __gitobj_commit_dispose ((struct gitobj_commit *) obj->ptr);
+            __gitobj_commit_dtor ((struct gitobj_commit *) obj->ptr);
             break;
         case GIT_OBJ_TYPE_TREE:
-            __gitobj_tree_dispose ((struct gitobj_tree *) obj->ptr);
+            __gitobj_tree_dtor ((struct gitobj_tree *) obj->ptr);
             break;
     }
 

@@ -1,8 +1,9 @@
-﻿#ifndef _G_KID_REPOSITORY_
-#define _G_KID_REPOSITORY_
+﻿#ifndef _G_KID_GITFS_
+#define _G_KID_GITFS_
 
 #include "define.h"
 #include "rbtree.h"
+#include "util.h"
 
 #define HEX(v) ((v) < 10 ? '0' + (v) : (v) - 10 + 'a')
 
@@ -74,7 +75,7 @@ G_KID_EXTERN struct gitmarket *get_gitmarket (const char *basepath);
 
 // 析构仓库市场
 // param <market>: 仓库市场指针
-G_KID_EXTERN void gitmarket_dispose (struct gitmarket *market);
+G_KID_EXTERN void gitmarket_dtor (struct gitmarket *market);
 
 G_KID_EXTERN void gitmarket_reset (struct gitmarket *market);
 G_KID_EXTERN int gitmarket_hasnext (struct gitmarket *market);
@@ -105,20 +106,13 @@ struct gitbranches {
 };
 
 G_KID_EXTERN struct gitbranches *gitrepo_get_branches (struct gitrepo *repo);
-G_KID_EXTERN void gitbranches_dispose (struct gitbranches *branches);
+G_KID_EXTERN void gitbranches_dtor (struct gitbranches *branches);
 G_KID_EXTERN char *gitbranch_get_name (struct gitbranch *branch);
 G_KID_EXTERN char *gitbranch_get_lastcommit_sign (struct gitbranch *branch);
 
 G_KID_EXTERN void gitbranches_reset (struct gitbranches *branches);
 G_KID_EXTERN int gitbranches_hasnext (struct gitbranches *branches);
 G_KID_EXTERN struct gitbranch *gitbranches_next (struct gitbranches *branches);
-
-struct __bytes {
-    unsigned char *buf;
-    int len;
-};
-
-struct __bytes *__inflate (struct __bytes *zip_buffer, int inflated_buffer_len);
 
 // git object 类型
 enum gitobj_type {
@@ -225,7 +219,7 @@ G_KID_EXTERN struct gitobj *get_gitobj (struct gitrepo *repo, const char* signtu
 
 // 析构git object
 // param <obj>: git object
-G_KID_EXTERN void dispose_gitobj (struct gitobj *obj);
+G_KID_EXTERN void gitobj_dtor (struct gitobj *obj);
 
 // 获取当前git object 的类型
 // param <obj>: git object
@@ -251,13 +245,13 @@ G_KID_EXTERN struct gitobj_tree *get_gitobj_tree (struct gitobj *obj);
 
 struct gitobj_blob *__git_obj_transfer_blob (char *body, size_t size);
 struct gitobj *__gitpack_item_transfer_blob (struct __gitpack_item item);
-void __gitobj_blob_dispose (struct gitobj_blob *obj);
+void __gitobj_blob_dtor (struct gitobj_blob *obj);
 struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size);
 struct gitobj *__gitpack_item_transfer_commit (struct __gitpack_item item);
-void __gitobj_commit_dispose (struct gitobj_commit *obj);
+void __gitobj_commit_dtor (struct gitobj_commit *obj);
 struct gitobj_tree *__git_obj_transfer_tree (char *body, size_t size);
 struct gitobj *__gitpack_item_transfer_tree (struct __gitpack_item item);
-void __gitobj_tree_dispose (struct gitobj_tree *obj);
+void __gitobj_tree_dtor (struct gitobj_tree *obj);
 
 
 // 获取 blob 内容的长度

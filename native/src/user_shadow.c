@@ -70,6 +70,6 @@ int open_shadow (struct db *db) {
     return __open_db (db, O_RDONLY);
 }
 
-void dispose_shadow (struct db *db) {
-    __dispose_db (db);
+void dtor_shadow (struct db *db) {
+    __dtor_db (db);
 }

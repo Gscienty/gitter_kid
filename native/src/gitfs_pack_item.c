@@ -75,7 +75,7 @@ struct __gitpack_file *__gitpack_fileopen (struct __gitpack *pack) {
     return ret;
 }
 
-void __gitpack_dispose_file (struct __gitpack_file *obj) {
+void __gitpack_dtor_file (struct __gitpack_file *obj) {
     if (obj == NULL) return;
     if (obj->fd != -1) close (obj->fd);
     free (obj);
@@ -143,7 +143,7 @@ struct __gitpack_segment *__gitpack_get_segment (struct __gitpack_file *packfile
     return ret;
 }
 
-void __gitpack_dispose_segment (struct __gitpack_segment *segment) {
+void __gitpack_dtor_segment (struct __gitpack_segment *segment) {
     if (segment == NULL) return;
     if (segment->bytes.buf != NULL) free (segment->bytes.buf);
     free (segment);
@@ -216,7 +216,7 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
     return NULL;
 }
 
-void __gitpack_dispose_item (struct __gitpack_item *item) {
+void __gitpack_dtor_item (struct __gitpack_item *item) {
     if (item == NULL) return;
     if (item->base_sign != NULL) free (item->base_sign);
     if (item->bytes.buf != NULL) free (item->bytes.buf);
@@ -233,24 +233,24 @@ struct __gitpack_item *__gitpack_refdelta_patch (struct gitrepo *repo, struct __
     }
     struct __gitpack_segment *base_segment = __gitpack_get_segment (base_packfile, findret->node->off, findret->node->len);
     struct __gitpack_item *base_packitem = __gitpack_get_item (*base_segment);
-    __gitpack_dispose_segment (base_segment);
+    __gitpack_dtor_segment (base_segment);
 
     if (base_packitem == NULL) return NULL;
 
     if (base_packitem->type == 6) {
         struct __gitpack_item *tmp_packitem = __gitpack_ofsdelta_patch (repo, base_packfile, *base_packitem);
 
-        __gitpack_dispose_item (base_packitem);
+        __gitpack_dtor_item (base_packitem);
         base_packitem = tmp_packitem;
     }
     else if (base_packitem->type == 7) {
         struct __gitpack_item *tmp_packitem = __gitpack_refdelta_patch (repo, *base_packitem);
 
-        __gitpack_dispose_item (base_packitem);
+        __gitpack_dtor_item (base_packitem);
         base_packitem = tmp_packitem;
     }
 
-    __gitpack_dispose_file (base_packfile);
+    __gitpack_dtor_file (base_packfile);
     free (findret);
 
     if (base_packitem == NULL) return NULL;
@@ -260,7 +260,7 @@ struct __gitpack_item *__gitpack_refdelta_patch (struct gitrepo *repo, struct __
         return NULL;
     }
     struct __bytes *patched_buf = __gitpack_delta_patch (base_packitem->bytes, packitem);
-    __gitpack_dispose_item (base_packitem);
+    __gitpack_dtor_item (base_packitem);
     ret->bytes = *patched_buf;
     free (patched_buf);
     return ret;
@@ -271,7 +271,7 @@ struct __gitpack_item *__gitpack_ofsdelta_patch (struct gitrepo *repo, struct __
     struct __gitpack_segment *base_segment = __gitpack_get_segment (packfile, packitem.off - packitem.negative_off, 0);
     struct __gitpack_item *base_packitem = __gitpack_get_item (*base_segment);
     // printf ("%d %d %d\n", packitem.off - packitem.negative_off, packitem.off, packitem.negative_off);
-    __gitpack_dispose_segment (base_segment);
+    __gitpack_dtor_segment (base_segment);
     
     if (base_packitem == NULL) return NULL;
 
@@ -279,14 +279,14 @@ struct __gitpack_item *__gitpack_ofsdelta_patch (struct gitrepo *repo, struct __
         // if base item is ofs delta then find continue
         struct __gitpack_item *tmp_packitem = __gitpack_ofsdelta_patch (repo, packfile, *base_packitem);
         // exchange base packitem
-        __gitpack_dispose_item (base_packitem);
+        __gitpack_dtor_item (base_packitem);
         base_packitem = tmp_packitem;
     }
     else if (base_packitem->type == 7) {
         // if base item is ref delta then find continue
         struct __gitpack_item *tmp_packitem = __gitpack_refdelta_patch (repo, *base_packitem);
         // exchange base packitem
-        __gitpack_dispose_item (base_packitem);
+        __gitpack_dtor_item (base_packitem);
         base_packitem = tmp_packitem;
     }
 
@@ -305,7 +305,7 @@ struct __gitpack_item *__gitpack_ofsdelta_patch (struct gitrepo *repo, struct __
     ret->off = 0;
     ret->origin_len = ret->bytes.len;
     ret->type = base_packitem->type;
-    __gitpack_dispose_item (base_packitem);
+    __gitpack_dtor_item (base_packitem);
     return ret;
 }
 
@@ -315,7 +315,7 @@ struct gitobj *__gitpack_get_obj__common (struct gitrepo *repo, struct __gitpack
     struct __gitpack_segment *segment = __gitpack_get_segment (packfile, findret->node->off, findret->node->len);
     struct __gitpack_item *packitem = __gitpack_get_item (*segment);
     struct __gitpack_item *tmp_packitem = NULL;
-    __gitpack_dispose_segment (segment);
+    __gitpack_dtor_segment (segment);
 
     struct gitobj *ret = NULL;
     
@@ -333,17 +333,17 @@ struct gitobj *__gitpack_get_obj__common (struct gitrepo *repo, struct __gitpack
 
         case 0x06:
             tmp_packitem = __gitpack_ofsdelta_patch (repo, packfile, *packitem);
-            __gitpack_dispose_item (packitem);
+            __gitpack_dtor_item (packitem);
             packitem = tmp_packitem;
             goto apply_delta;
         case 0x07:
             tmp_packitem = __gitpack_refdelta_patch (repo, *packitem);
-            __gitpack_dispose_item (packitem);
+            __gitpack_dtor_item (packitem);
             packitem = tmp_packitem;
             goto apply_delta;
     }
 
-    __gitpack_dispose_file (packfile);
+    __gitpack_dtor_file (packfile);
     free (packitem);
 
     // int i;

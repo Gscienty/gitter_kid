@@ -141,8 +141,8 @@ int open_passwd (struct db *db) {
     return __open_db (db, O_RDWR);
 }
 
-void dispose_passwd (struct db *db) {
-    __dispose_db (db);
+void dtor_passwd (struct db *db) {
+    __dtor_db (db);
 }
 
 

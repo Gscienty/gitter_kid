@@ -64,13 +64,13 @@ struct gitmarket *get_gitmarket (const char *basepath) {
         if (ent->d_type == DT_DIR && ent->d_name[0] != '.') {
             struct gitrepo *repo = (struct gitrepo *) malloc (sizeof (*repo));
             if (repo == NULL) {
-                gitmarket_dispose (ret);
+                gitmarket_dtor (ret);
                 return NULL;
             }
             repo->name = strdup (ent->d_name);
             if (repo->name == NULL) {
                 free (repo);
-                gitmarket_dispose (ret);
+                gitmarket_dtor (ret);
                 return NULL;
             }
             int reponame_len = strlen (ent->d_name);
@@ -78,7 +78,7 @@ struct gitmarket *get_gitmarket (const char *basepath) {
             if (repo->path == NULL) {
                 free (repo->name);
                 free (repo);
-                gitmarket_dispose (ret);
+                gitmarket_dtor (ret);
                 return NULL;
             }
 
@@ -89,7 +89,7 @@ struct gitmarket *get_gitmarket (const char *basepath) {
     return ret;
 }
 
-void gitmarket_dispose (struct gitmarket *market) {
+void gitmarket_dtor (struct gitmarket *market) {
     struct gitrepo *repo = market->head;
 
     while (repo) {

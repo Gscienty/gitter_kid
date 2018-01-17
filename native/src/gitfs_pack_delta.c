@@ -18,18 +18,8 @@ struct __bytes *__gitpack_delta_patch (struct __bytes base, struct __gitpack_ite
     // printf ("[RESULT] size: %d\n", size);
     // printf ("[BASE] size: %d\n", base.len);
     // printf ("%s\n", base.buf);
-    struct __bytes *ret = (struct __bytes *) malloc (sizeof (*ret));
-    if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: have not enough free memory");
-        return NULL;
-    }
-    ret->len = size;
-    ret->buf = (unsigned char *) malloc (size);
-    if (ret->buf == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: have not enough free memory");
-        free (ret);
-        return NULL;
-    }
+    struct __bytes *ret = __bytes_ctor (size);
+    if (ret == NULL) return NULL;
 
     char *out = ret->buf;
     while (data < top) {

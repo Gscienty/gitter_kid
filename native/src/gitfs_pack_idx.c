@@ -72,12 +72,12 @@ struct __gitpack *__gitpack_get (const char *path, size_t path_len, const char *
     return ret;
 }
 
-void __gitpack_collection_dispose (struct __gitpack_collection *obj) {
+void __gitpack_collection_dtor (struct __gitpack_collection *obj) {
     if (obj == NULL) {
         return ;
     }
 
-    // TODO: dispose
+    // TODO: dtor
 }
 
 struct __opend_mmap_file {
@@ -249,7 +249,7 @@ struct __gitpack_collection *__gitpack_collection_get (struct gitrepo *repo) {
 
             struct __gitpack *pack = __gitpack_get (repo->path, path_len, ent->d_name);
             if (pack == NULL) {
-                __gitpack_collection_dispose (ret);
+                __gitpack_collection_dtor (ret);
                 closedir (dir);
                 return NULL;
             }
@@ -257,7 +257,7 @@ struct __gitpack_collection *__gitpack_collection_get (struct gitrepo *repo) {
 
             struct __opend_mmap_file *idx_mmaped = __gitpack_idxfile_open (pack);
             if (idx_mmaped == NULL) {
-                __gitpack_collection_dispose (ret);
+                __gitpack_collection_dtor (ret);
                 closedir (dir);
                 return NULL;
             }

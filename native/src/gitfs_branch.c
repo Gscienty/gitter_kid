@@ -77,7 +77,7 @@ struct gitbranches *gitrepo_get_branches (struct gitrepo *repo) {
             struct gitbranch *branch = (struct gitbranch *) malloc (sizeof (*branch));
             if (branch == NULL) {
                 DBG_LOG (DBG_ERROR, "gitrepo_get_branches: have not enough free memory");
-                gitbranches_dispose (branches);
+                gitbranches_dtor (branches);
                 return NULL;
             }
 
@@ -85,7 +85,7 @@ struct gitbranches *gitrepo_get_branches (struct gitrepo *repo) {
             if (branch->name == NULL) {
                 DBG_LOG (DBG_ERROR, "git_brangitrepo_get_branchesches_get: have not enough free memory");
                 free (branch);
-                gitbranches_dispose (branches);
+                gitbranches_dtor (branches);
                 return NULL;
             }
 
@@ -95,7 +95,7 @@ struct gitbranches *gitrepo_get_branches (struct gitrepo *repo) {
                 DBG_LOG (DBG_ERROR, "gitrepo_get_branches: have not enough free memory");
                 free (branch->name);
                 free (branch);
-                gitbranches_dispose (branches);
+                gitbranches_dtor (branches);
             }
             
             FILE *head = fopen (ref_path, "r");
@@ -111,7 +111,7 @@ struct gitbranches *gitrepo_get_branches (struct gitrepo *repo) {
     return branches;
 }
 
-void gitbranches_dispose (struct gitbranches *branches) {
+void gitbranches_dtor (struct gitbranches *branches) {
     if (branches == NULL) {
         return;
     }

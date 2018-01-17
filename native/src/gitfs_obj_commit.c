@@ -73,7 +73,7 @@ struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size) {
             if (author == NULL) {
                 // cannnot transfer author
                 DBG_LOG (DBG_ERROR, "get_gitobj_commit: author format error");
-                __gitobj_commit_dispose (ret);
+                __gitobj_commit_dtor (ret);
                 return NULL;
             }
             ret->author = author;
@@ -83,7 +83,7 @@ struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size) {
             if (committer == NULL) {
                 // cannnot transfer committer
                 DBG_LOG (DBG_ERROR, "get_gitobj_commit: committer format error");
-                __gitobj_commit_dispose (ret);
+                __gitobj_commit_dtor (ret);
                 return NULL;
             }
             ret->committer = committer;
@@ -94,7 +94,7 @@ struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size) {
             if (parent == NULL) {
                 // not enough free memory
                 DBG_LOG (DBG_ERROR, "get_gitobj_commit: not enough free memory");
-                __gitobj_commit_dispose (ret);
+                __gitobj_commit_dtor (ret);
                 return NULL;
             }
             parent->sign = ch;
@@ -132,7 +132,7 @@ struct gitobj *__gitpack_item_transfer_commit (struct __gitpack_item item) {
     return ret;
 }
 
-void __gitobj_commit_dispose (struct gitobj_commit *obj) {
+void __gitobj_commit_dtor (struct gitobj_commit *obj) {
     if (obj == NULL) {
         return ;
     }

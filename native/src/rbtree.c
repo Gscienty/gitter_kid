@@ -222,6 +222,6 @@ struct rdt_node *rdt_find__byte_string (const struct rdt *tree, const void *key)
     return __rdt_find (tree, key, __compare_byte_string);
 }
 
-void rdt_dispose (struct rdt *tree) {
+void rdt_dtor (struct rdt *tree) {
     // TODO
 }

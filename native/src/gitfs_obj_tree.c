@@ -18,7 +18,7 @@ struct gitobj_tree *__git_obj_transfer_tree (char *body, size_t size) {
         struct gitobj_treeitem *tree_item = (struct gitobj_treeitem *) malloc (sizeof (*tree_item));
         if (tree_item == NULL) {
             DBG_LOG (DBG_ERROR, "get_gitobj_tree: have not enough free memory");
-            __gitobj_tree_dispose (ret);
+            __gitobj_tree_dtor (ret);
             return NULL;
         }
 
@@ -28,7 +28,7 @@ struct gitobj_tree *__git_obj_transfer_tree (char *body, size_t size) {
         char *ep;
         if ((tree_item->type = strtol (ch, &ep, 10)) == 0 && *ep) {
             DBG_LOG (DBG_ERROR, "get_gitobj_tree: type format error");
-            __gitobj_tree_dispose (ret);
+            __gitobj_tree_dtor (ret);
             return NULL;
         }
         tree_item->name = ch = space_ptr + 1;
@@ -39,7 +39,7 @@ struct gitobj_tree *__git_obj_transfer_tree (char *body, size_t size) {
         if (tree_item->sign == NULL) {
             DBG_LOG (DBG_ERROR, "get_gitobj_tree: have not enough free memory");
             free (tree_item);
-            __gitobj_tree_dispose (ret);
+            __gitobj_tree_dtor (ret);
             return NULL;
         }
 
@@ -81,7 +81,7 @@ struct gitobj *__gitpack_item_transfer_tree (struct __gitpack_item item) {
     return ret;
 }
 
-void __gitobj_tree_dispose (struct gitobj_tree *obj) {
+void __gitobj_tree_dtor (struct gitobj_tree *obj) {
     if (obj == NULL) {
         return ;
     }

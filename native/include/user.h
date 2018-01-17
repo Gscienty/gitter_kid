@@ -57,7 +57,7 @@ struct db {
 int __open_db (struct db *, int);
 int __save_db (struct db *);
 int __append_db (struct db *, const void *);
-void __dispose_db (struct db *);
+void __dtor_db (struct db *);
 
 void *__pw_dup (const void *);
 void __pw_free (void *);
@@ -110,7 +110,7 @@ static struct ops grp_ops = {
 
 G_KID_EXTERN struct db *build_passwd_handle ();
 G_KID_EXTERN int open_passwd (struct db *);
-G_KID_EXTERN void dispose_passwd (struct db *);
+G_KID_EXTERN void dtor_passwd (struct db *);
 
 G_KID_EXTERN int reset_passwd_cursor (struct db *);
 G_KID_EXTERN struct passwd *get_current_passwd (struct db *);
@@ -127,7 +127,7 @@ G_KID_EXTERN char *get_passwd_shell (struct passwd *);
 
 G_KID_EXTERN struct db *build_group_handle ();
 G_KID_EXTERN int open_group (struct db *);
-G_KID_EXTERN void dispose_group (struct db *);
+G_KID_EXTERN void dtor_group (struct db *);
 
 G_KID_EXTERN int reset_group_cursor (struct db *);
 G_KID_EXTERN struct group *get_current_group (struct db *);
@@ -147,11 +147,11 @@ G_KID_EXTERN void reset_group_member_cursor (struct group_member *);
 G_KID_EXTERN int get_group_member_count (struct group_member *);
 G_KID_EXTERN char *get_current_group_member_name (struct group_member *);
 G_KID_EXTERN int group_member_movenext (struct group_member *);
-G_KID_EXTERN int dispose_group_member (struct group_member *);
+G_KID_EXTERN int dtor_group_member (struct group_member *);
 
 G_KID_EXTERN struct db *build_shadow_handle ();
 G_KID_EXTERN int open_shadow (struct db *);
-G_KID_EXTERN void dispose_shadow (struct db *);
+G_KID_EXTERN void dtor_shadow (struct db *);
 
 G_KID_EXTERN int create_account (struct db *db, const char *name, const char *home, const char *shell, gid_t gid);
 

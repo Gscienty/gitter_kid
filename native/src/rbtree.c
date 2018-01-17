@@ -225,8 +225,8 @@ struct rdt_node *rdt_find__byte_string (const struct rdt *tree, const void *key)
 void __rdt_subtree_dtor (struct rdt_node *node, struct rdt *tree) {
     if (node == &tree->nil) return;
 
-    __rdt_subtree_dtor (node->left);
-    __rdt_subtree_dtor (node->right);
+    __rdt_subtree_dtor (node->left, tree);
+    __rdt_subtree_dtor (node->right, tree);
 
     free (node);
 }

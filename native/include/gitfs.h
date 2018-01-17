@@ -202,7 +202,7 @@ struct __bytes *__gitpack_delta_patch (struct __bytes base, struct __gitpack_ite
 
 struct gitobj *__gitpack_getobj__charstring (struct gitrepo *repo, const char *sign);
 struct gitobj *__gitpack_getobj__bytestring (struct gitrepo *repo, const void *sign);
-struct __gitpack_collection *__gitpack_collection_get (struct gitrepo *repo);
+struct __gitpack_collection *__gitpack_get_collection (struct gitrepo *repo);
 void __gitpack_collection_dtor (struct __gitpack_collection *collection);
 
 // blob 结构体

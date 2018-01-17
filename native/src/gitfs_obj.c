@@ -212,7 +212,7 @@ struct gitobj *gitrepo_get_gitobj (struct gitrepo *repo, const char* signture) {
     char *obj_path = __gitobj_path_get (repo, signture);
 
     if (obj_path == NULL) {
-        if (repo->packes == NULL) repo->packes = __gitpack_collection_get (repo);
+        if (repo->packes == NULL) repo->packes = __gitpack_get_collection (repo);
         return __gitpack_getobj__charstring (repo, signture);
     }
     else{

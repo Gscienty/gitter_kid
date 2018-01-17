@@ -72,12 +72,30 @@ struct __gitpack *__get_gitpack (const char *path, size_t path_len, const char *
     return ret;
 }
 
+void __gitpack_dtor (struct __gitpack *pack) {
+    if (pack == NULL) return;
+    if (pack->sign != NULL) free (pack->sign);
+    if (pack->idx_path != NULL) free (pack->idx_path);
+    if (pack->pack_path != NULL) free (pack->pack_path);
+    if (pack->rd_tree != NULL) rdt_dtor (pack->rd_tree);
+    if (pack->indexes != NULL) {
+        int i;
+        for (i = 0; i < pack->count; i++) free (pack->indexes[i].sign);
+        free (pack->indexes);
+    }
+    free (pack);
+}
+
 void __gitpack_collection_dtor (struct __gitpack_collection *obj) {
-    if (obj == NULL) {
-        return ;
+    if (obj == NULL) return;
+
+    while (obj->head != NULL) {
+        struct __gitpack *next = obj->head->next;
+        __gitpack_dtor (obj->head);
+        obj->head = next;
     }
 
-    // TODO: dtor
+    free (obj);
 }
 
 struct __opend_mmap_file {
@@ -215,14 +233,14 @@ size_t __gitpack_get_size (struct __gitpack *pack) {
     return st.st_size;
 }
 
-struct __gitpack_collection *__gitpack_collection_get (struct gitrepo *repo) {
+struct __gitpack_collection *__gitpack_get_collection (struct gitrepo *repo) {
     if (repo == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_collection_get: repo is null");
+        DBG_LOG (DBG_ERROR, "__gitpack_get_collection: repo is null");
         return NULL;
     }
     struct __gitpack_collection *ret = (struct __gitpack_collection *) malloc (sizeof (*ret));
     if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_collection_get: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "__gitpack_get_collection: have not enough free memory");
         return NULL;
     }
     ret->head = ret->tail = NULL;

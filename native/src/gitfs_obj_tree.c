@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 
-struct gitobj_tree *__git_obj_transfer_tree (char *body, size_t size) {
+struct gitobj_tree *__transfer_tree (struct __bytes bytes) {
     struct gitobj_tree *ret = (struct gitobj_tree *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
@@ -13,8 +13,8 @@ struct gitobj_tree *__git_obj_transfer_tree (char *body, size_t size) {
     }
     ret->head = ret->tail = ret->cursor = NULL;
 
-    register char *ch = body;
-    while (ch < body + size) {
+    register unsigned char *ch = bytes.buf;
+    while (ch < bytes.buf + bytes.len) {
         struct gitobj_treeitem *tree_item = (struct gitobj_treeitem *) malloc (sizeof (*tree_item));
         if (tree_item == NULL) {
             DBG_LOG (DBG_ERROR, "get_gitobj_tree: have not enough free memory");
@@ -63,10 +63,10 @@ struct gitobj_tree *__git_obj_transfer_tree (char *body, size_t size) {
     return ret;
 }
 
-struct gitobj *__gitpack_item_transfer_tree (struct __gitpack_item item) {
+struct gitobj *__packitem_transfer_tree (struct __gitpack_item item) {
     struct gitobj *ret = (struct gitobj *) malloc (sizeof (*ret));
     if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_transfer_tree: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "__packitem_transfer_tree: have not enough free memory");
         return NULL;
     }
 
@@ -76,7 +76,7 @@ struct gitobj *__gitpack_item_transfer_tree (struct __gitpack_item item) {
     ret->type = GIT_OBJ_TYPE_TREE;
     ret->size = item.bytes.len;
     ret->body = item.bytes.buf;
-    ret->ptr = __git_obj_transfer_tree (item.bytes.buf, item.bytes.len);
+    ret->ptr = __transfer_tree (item.bytes);
 
     return ret;
 }
@@ -97,7 +97,7 @@ void __gitobj_tree_dtor (struct gitobj_tree *obj) {
     free (obj);
 }
 
-struct gitobj_tree *get_gitobj_tree (struct gitobj *obj) {
+struct gitobj_tree *gitobj_get_tree (struct gitobj *obj) {
     if (obj == NULL) {
         return NULL;
     }

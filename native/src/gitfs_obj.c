@@ -154,24 +154,25 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
     free (obj_header);
     free (inflated_buffer);
 
+    struct __bytes param = { ret->body, ret->size };
     switch (ret->type) {
         case GIT_OBJ_TYPE_BLOB:
             DBG_LOG (DBG_INFO, "get_gitobj: transfer to blob");
-            ret->ptr = (void *) __git_obj_transfer_blob (ret->body, ret->size);
+            ret->ptr = (void *) __transfer_blob (param);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
             break;
         case GIT_OBJ_TYPE_COMMIT:
             DBG_LOG (DBG_INFO, "get_gitobj: transfer to commit");
-            ret->ptr = (void *) __git_obj_transfer_commit (ret->body, ret->size);
+            ret->ptr = (void *) __transfer_commit (param);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
             break;
         case GIT_OBJ_TYPE_TREE:
             DBG_LOG (DBG_INFO, "get_gitobj: transfer to tree");
-            ret->ptr = (void *) __git_obj_transfer_tree (ret->body, ret->size);
+            ret->ptr = (void *) __transfer_tree (param);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
@@ -189,7 +190,7 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
     return ret;
 }
 
-struct gitobj *get_gitobj (struct gitrepo *repo, const char* signture) {
+struct gitobj *gitrepo_get_gitobj (struct gitrepo *repo, const char* signture) {
     if (repo == NULL) {
         return NULL;
     }
@@ -222,7 +223,7 @@ struct gitobj *get_gitobj (struct gitrepo *repo, const char* signture) {
     }
 }
 
-enum gitobj_type get_gitobj_type (struct gitobj *obj) {
+enum gitobj_type gitobj_get_type (struct gitobj *obj) {
     return obj->type;
 }
 

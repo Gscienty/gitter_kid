@@ -322,13 +322,13 @@ struct gitobj *__gitpack_get_obj__common (struct gitrepo *repo, struct __gitpack
     apply_delta:
     switch (packitem->type) {
         case 0x01:
-            ret = __gitpack_item_transfer_commit (*packitem);
+            ret = __packitem_transfer_commit (*packitem);
             break;
         case 0x02:
-            ret = __gitpack_item_transfer_tree (*packitem);
+            ret = __packitem_transfer_tree (*packitem);
             break;
         case 0x03:
-            ret = __gitpack_item_transfer_blob (*packitem);
+            ret = __packitem_transfer_blob (*packitem);
             break;
 
         case 0x06:

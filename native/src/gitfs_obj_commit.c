@@ -40,7 +40,7 @@ struct gitperson *__transfer_person_log (const char *ch) {
         return ret;
 }
 
-struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size) {
+struct gitobj_commit *__transfer_commit (struct __bytes bytes) {
     struct gitobj_commit *ret = (struct gitobj_commit *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
@@ -51,9 +51,9 @@ struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size) {
     ret->tree_sign = ret->message = NULL;
     ret->author = ret->committer = NULL;
 
-    register char *ch;
-    for (ch = body; *ch;) {
-        char *end_ptr = strchr (ch, '\n');
+    register unsigned char *ch;
+    for (ch = bytes.buf; *ch;) {
+        unsigned char *end_ptr = strchr (ch, '\n');
         if (end_ptr == NULL) {
             break;
         }
@@ -114,10 +114,10 @@ struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size) {
     return ret;
 }
 
-struct gitobj *__gitpack_item_transfer_commit (struct __gitpack_item item) {
+struct gitobj *__packitem_transfer_commit (struct __gitpack_item item) {
     struct gitobj *ret = (struct gitobj *) malloc (sizeof (*ret));
     if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_transfer_commit: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "__packitem_transfer_commit: have not enough free memory");
         return NULL;
     }
 
@@ -127,7 +127,7 @@ struct gitobj *__gitpack_item_transfer_commit (struct __gitpack_item item) {
     ret->type = GIT_OBJ_TYPE_COMMIT;
     ret->size = item.bytes.len;
     ret->body = item.bytes.buf;
-    ret->ptr = __git_obj_transfer_commit (item.bytes.buf, item.bytes.len);
+    ret->ptr = __transfer_commit (item.bytes);
 
     return ret;
 }
@@ -154,9 +154,9 @@ void __gitobj_commit_dtor (struct gitobj_commit *obj) {
     free (obj);
 }
 
-struct gitobj_commit *get_gitobj_commit (struct gitobj *obj) {
+struct gitobj_commit *gitobj_get_commit (struct gitobj *obj) {
     if (obj == NULL) {
-        DBG_LOG (DBG_ERROR, "get_gitobj_commit: object is null");
+        DBG_LOG (DBG_ERROR, "gitobj_get_commit: object is null");
         return NULL;
     }
 
@@ -164,7 +164,7 @@ struct gitobj_commit *get_gitobj_commit (struct gitobj *obj) {
         return (struct gitobj_commit *) obj->ptr;
     }
     else {
-        DBG_LOG (DBG_ERROR, "get_gitobj_commit: object's type error");
+        DBG_LOG (DBG_ERROR, "gitobj_get_commit: object's type error");
         return NULL;
     }
 }

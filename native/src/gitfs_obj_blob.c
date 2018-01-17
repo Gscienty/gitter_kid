@@ -3,22 +3,22 @@
 #include <malloc.h>
 #include <stdlib.h>
 
-struct gitobj_blob *__git_obj_transfer_blob (char *body, size_t size) {
+struct gitobj_blob *__transfer_blob (struct __bytes bytes) {
     struct gitobj_blob *ret = (struct gitobj_blob *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_INFO, "have not enough free memory");
         return NULL;
     }
-    ret->len = size;
-    ret->content = body;
+    ret->len = bytes.len;
+    ret->content = bytes.buf;
     
     return ret;
 }
 
-struct gitobj *__gitpack_item_transfer_blob (struct __gitpack_item item) {
+struct gitobj *__packitem_transfer_blob (struct __gitpack_item item) {
     struct gitobj *ret = (struct gitobj *) malloc (sizeof (*ret));
     if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_item_transfer_blob: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "__packitem_transfer_blob: have not enough free memory");
         return NULL;
     }
 
@@ -28,12 +28,12 @@ struct gitobj *__gitpack_item_transfer_blob (struct __gitpack_item item) {
     ret->type = GIT_OBJ_TYPE_BLOB;
     ret->size = item.bytes.len;
     ret->body = item.bytes.buf;
-    ret->ptr = __git_obj_transfer_blob (item.bytes.buf, item.bytes.len);
+    ret->ptr = __transfer_blob (item.bytes);
 
     return ret;
 }
 
-struct gitobj_blob *get_gitobj_blob (struct gitobj *obj) {
+struct gitobj_blob *gitobj_get_blob (struct gitobj *obj) {
     if (obj == NULL) {
         return NULL;
     }

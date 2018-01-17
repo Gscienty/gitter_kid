@@ -215,7 +215,7 @@ struct gitobj_tree {
 // param <repo>: 仓库指针
 // param <signture>: git object 签名
 // return: git object
-G_KID_EXTERN struct gitobj *get_gitobj (struct gitrepo *repo, const char* signture);
+G_KID_EXTERN struct gitobj *gitrepo_get_gitobj (struct gitrepo *repo, const char* signture);
 
 // 析构git object
 // param <obj>: git object
@@ -224,33 +224,35 @@ G_KID_EXTERN void gitobj_dtor (struct gitobj *obj);
 // 获取当前git object 的类型
 // param <obj>: git object
 // return: 0-Unknow | 1-blob | 2-commit | 3-tree
-G_KID_EXTERN enum gitobj_type get_gitobj_type (struct gitobj *obj);
+G_KID_EXTERN enum gitobj_type gitobj_get_type (struct gitobj *obj);
 
 
 // 通过 git object 获取 blob
 // param <obj>: git object
 // return: blob object
-G_KID_EXTERN struct gitobj_blob *get_gitobj_blob (struct gitobj *obj);
+G_KID_EXTERN struct gitobj_blob *gitobj_get_blob (struct gitobj *obj);
 
 // 通过 git object 获取 commit
 // param <obj>: git object
 // return: commit object
-G_KID_EXTERN struct gitobj_commit *get_gitobj_commit (struct gitobj *obj);
+G_KID_EXTERN struct gitobj_commit *gitobj_get_commit (struct gitobj *obj);
 
 // 通过 git object 获取 tree
 // param <obj>: git object
 // return: tree object
-G_KID_EXTERN struct gitobj_tree *get_gitobj_tree (struct gitobj *obj);
+G_KID_EXTERN struct gitobj_tree *gitobj_get_tree (struct gitobj *obj);
 
 
-struct gitobj_blob *__git_obj_transfer_blob (char *body, size_t size);
-struct gitobj *__gitpack_item_transfer_blob (struct __gitpack_item item);
+struct gitobj_blob *__transfer_blob (struct __bytes bytes);
+struct gitobj *__packitem_transfer_blob (struct __gitpack_item item);
 void __gitobj_blob_dtor (struct gitobj_blob *obj);
-struct gitobj_commit *__git_obj_transfer_commit (char *body, size_t size);
-struct gitobj *__gitpack_item_transfer_commit (struct __gitpack_item item);
+
+struct gitobj_commit *__transfer_commit (struct __bytes bytes);
+struct gitobj *__packitem_transfer_commit (struct __gitpack_item item);
 void __gitobj_commit_dtor (struct gitobj_commit *obj);
-struct gitobj_tree *__git_obj_transfer_tree (char *body, size_t size);
-struct gitobj *__gitpack_item_transfer_tree (struct __gitpack_item item);
+
+struct gitobj_tree *__transfer_tree (struct __bytes bytes);
+struct gitobj *__packitem_transfer_tree (struct __gitpack_item item);
 void __gitobj_tree_dtor (struct gitobj_tree *obj);
 
 

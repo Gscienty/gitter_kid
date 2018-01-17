@@ -222,7 +222,7 @@ size_t __gitpack_size_get (struct __gitpack *pack) {
     return st.st_size;
 }
 
-struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo) {
+struct __gitpack_collection *__gitpack_collection_get (struct gitrepo *repo) {
     if (repo == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_collection_get: repo is null");
         return NULL;

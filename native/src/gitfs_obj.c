@@ -18,11 +18,11 @@ void __zfree (void *q, void *p) {
 }
 
 // inflate object file
-struct __buf *__inflate (struct __buf *zip_buffer, int inflated_buffer_len) {
+struct __bytes *__inflate (struct __bytes *zip_buffer, int inflated_buffer_len) {
     if (zip_buffer == NULL) {
         return NULL;
     }
-    struct __buf *ret = (struct __buf *) malloc (sizeof (*ret));
+    struct __bytes *ret = (struct __bytes *) malloc (sizeof (*ret));
     if (ret == NULL) {
         return NULL;
     }
@@ -53,7 +53,7 @@ struct __buf *__inflate (struct __buf *zip_buffer, int inflated_buffer_len) {
     return ret;
 }
 
-char *__gitobj_path_get (struct git_repo *repo, const char *signture) {
+char *__gitobj_path_get (struct gitrepo *repo, const char *signture) {
     size_t path_length = strlen (repo->path);
     char *ret = malloc (path_length + 128);
     if (ret == NULL) {
@@ -72,8 +72,8 @@ char *__gitobj_path_get (struct git_repo *repo, const char *signture) {
 
 
 // object file stored by loose type. get object content
-struct __buf *__gitobj_loose_content (FILE *object_file) {
-    struct __buf *ret = (struct __buf *) malloc (sizeof (*ret));
+struct __bytes *__gitobj_loose_content (FILE *object_file) {
+    struct __bytes *ret = (struct __bytes *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // have not enough free memory
         DBG_LOG (DBG_ERROR, "__gitobj_loose_content: have not enough free memory");
@@ -99,7 +99,7 @@ struct __buf *__gitobj_loose_content (FILE *object_file) {
 }
 
 // get repository's object file
-struct __buf *__gitobj_get (const char *path) {
+struct __bytes *__gitobj_get (const char *path) {
     if (path == NULL) {
         DBG_LOG (DBG_ERROR, "__gitobj_get: object file's path is null");
         return NULL;
@@ -110,7 +110,7 @@ struct __buf *__gitobj_get (const char *path) {
         DBG_LOG (DBG_ERROR, "__gitobj_get: cannot open object file");
         return NULL;
     }
-    struct __buf *ret = __gitobj_loose_content (object_file);
+    struct __bytes *ret = __gitobj_loose_content (object_file);
 
     fclose (object_file);
     
@@ -162,15 +162,15 @@ struct __gitobj_header *__gitobj_header_get (unsigned char *buf) {
     return ret;
 }
 
-struct __buf *__gitobj_get_content (const char *path) {
-    struct __buf *deflated_obj = __gitobj_get (path);
+struct __bytes *__gitobj_get_content (const char *path) {
+    struct __bytes *deflated_obj = __gitobj_get (path);
     if (deflated_obj == NULL) {
         // cannot get obj file. reason maybe have not enough memory or the object file not exist.
         DBG_LOG (DBG_ERROR, "get_gitobj: cannot get obj file");
         return NULL;
     }
     // inflate origin object file's content
-    struct __buf *inflated_buffer = __inflate (deflated_obj, deflated_obj->len * 3 + 1024);
+    struct __bytes *inflated_buffer = __inflate (deflated_obj, deflated_obj->len * 3 + 1024);
     // clear object file's used memory
     free (deflated_obj->buf);
     free (deflated_obj);
@@ -190,7 +190,7 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
         return NULL;
     }
 
-    struct __buf *inflated_buffer = __gitobj_get_content (obj_path);
+    struct __bytes *inflated_buffer = __gitobj_get_content (obj_path);
     if (inflated_buffer == NULL) return NULL;
 
     // try get object file header, which contains object file's type & length
@@ -251,7 +251,7 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
     return ret;
 }
 
-struct gitobj *get_gitobj (struct git_repo *repo, const char* signture) {
+struct gitobj *get_gitobj (struct gitrepo *repo, const char* signture) {
     if (repo == NULL) {
         return NULL;
     }

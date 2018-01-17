@@ -60,9 +60,9 @@ int test_market_init () {
     gitmarket_reset (market);
 
     while (gitmarket_hasnext (market)) {
-        struct git_repo *repo = gitmarket_next (market);
+        struct gitrepo *repo = gitmarket_next (market);
         
-        if (strcmp (git_repo_name (repo), "repo") == 0) {
+        if (strcmp (gitrepo_get_name (repo), "repo") == 0) {
             struct gitobj *obj = get_gitobj (repo, "ce013625030ba8dba906f756967f9e9ca394464a");
         }
     }
@@ -83,9 +83,9 @@ int test_branches () {
     gitmarket_reset (market);
 
     while (gitmarket_hasnext (market)) {
-        struct git_repo *repo = gitmarket_next (market);
+        struct gitrepo *repo = gitmarket_next (market);
         
-        if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
+        if (strcmp (gitrepo_get_name (repo), "gitterRepo") == 0) {
             struct gitbranches *branches = gitrepo_get_branches (repo);
             gitbranches_reset (branches);
 
@@ -109,9 +109,9 @@ int test_commits_parent () {
     gitmarket_reset (market);
 
     while (gitmarket_hasnext (market)) {
-        struct git_repo *repo = gitmarket_next (market);
+        struct gitrepo *repo = gitmarket_next (market);
         
-        if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
+        if (strcmp (gitrepo_get_name (repo), "gitterRepo") == 0) {
             struct gitobj *obj = get_gitobj (repo, "54415a12532e7e77dfc4037962e870abe72e0300");
             struct gitobj_commit *commit = get_gitobj_commit (obj);
 
@@ -132,8 +132,8 @@ int test_pack () {
     gitmarket_reset (market);
 
     while (gitmarket_hasnext (market)) {
-        struct git_repo *repo = gitmarket_next (market);
-        if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
+        struct gitrepo *repo = gitmarket_next (market);
+        if (strcmp (gitrepo_get_name (repo), "gitterRepo") == 0) {
             // printf ("TYPE: %d\n", get_gitobj (repo, "6074c189b9f709892de2f413f08b1be6b9eab0af")->type);
             // printf ("TYPE: %d\n", get_gitobj (repo, "1aea93543e697af2f00499c53116bbb3cc8ffcbf")->type);
             // printf ("TYPE: %d\n", get_gitobj (repo, "ec4735f69b5d60b91d95634f511200ad37486ba4")->type);

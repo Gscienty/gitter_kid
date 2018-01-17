@@ -21,7 +21,7 @@ char *__gitrepo_get_path (const char *basepath, size_t basepath_len, const char 
     return ret;
 }
 
-void __gitmarket_append (struct gitmarket *market, struct git_repo* repo) {
+void __gitmarket_append (struct gitmarket *market, struct gitrepo* repo) {
     repo->packes = NULL;
     repo->prev = market->tail;
     repo->next = NULL;
@@ -62,7 +62,7 @@ struct gitmarket *get_gitmarket (const char *basepath) {
     int basepath_len = strlen (basepath);
     while ((ent = readdir (dir))) {
         if (ent->d_type == DT_DIR && ent->d_name[0] != '.') {
-            struct git_repo *repo = (struct git_repo *) malloc (sizeof (*repo));
+            struct gitrepo *repo = (struct gitrepo *) malloc (sizeof (*repo));
             if (repo == NULL) {
                 gitmarket_dispose (ret);
                 return NULL;
@@ -90,13 +90,13 @@ struct gitmarket *get_gitmarket (const char *basepath) {
 }
 
 void gitmarket_dispose (struct gitmarket *market) {
-    struct git_repo *repo = market->head;
+    struct gitrepo *repo = market->head;
 
     while (repo) {
         free (repo->path);
         free (repo->name);
 
-        struct git_repo *next_repo = repo->next;
+        struct gitrepo *next_repo = repo->next;
         free (repo);
         repo = next_repo;
     }
@@ -123,7 +123,7 @@ int gitmarket_hasnext (struct gitmarket *market) {
     return (market->cursor == NULL ?market->head : market->cursor->next) != NULL;
 }
 
-struct git_repo *gitmarket_next (struct gitmarket *market) {
+struct gitrepo *gitmarket_next (struct gitmarket *market) {
     if (market == NULL) {
         DBG_LOG (DBG_ERROR, "gitmarket_next: market is null");
         return NULL;
@@ -132,14 +132,14 @@ struct git_repo *gitmarket_next (struct gitmarket *market) {
     return (market->cursor = (market->cursor == NULL ? market->head : market->cursor->next));
 }
 
-G_KID_EXTERN char *git_repo_path (struct git_repo *repo) {
+G_KID_EXTERN char *gitrepo_get_path (struct gitrepo *repo) {
     if (repo == NULL) {
         return NULL;
     }
     return repo->path;
 }
 
-G_KID_EXTERN char *git_repo_name (struct git_repo *repo) {
+G_KID_EXTERN char *gitrepo_get_name (struct gitrepo *repo) {
     if (repo == NULL) {
         return NULL;
     }

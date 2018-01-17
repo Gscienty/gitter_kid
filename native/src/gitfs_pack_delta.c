@@ -2,9 +2,9 @@
 #include <malloc.h>
 #include <string.h>
 
-struct __buf *__gitpack_delta_patch (struct __buf base, struct __gitpack_item delta) {
-    unsigned char *data = delta.buf.buf + 2;
-    const unsigned char *top = (const unsigned char *) delta.buf.buf + delta.buf.len;
+struct __bytes *__gitpack_delta_patch (struct __bytes base, struct __gitpack_item delta) {
+    unsigned char *data = delta.bytes.buf + 2;
+    const unsigned char *top = (const unsigned char *) delta.bytes.buf + delta.bytes.len;
 
     size_t size = 0;
 
@@ -18,7 +18,7 @@ struct __buf *__gitpack_delta_patch (struct __buf base, struct __gitpack_item de
     // printf ("[RESULT] size: %d\n", size);
     // printf ("[BASE] size: %d\n", base.len);
     // printf ("%s\n", base.buf);
-    struct __buf *ret = (struct __buf *) malloc (sizeof (*ret));
+    struct __bytes *ret = (struct __bytes *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: have not enough free memory");
         return NULL;

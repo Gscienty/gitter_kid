@@ -121,13 +121,13 @@ struct gitobj *__gitpack_item_transfer_commit (struct __gitpack_item item) {
         return NULL;
     }
 
-    ret->buf = item.buf.buf;
+    ret->buf = item.bytes.buf;
     ret->path = NULL;
     ret->sign = NULL;
     ret->type = GIT_OBJ_TYPE_COMMIT;
-    ret->size = item.buf.len;
-    ret->body = item.buf.buf;
-    ret->ptr = __git_obj_transfer_commit (item.buf.buf, item.buf.len);
+    ret->size = item.bytes.len;
+    ret->body = item.bytes.buf;
+    ret->ptr = __git_obj_transfer_commit (item.bytes.buf, item.bytes.len);
 
     return ret;
 }

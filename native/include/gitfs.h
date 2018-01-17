@@ -33,21 +33,21 @@ struct __gitpack_collection {
 
 
 // 仓库结构体
-struct git_repo {
+struct gitrepo {
     char *path;                             // 仓库路径
     char *name;                             // 仓库名称
     struct __gitpack_collection *packes;    // 压缩包集合
-    struct git_repo *prev;                  // 下一个仓库
-    struct git_repo *next;                  // 上一个仓库
+    struct gitrepo *prev;                  // 下一个仓库
+    struct gitrepo *next;                  // 上一个仓库
 };
 
 // 仓库市场结构体
 struct gitmarket {
     char *path;                 //仓库市场路径
 
-    struct git_repo *head;      // 仓库队列头部指针
-    struct git_repo *tail;      // 仓库队列尾部指针
-    struct git_repo *cursor;    //仓库游标
+    struct gitrepo *head;      // 仓库队列头部指针
+    struct gitrepo *tail;      // 仓库队列尾部指针
+    struct gitrepo *cursor;    //仓库游标
 };
 
 #define USER_READABLE    0400
@@ -78,17 +78,17 @@ G_KID_EXTERN void gitmarket_dispose (struct gitmarket *market);
 
 G_KID_EXTERN void gitmarket_reset (struct gitmarket *market);
 G_KID_EXTERN int gitmarket_hasnext (struct gitmarket *market);
-G_KID_EXTERN struct git_repo *gitmarket_next (struct gitmarket *market);
+G_KID_EXTERN struct gitrepo *gitmarket_next (struct gitmarket *market);
 
 // 获取仓库路径
 // param <repo>: 仓库指针
 // return: 仓库路径
-G_KID_EXTERN char *git_repo_path (struct git_repo *repo);
+G_KID_EXTERN char *gitrepo_get_path (struct gitrepo *repo);
 
 // 获取仓库名称
 // param <repo>: 仓库指针
 // return: 仓库名称
-G_KID_EXTERN char *git_repo_name (struct git_repo *repo);
+G_KID_EXTERN char *gitrepo_get_name (struct gitrepo *repo);
 
 struct gitbranch {
     char *name;
@@ -104,7 +104,7 @@ struct gitbranches {
     struct gitbranch *cursor;
 };
 
-G_KID_EXTERN struct gitbranches *gitrepo_get_branches (struct git_repo *repo);
+G_KID_EXTERN struct gitbranches *gitrepo_get_branches (struct gitrepo *repo);
 G_KID_EXTERN void gitbranches_dispose (struct gitbranches *branches);
 G_KID_EXTERN char *gitbranch_get_name (struct gitbranch *branch);
 G_KID_EXTERN char *gitbranch_get_lastcommit_sign (struct gitbranch *branch);
@@ -113,12 +113,12 @@ G_KID_EXTERN void gitbranches_reset (struct gitbranches *branches);
 G_KID_EXTERN int gitbranches_hasnext (struct gitbranches *branches);
 G_KID_EXTERN struct gitbranch *gitbranches_next (struct gitbranches *branches);
 
-struct __buf {
+struct __bytes {
     unsigned char *buf;
     int len;
 };
 
-struct __buf *__inflate (struct __buf *zip_buffer, int inflated_buffer_len);
+struct __bytes *__inflate (struct __bytes *zip_buffer, int inflated_buffer_len);
 
 // git object 类型
 enum gitobj_type {
@@ -149,7 +149,7 @@ struct __gitpack_file {
 };
 
 struct __gitpack_item {
-    struct __buf buf;
+    struct __bytes bytes;
     unsigned char type;
 
     void *base_sign;
@@ -158,14 +158,14 @@ struct __gitpack_item {
     size_t origin_len;
 };
 
-struct __gitpack_item *__gitpack_ofsdelta_patch (struct git_repo *repo, struct __gitpack_file *packfile, struct __gitpack_item packitem);
-struct __gitpack_item *__gitpack_refdelta_patch (struct git_repo *repo, struct __gitpack_item packitem);
+struct __gitpack_item *__gitpack_ofsdelta_patch (struct gitrepo *repo, struct __gitpack_file *packfile, struct __gitpack_item packitem);
+struct __gitpack_item *__gitpack_refdelta_patch (struct gitrepo *repo, struct __gitpack_item packitem);
 
-struct __buf *__gitpack_delta_patch (struct __buf base, struct __gitpack_item delta);
+struct __bytes *__gitpack_delta_patch (struct __bytes base, struct __gitpack_item delta);
 
-struct gitobj *__gitpack_getobj__charstring (struct git_repo *repo, const char *sign);
-struct gitobj *__gitpack_getobj__bytestring (struct git_repo *repo, const void *sign);
-struct __gitpack_collection *__gitpack_collection_get (struct git_repo *repo);
+struct gitobj *__gitpack_getobj__charstring (struct gitrepo *repo, const char *sign);
+struct gitobj *__gitpack_getobj__bytestring (struct gitrepo *repo, const void *sign);
+struct __gitpack_collection *__gitpack_collection_get (struct gitrepo *repo);
 
 // blob 结构体
 struct gitobj_blob {
@@ -221,7 +221,7 @@ struct gitobj_tree {
 // param <repo>: 仓库指针
 // param <signture>: git object 签名
 // return: git object
-G_KID_EXTERN struct gitobj *get_gitobj (struct git_repo *repo, const char* signture);
+G_KID_EXTERN struct gitobj *get_gitobj (struct gitrepo *repo, const char* signture);
 
 // 析构git object
 // param <obj>: git object

@@ -48,7 +48,7 @@ void __gitbranches_append (struct gitbranches *branches, struct gitbranch *branc
     branches->tail = branch;
 }
 
-struct gitbranches *gitrepo_get_branches (struct git_repo *repo) {
+struct gitbranches *gitrepo_get_branches (struct gitrepo *repo) {
     if (repo == NULL) {
         DBG_LOG (DBG_ERROR, "gitrepo_get_branches: repo is null");
         return NULL;

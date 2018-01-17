@@ -22,7 +22,7 @@ public class PersonLog {
 	 * @return person log的名称
 	 */
 	public String getName() {
-		return this.lib.git_person_log_name(this.handle);
+		return this.lib.gitperson_get_name (this.handle);
 	}
 	
 	/**
@@ -30,7 +30,7 @@ public class PersonLog {
 	 * @return person log的mail
 	 */
 	public String getMail() {
-		return this.lib.git_person_log_mail(this.handle);
+		return this.lib.gitperson_get_mail (this.handle);
 	}
 	
 	/**
@@ -38,7 +38,7 @@ public class PersonLog {
 	 * @return person log的时区
 	 */
 	public String getTimeZone() {
-		return this.lib.git_person_timezone(this.handle);
+		return this.lib.gitperson_get_timezone (this.handle);
 	}
 	
 	/**
@@ -46,6 +46,6 @@ public class PersonLog {
 	 * @return person log的时间戳
 	 */
 	public long getTimestamp() {
-		return this.lib.git_person_log_timestamp(this.handle);
+		return this.lib.gitperson_get_timestamp (this.handle);
 	}
 }

@@ -14,22 +14,20 @@ public class GitBranches
 	implements Iterable<GitBranch>, Iterator<GitBranch>, IQueryable<GitBranch> {
 	private Repository repository;
 	private Pointer handle;
-	private boolean iterateFirst;
 	private IRepositoryLibrary lib;
 	
-	public GitBranches(Repository repository, Pointer branchesPointer) {
+	public GitBranches (Repository repository, Pointer branchesPointer) {
 		this.handle = branchesPointer;
 		this.lib = IRepositoryLibrary.Instance;
-		this.iterateFirst = true;
 		this.repository = repository;
 		
-		this.lib.git_branches_reset(this.handle);
+		this.lib.gitbranches_reset (this.handle);
 	}
 	
 	@Override
-	public boolean any(Predicate<GitBranch> predicate) {
+	public boolean any (Predicate<GitBranch> predicate) {
 		for (GitBranch branch : this) {
-			if (predicate.test(branch)) {
+			if (predicate.test (branch)) {
 				return true;
 			}
 		}
@@ -37,9 +35,9 @@ public class GitBranches
 	}
 
 	@Override
-	public boolean all(Predicate<GitBranch> predicate) {
+	public boolean all (Predicate<GitBranch> predicate) {
 		for (GitBranch branch : this) {
-			if (predicate.test(branch) == false) {
+			if (predicate.test (branch) == false) {
 				return false;
 			}
 		}
@@ -47,9 +45,9 @@ public class GitBranches
 	}
 
 	@Override
-	public GitBranch first(Predicate<GitBranch> predicate) {
+	public GitBranch first (Predicate<GitBranch> predicate) {
 		for (GitBranch branch : this) {
-			if (predicate.test(branch)) {
+			if (predicate.test (branch)) {
 				return branch;
 			}
 		}
@@ -57,35 +55,27 @@ public class GitBranches
 	}
 
 	@Override
-	public <R> List<R> filter(Function<GitBranch, R> transfer) {
-		List<R> result = new Vector<>();
+	public <R> List<R> filter (Function<GitBranch, R> transfer) {
+		List<R> result = new Vector<> ();
 		for (GitBranch branch : this) {
-			result.add(transfer.apply(branch));
+			result.add (transfer.apply (branch));
 		}
 		return result;
 	}
 
 	@Override
-	public boolean hasNext() {
-		if (this.iterateFirst) {
-			this.iterateFirst = false;
-			return this.lib.git_branches_get_current(this.handle) != Pointer.NULL;
-		}
-		
-		return this.lib.git_branches_move_next(this.handle) == 0;
+	public boolean hasNext () {
+		return this.lib.gitbranches_hasnext (this.handle) != 0;
 	}
 
 	@Override
 	public GitBranch next() {
-		return new GitBranch(
-			this.repository,
-			this.lib.git_branches_get_current(this.handle)
-		);
+		return new GitBranch (this.repository, this.lib.gitbranches_next (this.handle));
 	}
 
 	@Override
 	public Iterator<GitBranch> iterator() {
-		this.lib.git_branches_reset(this.handle);
+		this.lib.gitbranches_reset (this.handle);
 		return this;
 	}
 
@@ -94,7 +84,7 @@ public class GitBranches
      */
     @Override
     protected void finalize() throws Throwable {
-        this.lib.git_branches_dispose(this.handle);
+        this.lib.gitbranches_dtor (this.handle);
         super.finalize();
     }
 }

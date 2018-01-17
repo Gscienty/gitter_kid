@@ -15,7 +15,7 @@ public abstract class GitObject {
         this.lib = IGitObjectLibrary.Instance;
         this.signture = signture;
         this.repository = repository;
-        this.objHandle = this.lib.git_obj_get(repository.getHandle(), this.signture);
+        this.objHandle = this.lib.gitrepo_get_gitobj (repository.getHandle(), this.signture);
         
         this.objectType = null;
     }
@@ -28,9 +28,9 @@ public abstract class GitObject {
      * 获取实体对象的类型
      * @return
      */
-    public GitObjectType getObjectType() {
+    public GitObjectType getObjectType () {
         if (this.objectType == null) {
-            int numericObjType = this.lib.git_obj_type(this.objHandle);
+            int numericObjType = this.lib.gitobj_get_type (this.objHandle);
 
             switch (numericObjType) {
                 case 0: this.objectType = GitObjectType.Unknow; break;
@@ -48,8 +48,8 @@ public abstract class GitObject {
      * 析构方法
      */
     @Override
-    protected void finalize() throws Throwable {
-        this.lib.git_obj_dispose(this.objHandle);
-        super.finalize();
+    protected void finalize () throws Throwable {
+        this.lib.gitobj_dtor (this.objHandle);
+        super.finalize ();
     }
 }

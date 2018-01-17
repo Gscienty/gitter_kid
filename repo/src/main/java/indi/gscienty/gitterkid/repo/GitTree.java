@@ -18,36 +18,28 @@ public class GitTree
 	implements Iterable<GitTree.Item>, Iterator<GitTree.Item>, IQueryable<GitTree.Item> {
 	
 	private Pointer handle;
-	private boolean iterateFirst;
 
-	public GitTree(Repository repository, String signture) {
-		super(repository, signture);
-		this.iterateFirst = true;
-		this.handle = this.lib.git_obj_get_tree(this.objHandle);
+	public GitTree (Repository repository, String signture) {
+		super (repository, signture);
+		this.handle = this.lib.gitobj_get_tree (this.objHandle);
 	}
 
-	public Iterator<Item> iterator() {
-		this.lib.git_obj_tree_reset(this.handle);
-		this.iterateFirst = true;
+	public Iterator<Item> iterator () {
+		this.lib.gitobj_tree_reset (this.handle);
 		return this;
 	}
 
-	public boolean hasNext() {
-		if (this.iterateFirst) {
-			this.iterateFirst = false;
-			return this.lib.git_obj_tree_current(this.handle) != Pointer.NULL;
-		}
-		
-		return this.lib.git_obj_tree_move_next(this.handle) == 0;
+	public boolean hasNext () {
+		return this.lib.gitobj_tree_hasnext (this.handle) != 0;
 	}
 
 
-	public Item next() {
-		Pointer itemPointer = this.lib.git_obj_tree_current(this.handle);
-		String name = this.lib.git_obj_tree_item_name(itemPointer);
-		String signture = this.lib.git_obj_tree_item_sign(itemPointer);
+	public Item next () {
+		Pointer itemPointer = this.lib.gitobj_tree_next (this.handle);
+		String name = this.lib.gitobj_treeitem_get_name (itemPointer);
+		String signture = this.lib.gitobj_treeitem_get_sign (itemPointer);
 		
-		switch (this.lib.git_obj_tree_item_type(itemPointer)) {
+		switch (this.lib.gitobj_treeitem_get_type (itemPointer)) {
 			case 3:
 				return new TreeItem(this.repository, name, signture);
 			default:
@@ -58,9 +50,9 @@ public class GitTree
 	/**
 	 * Tree中是否存在满足某条件的Tree Item
 	 */
-	public boolean any(Predicate<Item> predicate) {
+	public boolean any (Predicate<Item> predicate) {
 		for (Item item : this) {
-			if (predicate.test(item)) {
+			if (predicate.test (item)) {
 				return true;
 			}
 		}
@@ -70,9 +62,9 @@ public class GitTree
 	/**
 	 * Tree中的元素是否全部满足某条件
 	 */
-	public boolean all(Predicate<Item> predicate) {
+	public boolean all (Predicate<Item> predicate) {
 		for (Item item : this) {
-			if (predicate.test(item) == false) {
+			if (predicate.test (item) == false) {
 				return false;
 			}
 		}
@@ -82,9 +74,9 @@ public class GitTree
 	/**
 	 * 返回Tree中第一个满足某条件的Tree Item
 	 */
-	public Item first(Predicate<Item> predicate) {
+	public Item first (Predicate<Item> predicate) {
 		for (Item item : this) {
-			if (predicate.test(item)) {
+			if (predicate.test (item)) {
 				return item;
 			}
 		}
@@ -94,10 +86,10 @@ public class GitTree
 	/**
 	 * 将Tree内的元素映射成为新的集合
 	 */
-	public <R> List<R> filter(Function<Item, R> transfer) {
+	public <R> List<R> filter (Function<Item, R> transfer) {
 		List<R> result = new Vector<>();
 		for (Item item : this) {
-			result.add(transfer.apply(item));
+			result.add (transfer.apply (item));
 		}
 		return result;
 	}
@@ -112,7 +104,7 @@ public class GitTree
 		private String name;
 		private String signture;
 		
-		Item(GitObjectType treeItemType, String name, String signture) {
+		Item (GitObjectType treeItemType, String name, String signture) {
 			this.treeItemType = treeItemType;
 			this.name = name;
 			this.signture = signture;
@@ -122,7 +114,7 @@ public class GitTree
 		 * 获取当前Tree Item实体类型
 		 * @return
 		 */
-		public GitObjectType getGitObjectType() {
+		public GitObjectType getGitObjectType () {
 			return this.treeItemType;
 		}
 		
@@ -130,7 +122,7 @@ public class GitTree
 		 * 获取Tree Item实体的名称
 		 * @return
 		 */
-		public String getName() {
+		public String getName () {
 			return this.name;
 		}
 		
@@ -138,7 +130,7 @@ public class GitTree
 		 * 获取Tree Item实体的签名
 		 * @return
 		 */
-		public String getSignture() {
+		public String getSignture () {
 			return this.signture;
 		}
 	}
@@ -151,8 +143,8 @@ public class GitTree
 	public class TreeItem extends Item {
 		private Repository repository;
 		
-		public TreeItem(Repository repository, String name, String signture) {
-			super(GitObjectType.Tree, name, signture);
+		public TreeItem (Repository repository, String name, String signture) {
+			super (GitObjectType.Tree, name, signture);
 			this.repository = repository;
 		}
 		
@@ -160,8 +152,8 @@ public class GitTree
 		 * 获取Tree实体 
 		 * @return Tree实体
 		 */
-		public GitTree getTree() {
-			return new GitTree(this.repository, this.getSignture());
+		public GitTree getTree () {
+			return new GitTree (this.repository, this.getSignture ());
 		}
 	}
 	
@@ -173,8 +165,8 @@ public class GitTree
 	public class BlobItem extends Item {
 		private Repository repository;
 		
-		public BlobItem(Repository repository, String name, String signture) {
-			super(GitObjectType.Blob, name, signture);
+		public BlobItem (Repository repository, String name, String signture) {
+			super (GitObjectType.Blob, name, signture);
 			this.repository = repository;
 		}
 		
@@ -182,8 +174,8 @@ public class GitTree
 		 * 获取Blob实体
 		 * @return Blob实体
 		 */
-		public GitBlob getBlob() {
-			return new GitBlob(this.repository, this.getSignture());
+		public GitBlob getBlob () {
+			return new GitBlob (this.repository, this.getSignture ());
 		}
 	}
 }

@@ -17,7 +17,7 @@ public class Repository {
      * 构造方法
      * @param repositoryPointer 仓库路径
      */
-    public Repository(Pointer repositoryPointer) {
+    public Repository (Pointer repositoryPointer) {
         this.handle = repositoryPointer;
         this.lib = IRepositoryLibrary.Instance;
     }
@@ -26,23 +26,23 @@ public class Repository {
      * 获取仓库路径
      * @return 仓库路径
      */
-    public String getPath() {
-        return this.lib.git_repo_path(this.handle);
+    public String getPath () {
+        return this.lib.gitrepo_get_path (this.handle);
     }
 
     /**
      * 获取仓库名称
      * @return 仓库名称
      */
-    public String getName() {
-        return this.lib.git_repo_name(this.handle);
+    public String getName () {
+        return this.lib.gitrepo_get_name (this.handle);
     }
     
     /**
      * 获取仓库指针
      * @return 仓库指针
      */
-    public Pointer getHandle() {
+    public Pointer getHandle () {
         return this.handle;
     }
     
@@ -51,8 +51,8 @@ public class Repository {
      * @param signture Commit签名
      * @return Commit实体
      */
-    public GitCommit getCommit(String signture) {
-    	return new GitCommit(this, signture);
+    public GitCommit getCommit (String signture) {
+    	return new GitCommit (this, signture);
     }
     
     /**
@@ -60,8 +60,8 @@ public class Repository {
      * @param signture Blob签名
      * @return Blob实体
      */
-    public GitBlob getBlob(String signture) {
-    	return new GitBlob(this, signture);
+    public GitBlob getBlob (String signture) {
+    	return new GitBlob (this, signture);
     }
     
     /**
@@ -69,16 +69,16 @@ public class Repository {
      * @param signture Tree签名
      * @return Tree实体
      */
-    public GitTree getTree(String signture) {
-    	return new GitTree(this, signture);
+    public GitTree getTree (String signture) {
+    	return new GitTree (this, signture);
     }
     
     /**
      * 获取当前仓库的Branches
      * @return Branches
      */
-    public GitBranches getBranches() {
-    	return new GitBranches(this, this.lib.git_branches_get(this.handle));
+    public GitBranches getBranches () {
+    	return new GitBranches (this, this.lib.gitrepo_get_branches(this.handle));
     }
     
 }

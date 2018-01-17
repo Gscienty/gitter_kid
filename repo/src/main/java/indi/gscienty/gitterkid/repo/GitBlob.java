@@ -9,13 +9,13 @@ public class GitBlob extends GitObject {
 
     public GitBlob(Repository repository, String signture) {
         super(repository, signture);
-        this.blobHandle = this.lib.git_obj_get_blob(this.objHandle);
+        this.blobHandle = this.lib.gitobj_get_blob (this.objHandle);
         this.Initialize();
     }
 
     private void Initialize() {
-        this.length = this.lib.git_obj_blob_length(this.blobHandle);
-        this.content = this.lib.git_obj_blob_content(this.blobHandle).getByteArray(0, this.length);
+        this.length = this.lib.gitobj_blob_length (this.blobHandle);
+        this.content = this.lib.gitobj_blob_content (this.blobHandle).getByteArray(0, this.length);
     }
 
     public int getLength() {

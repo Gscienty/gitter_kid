@@ -20,48 +20,39 @@ public class Market
     private IMarketLibrary lib;
     private String basePath;
     private Pointer handle;
-    private boolean iterateFirst;
 
     /**
      * 构造方法
      * @param path 仓库市场路径
      */
-    public Market(String path) {
+    public Market (String path) {
         this.basePath = path;
         this.lib = IMarketLibrary.Instance;
-        this.iterateFirst = true;
 
-        this.handle = this.lib.git_market_build(this.basePath);
+        this.handle = this.lib.get_gitmarket (this.basePath);
     }
     
     /**
      * 析构方法
      */
     @Override
-    protected void finalize() throws Throwable {
-        this.lib.git_market_dispose(this.handle);
+    protected void finalize () throws Throwable {
+        this.lib.gitmarket_dtor (this.handle);
 
-        super.finalize();
+        super.finalize ();
     }
 
-	public Iterator<Repository> iterator() {
-        this.lib.git_market_cursor_reset(this.handle);
-        this.iterateFirst = true;
+	public Iterator<Repository> iterator () {
+        this.lib.gitmarket_reset (this.handle);
 		return this;
 	}
 
-	public boolean hasNext() {
-        if (this.iterateFirst) {
-            this.iterateFirst = false;
-            return this.lib.git_market_cursor_current(this.handle) != Pointer.NULL;
-        }
-        else {
-            return this.lib.git_market_cursor_move_next(this.handle) == 0;
-        }
+	public boolean hasNext () {
+        return this.lib.gitmarket_hasnext(this.handle) != 0;
 	}
 
 	public Repository next() {
-		return new Repository(this.lib.git_market_cursor_current(this.handle));
+		return new Repository(this.lib.gitmarket_next(this.handle));
 	}
 	
 	/**

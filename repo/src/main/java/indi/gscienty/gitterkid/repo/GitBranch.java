@@ -9,18 +9,18 @@ public class GitBranch {
 	private IRepositoryLibrary lib;
 	private Repository repository;
 	
-	public GitBranch(Repository repository, Pointer handle) {
+	public GitBranch (Repository repository, Pointer handle) {
 		this.handle = handle;
 		this.repository = repository;
 		this.lib = IRepositoryLibrary.Instance;
 	}
 	
 	public String getName() {
-		return this.lib.git_branch_get_name(this.handle);
+		return this.lib.gitbranch_get_name (this.handle);
 	}
 	
 	public String getLastCommitSignture() {
-		return this.lib.git_branch_get_last_commit_sign(this.handle);
+		return this.lib.gitbranch_get_lastcommit_sign (this.handle);
 	}
 	
 	public GitCommit getLastCommit() {

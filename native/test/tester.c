@@ -55,17 +55,17 @@ int test_enum_group () {
 }
 
 int test_market_init () {
-    struct git_market *market = git_market_build("/home/ant");
+    struct gitmarket *market = get_gitmarket("/home/ant");
 
-    git_market_cursor_reset (market);
+    gitmarket_reset (market);
 
-    do {
-        struct git_repo *repo = git_market_cursor_current (market);
+    while (gitmarket_hasnext (market)) {
+        struct git_repo *repo = gitmarket_next (market);
         
         if (strcmp (git_repo_name (repo), "repo") == 0) {
             struct gitobj *obj = get_gitobj (repo, "ce013625030ba8dba906f756967f9e9ca394464a");
         }
-    } while (git_market_cursor_movenext (market) == 0);
+    }
     return 0;
 }
 
@@ -78,12 +78,12 @@ int test_create_account () {
 
 
 int test_branches () {
-    struct git_market *market = git_market_build("/home/ant");
+    struct gitmarket *market = get_gitmarket ("/home/ant");
 
-    git_market_cursor_reset (market);
+    gitmarket_reset (market);
 
-    do {
-        struct git_repo *repo = git_market_cursor_current (market);
+    while (gitmarket_hasnext (market)) {
+        struct git_repo *repo = gitmarket_next (market);
         
         if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
             struct gitbranches *branches = gitrepo_get_branches (repo);
@@ -98,18 +98,18 @@ int test_branches () {
             }
             break;
         }
-    } while (git_market_cursor_movenext (market) == 0);
+    }
     return 0;
 }
 
 int test_commits_parent () {
     //659cba9dc3f15adc2ba51f0fb66b92ef7127186d
-    struct git_market *market = git_market_build("/home/ant");
+    struct gitmarket *market = get_gitmarket ("/home/ant");
 
-    git_market_cursor_reset (market);
+    gitmarket_reset (market);
 
-    do {
-        struct git_repo *repo = git_market_cursor_current (market);
+    while (gitmarket_hasnext (market)) {
+        struct git_repo *repo = gitmarket_next (market);
         
         if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
             struct gitobj *obj = get_gitobj (repo, "54415a12532e7e77dfc4037962e870abe72e0300");
@@ -123,16 +123,16 @@ int test_commits_parent () {
 
             break;
         }
-    } while (git_market_cursor_movenext (market) == 0);
+    }
     return 0;
 }
 
 int test_pack () {
-    struct git_market *market = git_market_build("/home/ant");
-    git_market_cursor_reset (market);
+    struct gitmarket *market = get_gitmarket ("/home/ant");
+    gitmarket_reset (market);
 
-    do {
-        struct git_repo *repo = git_market_cursor_current (market);
+    while (gitmarket_hasnext (market)) {
+        struct git_repo *repo = gitmarket_next (market);
         if (strcmp (git_repo_name (repo), "gitterRepo") == 0) {
             // printf ("TYPE: %d\n", get_gitobj (repo, "6074c189b9f709892de2f413f08b1be6b9eab0af")->type);
             // printf ("TYPE: %d\n", get_gitobj (repo, "1aea93543e697af2f00499c53116bbb3cc8ffcbf")->type);
@@ -153,7 +153,7 @@ int test_pack () {
             //     // __git_pack_get_obj (git_packes_get_current (packes), "d139fedcdb55b4f266db2abecac304cafadc2e29");
 
         }
-    } while (git_market_cursor_movenext (market) == 0);
+    }
     return 0;
 }
 

@@ -3,12 +3,12 @@
 #include <string.h>
 #include <dirent.h>
 
-struct git_market *git_market_build (const char *basepath) {
+struct gitmarket *get_gitmarket (const char *basepath) {
     if (__access_file_exist (basepath) != 0) {
         // path not exist
         return NULL;
     }
-    struct git_market *ret = (struct git_market *) malloc (sizeof (*ret));
+    struct gitmarket *ret = (struct gitmarket *) malloc (sizeof (*ret));
     if (ret == NULL) {
         // not enough free memory
         return NULL;
@@ -75,11 +75,11 @@ struct git_market *git_market_build (const char *basepath) {
     return ret;
     // free repo list
     free_repo_list:
-    git_market_dispose (ret);
+    gitmarket_dispose (ret);
     return NULL;
 }
 
-void git_market_dispose (struct git_market *market) {
+void gitmarket_dispose (struct gitmarket *market) {
     struct git_repo *repo = market->head;
 
     while (repo) {
@@ -95,31 +95,31 @@ void git_market_dispose (struct git_market *market) {
     free (market);
 }
 
-int git_market_cursor_movenext (struct git_market *market) {
+void gitmarket_reset (struct gitmarket *market) {
     if (market == NULL) {
-        DBG_LOG (DBG_ERROR, "git_market_cursor_movenext: market is null");
-        return -1;
-    }
-    if (market->cursor == NULL) {
-        DBG_LOG (DBG_INFO, ":git_market_cursor_move_net: market's cursor is null");
-        return -1;
+        DBG_LOG (DBG_ERROR, "gitmarket_reset: market is null");
+        return;
     }
 
-    return (market->cursor = market->cursor->next) == NULL ? -1 : 0;
+    market->cursor = NULL;
 }
 
-struct git_repo *git_market_cursor_current (const struct git_market *market) {
+int gitmarket_hasnext (struct gitmarket *market) {
     if (market == NULL) {
+        DBG_LOG (DBG_ERROR, "gitmarket_hasnext: market is null");
+        return 0;
+    }
+
+    return (market->cursor == NULL ?market->head : market->cursor->next) != NULL;
+}
+
+struct git_repo *gitmarket_next (struct gitmarket *market) {
+    if (market == NULL) {
+        DBG_LOG (DBG_ERROR, "gitmarket_next: market is null");
         return NULL;
     }
-    return market->cursor;
-}
 
-void git_market_cursor_reset (struct git_market *market) {
-    if (market == NULL) {
-        return ;
-    }
-    market->cursor = market->head;
+    return (market->cursor = (market->cursor == NULL ? market->head : market->cursor->next));
 }
 
 G_KID_EXTERN char *git_repo_path (struct git_repo *repo) {

@@ -13,32 +13,6 @@ int __access_file_exist (const char* filepath);
 int __access_chmod (const char* path, unsigned int mode);
 int __access_chown (const char* path, unsigned int owner, unsigned int group);
 
-
-// 仓库市场结构体
-struct git_market {
-    char *path;                 //仓库市场路径
-
-    struct git_repo *head;      // 仓库队列头部指针
-    struct git_repo *tail;      // 仓库队列尾部指针
-    struct git_repo *cursor;    //仓库游标
-};
-
-#define USER_READABLE    0400
-#define USER_WRITABLE    0200
-#define USER_EXECUTABLE  0100
-
-#define GROUP_READABLE      0040
-#define GROUP_WRITABLE      0020
-#define GROUP_EXECUTABLE    0010
-
-#define OTHER_READABLE      0004
-#define OTHER_WRITABLE      0002
-#define OTHER_EXECUTABLE    0001
-
-int __repository_init (const char* path, const char* description);
-int __repository_remove (const char* path);
-
-
 struct __gitpack {
     char *sign;
     int count;
@@ -67,28 +41,44 @@ struct git_repo {
     struct git_repo *next;                  // 上一个仓库
 };
 
+// 仓库市场结构体
+struct gitmarket {
+    char *path;                 //仓库市场路径
+
+    struct git_repo *head;      // 仓库队列头部指针
+    struct git_repo *tail;      // 仓库队列尾部指针
+    struct git_repo *cursor;    //仓库游标
+};
+
+#define USER_READABLE    0400
+#define USER_WRITABLE    0200
+#define USER_EXECUTABLE  0100
+
+#define GROUP_READABLE      0040
+#define GROUP_WRITABLE      0020
+#define GROUP_EXECUTABLE    0010
+
+#define OTHER_READABLE      0004
+#define OTHER_WRITABLE      0002
+#define OTHER_EXECUTABLE    0001
+
+int __repository_init (const char* path, const char* description);
+int __repository_remove (const char* path);
+
+
+
 // 通过指定的路径构造仓库市场
 // param <basepath>: 指定的路径
 // return: 返回仓库市场指针
-G_KID_EXTERN struct git_market *git_market_build (const char *basepath);
+G_KID_EXTERN struct gitmarket *get_gitmarket (const char *basepath);
 
 // 析构仓库市场
 // param <market>: 仓库市场指针
-G_KID_EXTERN void git_market_dispose (struct git_market *market);
+G_KID_EXTERN void gitmarket_dispose (struct gitmarket *market);
 
-// 将仓库市场的游标移动指向到下一个仓库
-// param <market>: 仓库市场指针
-// return: 成功移动到下一个仓库时，返回0，否则返回-1
-G_KID_EXTERN int git_market_cursor_movenext (struct git_market *market);
-
-// 获取仓库市场的游标当前指向的仓库
-// param <market>: 仓库市场指针
-// return: 获取当前仓库，如果不存在则返回为NULL
-G_KID_EXTERN struct git_repo *git_market_cursor_current (const struct git_market *market);
-
-// 重置仓库市场的游标
-// param <market>: 仓库市场指针
-G_KID_EXTERN void git_market_cursor_reset (struct git_market *market);
+G_KID_EXTERN void gitmarket_reset (struct gitmarket *market);
+G_KID_EXTERN int gitmarket_hasnext (struct gitmarket *market);
+G_KID_EXTERN struct git_repo *gitmarket_next (struct gitmarket *market);
 
 // 获取仓库路径
 // param <repo>: 仓库指针

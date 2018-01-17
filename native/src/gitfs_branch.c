@@ -156,8 +156,7 @@ int gitbranches_hasnext (struct gitbranches *branches) {
         return 0;
     }
 
-    if (branches->cursor == NULL) return branches->head != NULL;
-    return branches->cursor->next != NULL;
+    return (branches->cursor == NULL ? branches->head : branches->cursor->next) != NULL;
 }
 
 struct gitbranch *gitbranches_next (struct gitbranches *branches) {
@@ -165,8 +164,6 @@ struct gitbranch *gitbranches_next (struct gitbranches *branches) {
         DBG_LOG (DBG_ERROR, "gitbranches_reset: branches is null");
         return NULL;
     }
-    if (branches->cursor == NULL) branches->cursor = branches->head;
-    else branches->cursor = branches->cursor->next;
 
-    return branches->cursor;
+    return (branches->cursor = (branches->cursor == NULL ? branches->head : branches->cursor->next));
 }

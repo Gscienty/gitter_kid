@@ -9,10 +9,10 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 
-DIR *__gitpack_packdir_get (const char *path, size_t path_len) {
+DIR *__gitpack_get_packdir (const char *path, size_t path_len) {
     char *pack_path = (char *) malloc (sizeof (char) * (path_len + 14));
     if (pack_path == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_packdir_get: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "__gitpack_get_packdir: have not enough free memory");
         return NULL;
     }
 
@@ -26,16 +26,16 @@ DIR *__gitpack_packdir_get (const char *path, size_t path_len) {
     return ret;
 }
 
-struct __gitpack *__gitpack_get (const char *path, size_t path_len, const char *idx_name) {
+struct __gitpack *__get_gitpack (const char *path, size_t path_len, const char *idx_name) {
     struct __gitpack *ret = (struct __gitpack *) malloc (sizeof (*ret));
     if (ret == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_get: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "__get_gitpack: have not enough free memory");
         return NULL;
     }
 
     ret->sign = (char *) malloc (sizeof (char) * 41);
     if (ret->sign == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_get: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "__get_gitpack: have not enough free memory");
         free (ret);
         return NULL;
     }
@@ -43,7 +43,7 @@ struct __gitpack *__gitpack_get (const char *path, size_t path_len, const char *
     
     ret->idx_path = (char *) malloc (sizeof (char) * (path_len + 63));
     if (ret->idx_path == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_get: have not enough free memory");
+        DBG_LOG (DBG_ERROR, "__get_gitpack: have not enough free memory");
         free (ret->sign);
         free (ret);
         return NULL;
@@ -128,7 +128,7 @@ struct __opend_mmap_file *__gitpack_idxfile_open (struct __gitpack *pack) {
     return ret;
 }
 
-int __gitpack_item_count_get (struct __opend_mmap_file *mmaped) {
+int __gitpack_get_count (struct __opend_mmap_file *mmaped) {
     if (mmaped == NULL) return 0;
     unsigned int *p = (unsigned int *) (mmaped->val + 8);
     int count = 0;
@@ -144,17 +144,17 @@ int __gitpack_item_count_get (struct __opend_mmap_file *mmaped) {
 #define __GITPACK_NTH_SIGN(val, n) ((val) + 8 + 1024 + 20 * (n))
 #define __GITPACK_NTH_OFF(val, nr, n) ntohl (*((int *) ((val) + 8 + 1024 + 24 * (nr) + 4 * (n))))
 
-void __gitpack_quicksort_indexes (unsigned char *val, struct __gitpack *pack, int *indexes, int start, int end) {
+void __gitpack_quicksort_indexes (unsigned char *val, struct __gitpack *pack, struct __gitpack_index *indexes, int start, int end) {
     if (start >= end) return;
 
     int i = start;
     int j = end;
-    int k = indexes[start];
+    struct __gitpack_index k = indexes[start];
 
     while (i < j) {
-        while (i < j && __GITPACK_NTH_OFF (val, pack->count, k) < __GITPACK_NTH_OFF (val, pack->count, indexes[j])) j--;
+        while (i < j && k.off < indexes[j].off) j--;
         indexes[i] = indexes[j];
-        while (i < j && __GITPACK_NTH_OFF (val, pack->count, indexes[i]) < __GITPACK_NTH_OFF (val, pack->count, k)) i++;
+        while (i < j && indexes[i].off < k.off) i++;
         indexes[j] = indexes[i];
     }
     indexes[i] = k;
@@ -163,58 +163,51 @@ void __gitpack_quicksort_indexes (unsigned char *val, struct __gitpack *pack, in
     __gitpack_quicksort_indexes (val, pack, indexes, i + 1, end);
 }
 
-int *__gitpack_sortedindexes_get (unsigned char *val, struct __gitpack *pack) {
-    int *ret = (int *) malloc (sizeof (*ret) * pack->count);
-    int i = 0;
-    for (i = 0; i < pack->count; i++) ret[i] = i;
-
-    __gitpack_quicksort_indexes (val, pack, ret, 0, pack->count - 1);
-
-    return ret;
-}
-
-void * __sign_dup (void *off) {
+void * __sign_dup (void *key) {
     void *ret = (void *) malloc (20);
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__sign_dup: have not enough free memory");
         return NULL;
     }
     
-    memcpy (ret, off, 20);
+    memcpy (ret, key, 20);
 
     return ret;
 }
 
-struct rdt *__gitpack_rdt_build (struct __opend_mmap_file *mmaped, struct __gitpack *pack, size_t packsize) {
-    if (pack == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_rdt_build: pack is null");
-        return NULL;
+struct __gitpack_index *__gitpack_get_sortedindexes (unsigned char *val, struct __gitpack *pack, size_t packsize) {
+    struct __gitpack_index *ret = (struct __gitpack_index *) malloc (sizeof (*ret) * pack->count);
+    int i = 0;
+    for (i = 0; i < pack->count; i++) {
+        struct __gitpack_index index = { i, __GITPACK_NTH_OFF(val, pack->count, i), 0, NULL };
+        ret[i] = index;
+        ret[i].sign = __sign_dup(__GITPACK_NTH_SIGN (val, i));
     }
-    if (mmaped == NULL) {
-        DBG_LOG (DBG_ERROR, "__gitpack_rdt_build: mmaped is null");
+
+    __gitpack_quicksort_indexes (val, pack, ret, 0, pack->count - 1);
+
+    ret[pack->count - 1].len = packsize - 20 - ret[pack->count - 1].off;
+    for (i = 0; i < pack->count - 1; i++) {
+        ret[i].len = ret[i + 1].off - ret[i].off;
+    }
+    return ret;
+}
+
+struct rdt *__gitpack_build_redblacktree (struct __gitpack_index *indexes, size_t count) {
+    if (indexes == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_build_redblacktree: indexes is null");
         return NULL;
     }
     struct rdt *ret = rdt_build ();
-
-    int *indexes = __gitpack_sortedindexes_get (mmaped->val, pack);
     int i = 0;
-    for (i = 0; i < pack->count; i++) {
-        // if (__GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i]) <= 85338) printf ("%d\n", __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i]));
-        rdt_insert (
-            ret,
-            __sign_dup (__GITPACK_NTH_SIGN (mmaped->val, indexes[i])),
-            __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i]),
-            i + 1 == pack->count
-                ? packsize - 20 - __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i])
-                : __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i + 1]) - __GITPACK_NTH_OFF (mmaped->val, pack->count, indexes[i])
-        );
+    for (i = 0; i < count; i++) {
+        rdt_insert (ret, indexes[i].sign, indexes[i].off, indexes[i].len);
     }
-    free (indexes);
 
     return ret;
 }
 
-size_t __gitpack_size_get (struct __gitpack *pack) {
+size_t __gitpack_get_size (struct __gitpack *pack) {
     struct stat st;
     if (stat (pack->pack_path, &st) != 0) {
         return 0;
@@ -236,7 +229,7 @@ struct __gitpack_collection *__gitpack_collection_get (struct gitrepo *repo) {
 
     size_t path_len = strlen (repo->path);
 
-    DIR *dir = __gitpack_packdir_get (repo->path, path_len);
+    DIR *dir = __gitpack_get_packdir (repo->path, path_len);
     if (dir == NULL) {
         free (ret);
         return NULL;
@@ -247,13 +240,12 @@ struct __gitpack_collection *__gitpack_collection_get (struct gitrepo *repo) {
         if (ent->d_type == DT_REG) {
             if (strcmp (ent->d_name + 45, ".idx") != 0) continue;
 
-            struct __gitpack *pack = __gitpack_get (repo->path, path_len, ent->d_name);
+            struct __gitpack *pack = __get_gitpack (repo->path, path_len, ent->d_name);
             if (pack == NULL) {
                 __gitpack_collection_dtor (ret);
                 closedir (dir);
                 return NULL;
             }
-            
 
             struct __opend_mmap_file *idx_mmaped = __gitpack_idxfile_open (pack);
             if (idx_mmaped == NULL) {
@@ -263,9 +255,11 @@ struct __gitpack_collection *__gitpack_collection_get (struct gitrepo *repo) {
             }
 
             // get count
-            pack->count = __gitpack_item_count_get (idx_mmaped);
-            // build red black tree
-            pack->rd_tree = __gitpack_rdt_build (idx_mmaped, pack, __gitpack_size_get (pack));
+            pack->count = __gitpack_get_count (idx_mmaped);
+            // build linear indexes
+            pack->indexes = __gitpack_get_sortedindexes (idx_mmaped->val, pack, __gitpack_get_size (pack));
+            // build red black tree by indexes
+            pack->rd_tree = __gitpack_build_redblacktree (pack->indexes, pack->count);
 
             __gitpack_idxfile_close (idx_mmaped);
 

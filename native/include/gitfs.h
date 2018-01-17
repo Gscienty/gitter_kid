@@ -14,6 +14,13 @@ int __access_file_exist (const char* filepath);
 int __access_chmod (const char* path, unsigned int mode);
 int __access_chown (const char* path, unsigned int owner, unsigned int group);
 
+struct __gitpack_index {
+    int nth;
+    size_t off;
+    size_t len;
+    void *sign;
+};
+
 struct __gitpack {
     char *sign;
     int count;
@@ -22,6 +29,7 @@ struct __gitpack {
     char *pack_path;
 
     struct rdt *rd_tree;
+    struct __gitpack_index *indexes;
 
     struct __gitpack *prev;
     struct __gitpack *next;
@@ -369,29 +377,29 @@ G_KID_EXTERN char *gitperson_get_timezone (struct gitperson *person_log);
 // param <tree_obj>: tree object
 G_KID_EXTERN void gitobj_tree_reset (struct gitobj_tree *tree_obj);
 
-// 移动 tree 游标指向下一个item
+// tree 游标是否存在下一个 item
 // param <tree_obj>: tree object
-// return: 成功移动到下一个item时，返回0，否则返回-1
-G_KID_EXTERN int gitobj_tree_movenext (struct gitobj_tree *tree_obj);
+// return: tree 游标是否存在下一个 item
+G_KID_EXTERN int gitobj_tree_hasnext (struct gitobj_tree *tree_obj);
 
 // 获取当前 tree 游标所指向的 item
 // param <tree_obj>: tree object
 // return: item
-G_KID_EXTERN struct gitobj_treeitem *gitobj_tree_current (struct gitobj_tree *tree_obj);
+G_KID_EXTERN struct gitobj_treeitem *gitobj_tree_next (struct gitobj_tree *tree_obj);
 
 
 // 获取 tree item 中的签名
 // param <tree_item_obj>: tree item object
 // return: item 的签名
-G_KID_EXTERN char *gitobj_treeitem_sign (struct gitobj_treeitem *tree_item_obj);
+G_KID_EXTERN char *gitobj_treeitem_get_sign (struct gitobj_treeitem *tree_item_obj);
 
 // 获取 tree item 中的名称
 // param <tree_item_obj>: tree item object
 // return: item 的名称
-G_KID_EXTERN char *gitobj_treeitem_name (struct gitobj_treeitem *tree_item_obj);
+G_KID_EXTERN char *gitobj_treeitem_get_name (struct gitobj_treeitem *tree_item_obj);
 
 // 获取 tree item 中的类型
 // param <tree_item_obj>: tree item object
 // return: item 的类型
-G_KID_EXTERN enum gitobj_type gitobj_treeitem_type (struct gitobj_treeitem *tree_item_obj);
+G_KID_EXTERN enum gitobj_type gitobj_treeitem_get_type (struct gitobj_treeitem *tree_item_obj);
 #endif

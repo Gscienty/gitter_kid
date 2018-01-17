@@ -183,6 +183,7 @@ struct gitobj {
 struct __gitpack_file {
     int fd;
     size_t len;
+    struct __gitpack *pack;
 };
 
 struct __gitpack_item {

@@ -71,6 +71,7 @@ struct __gitpack_file *__gitpack_fileopen (struct __gitpack *pack) {
         return NULL;
     }
     ret->len = st.st_size;
+    ret->pack = pack;
 
     return ret;
 }
@@ -266,9 +267,29 @@ struct __gitpack_item *__gitpack_refdelta_patch (struct gitrepo *repo, struct __
     return ret;
 }
 
+size_t __gitpack_indexes_findlen__off (struct __gitpack_index* indexes, size_t count, size_t off) {
+    int i = 0;
+    int j = count;
+    while (i < j) {
+        int mid = (i + j) / 2;
+        if (off < indexes[mid].off) j = mid - 1;
+        else if (off > indexes[mid].off) i = mid + 1;
+        else return indexes[mid].len;
+    }
+    return 0;
+}
+
 struct __gitpack_item *__gitpack_ofsdelta_patch (struct gitrepo *repo, struct __gitpack_file *packfile, struct __gitpack_item packitem) {
     // get base packitem1
-    struct __gitpack_segment *base_segment = __gitpack_get_segment (packfile, packitem.off - packitem.negative_off, 0);
+    struct __gitpack_segment *base_segment = __gitpack_get_segment (
+        packfile,
+        packitem.off - packitem.negative_off,
+        __gitpack_indexes_findlen__off (
+            packfile->pack->indexes,
+            packfile->pack->count,
+            packitem.off - packitem.negative_off
+        )
+    );
     struct __gitpack_item *base_packitem = __gitpack_get_item (*base_segment);
     // printf ("%d %d %d\n", packitem.off - packitem.negative_off, packitem.off, packitem.negative_off);
     __gitpack_dtor_segment (base_segment);

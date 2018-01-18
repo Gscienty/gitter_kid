@@ -133,7 +133,7 @@ struct gitobj_treeitem *gitobj_tree_next (struct gitobj_tree *tree_obj) {
         DBG_LOG (DBG_ERROR, "gitobj_tree_current: tree object is null");
         return NULL;
     }
-    return (tree_obj->cursor = (tree_obj->cursor ? tree_obj->head : tree_obj->cursor->next));
+    return (tree_obj->cursor = (tree_obj->cursor == NULL ? tree_obj->head : tree_obj->cursor->next));
 }
 
 char *gitobj_treeitem_get_sign (struct gitobj_treeitem *tree_item_obj) {

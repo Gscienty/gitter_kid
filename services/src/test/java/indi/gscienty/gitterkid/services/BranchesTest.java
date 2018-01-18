@@ -16,7 +16,7 @@ public class BranchesTest extends TestCase {
 	
 	public void testBranches() {
 		GitRepositoriesService repos = new GitRepositoriesService("/home/ant");
-		GitBranchesService brans = new GitBranchesService(repos.getRepository("repo"));
+		GitBranchesService brans = new GitBranchesService(repos.getRepository("gitterRepo"));
 		
 		brans.getCommits("master").forEach(commit -> {
 			System.out.println(commit.getMessage());

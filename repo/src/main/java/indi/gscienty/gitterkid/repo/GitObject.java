@@ -1,10 +1,14 @@
 package indi.gscienty.gitterkid.repo;
 
+import java.util.logging.Logger;
+
 import com.sun.jna.Pointer;
 
 import indi.gscienty.gitterkid.repo.nativelib.IGitObjectLibrary;
 
 public abstract class GitObject {
+	private static Logger logger = Logger.getLogger(GitObject.class.getName()); 
+	
     protected IGitObjectLibrary lib;
     protected Pointer objHandle;
     protected Repository repository;
@@ -16,7 +20,6 @@ public abstract class GitObject {
         this.signture = signture;
         this.repository = repository;
         this.objHandle = this.lib.gitrepo_get_gitobj (repository.getHandle(), this.signture);
-        
         this.objectType = null;
     }
     

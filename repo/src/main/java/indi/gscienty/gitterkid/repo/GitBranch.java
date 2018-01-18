@@ -1,10 +1,14 @@
 package indi.gscienty.gitterkid.repo;
 
+import java.util.logging.Logger;
+
 import com.sun.jna.Pointer;
 
 import indi.gscienty.gitterkid.repo.nativelib.IRepositoryLibrary;
 
 public class GitBranch {
+	private static Logger logger = Logger.getLogger(GitBranch.class.getName());
+	
 	private Pointer handle;
 	private IRepositoryLibrary lib;
 	private Repository repository;
@@ -29,6 +33,8 @@ public class GitBranch {
 	
 	public GitCommit getLastCommit () {
 		String currentCommitSignture = this.getLastCommitSignture ();
+		
+		logger.info(currentCommitSignture);
 		
 		if (this.lastCommit == null) {
 			this.lastCommitSignture = currentCommitSignture;

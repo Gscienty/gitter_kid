@@ -9,10 +9,10 @@ char *__gitobj_path_get (struct gitrepo *repo, const char *signture) {
     char *ret = malloc (path_length + 128);
     if (ret == NULL) {
         // have not enough free memory
+        DBG_LOG (DBG_ERROR, "__gitobj_path_get: have not enough free memory");
         return NULL;
     }
     snprintf (ret, path_length + 50, "%sobjects/%c%c/%s", repo->path, signture[0], signture[1], signture + 2);
-    
     if (access (ret, F_OK) != 0) {
         free (ret);
         return NULL;
@@ -118,6 +118,8 @@ struct __bytes *__gitobj_get_content (const char *path) {
         DBG_LOG (DBG_ERROR, "get_gitobj: cannot inflate buffer");
         return NULL;
     }
+
+    return inflated_buffer;
 }
 
 struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
@@ -130,7 +132,7 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
 
     struct __bytes *inflated_buffer = __gitobj_get_content (obj_path);
     if (inflated_buffer == NULL) return NULL;
-
+    
     // try get object file header, which contains object file's type & length
     struct __gitobj_header *obj_header = __gitobj_header_get (inflated_buffer->buf);
     if (obj_header == NULL || obj_header->type == GIT_OBJ_TYPE_UNKNOW) {
@@ -157,21 +159,18 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
     struct __bytes param = { ret->body, ret->size };
     switch (ret->type) {
         case GIT_OBJ_TYPE_BLOB:
-            DBG_LOG (DBG_INFO, "get_gitobj: transfer to blob");
             ret->ptr = (void *) __transfer_blob (param);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
             break;
         case GIT_OBJ_TYPE_COMMIT:
-            DBG_LOG (DBG_INFO, "get_gitobj: transfer to commit");
             ret->ptr = (void *) __transfer_commit (param);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;
             }
             break;
         case GIT_OBJ_TYPE_TREE:
-            DBG_LOG (DBG_INFO, "get_gitobj: transfer to tree");
             ret->ptr = (void *) __transfer_tree (param);
             if (ret->ptr == NULL) {
                 goto obj_type_occur_error;

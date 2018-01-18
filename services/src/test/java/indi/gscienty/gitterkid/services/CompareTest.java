@@ -15,16 +15,12 @@ public class CompareTest extends TestCase {
 	}
 	
 	public void testCompare() {
-		GitRepositoriesService repos = new GitRepositoriesService("/home/ant");
-		GitBranchesService brans = new GitBranchesService(repos.getRepository("gitterRepo"));
+		GitRepositoriesService reposService = new GitRepositoriesService("/home/ant");
+		GitBranchesService bransService = new GitBranchesService(reposService.getRepository("gitterRepo"));
 		
-		brans.compareCommitHistory(brans.getLastCommit("master")).forEach(item -> {
-			item.getGitBlobCompares().forEach(c -> {
-				System.out.println(c.getBlobPath());
-				System.out.println(c.getStatus());
-				System.out.println(c.getAddedLine());
-				System.out.println(c.getRemovedLine());
-			});
-		});
+		
+		GitCommitService commService = new GitCommitService(bransService.getLastCommit("master"));
+		
+		commService.compareHistory();
 	}
 }

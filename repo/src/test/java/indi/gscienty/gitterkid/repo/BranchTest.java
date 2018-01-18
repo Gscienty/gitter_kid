@@ -18,4 +18,12 @@ public class BranchTest extends TestCase {
 		Repository repository = market.first (r -> r.getName ().equals ("gitterRepo"));
 		repository.getBranches ().forEach (branch -> System.out.println(branch.getName()));
 	}
+	
+	public void testBranchCommit () {
+		Market market = new Market ("/home/ant");
+		Repository repository = market.first(r -> r.getName().equals("gitterRepo"));
+		GitBranch branch = repository.getBranches().first(b -> b.getName().equals("master"));
+		
+		System.out.println(branch.getLastCommit());
+	}
 }

@@ -119,7 +119,7 @@ void gitobj_tree_reset (struct gitobj_tree *tree_obj) {
     tree_obj->cursor = NULL;
 }
 
-int gitobj_tree_movenext (struct gitobj_tree *tree_obj) {
+int gitobj_tree_hasnext (struct gitobj_tree *tree_obj) {
     if (tree_obj == NULL) {
         DBG_LOG (DBG_ERROR, "gitobj_tree_movenext: tree object is null");
         return 0;

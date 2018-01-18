@@ -17,11 +17,19 @@ import indi.gscienty.gitterkid.repo.nativelib.IGitObjectLibrary;
  */
 public class GitCommit extends GitObject {
 	private Pointer handle;
+	private GitTree tree;
+	private PersonLog author;
+	private PersonLog committer;
+	private CommitParents commitParents;
 	
 	public GitCommit (Repository repository, String signture) {
 		super (repository, signture);
 		
 		this.handle = this.lib.gitobj_get_commit (this.objHandle);
+		this.tree = null;
+		this.author = null;
+		this.committer = null;
+		this.commitParents = null;
 	}
 	
 	/**
@@ -37,8 +45,12 @@ public class GitCommit extends GitObject {
 	 * @return commit关联的Tree
 	 */
 	public GitTree getTree () {
-		String treeSignture = this.lib.gitobj_commit_get_treesign (this.handle);
-		return new GitTree (this.repository, treeSignture);
+		if (this.tree == null) {
+			String treeSignture = this.lib.gitobj_commit_get_treesign (this.handle);
+			this.tree = new GitTree (this.repository, treeSignture);	
+		}
+		
+		return this.tree;
 	}
 	
 	/**
@@ -46,7 +58,10 @@ public class GitCommit extends GitObject {
 	 * @return 作者提交信息
 	 */
 	public PersonLog getAuthor () {
-		return new PersonLog (this.lib.gitobj_commit_get_author (this.handle));
+		if (this.author == null) {
+			this.author = new PersonLog (this.lib.gitobj_commit_get_author (this.handle));
+		}
+		return this.author;
 	}
 	
 	/**
@@ -54,7 +69,10 @@ public class GitCommit extends GitObject {
 	 * @return 提交者提交信息
 	 */
 	public PersonLog getCommitter () {
-		return new PersonLog (this.lib.gitobj_commit_get_committer (this.handle));
+		if (this.committer == null) {
+			this.committer = new PersonLog (this.lib.gitobj_commit_get_committer (this.handle));
+		}
+		return this.committer;
 	}
 	
 	/**
@@ -62,7 +80,10 @@ public class GitCommit extends GitObject {
 	 * @return CommitParents
 	 */
 	public CommitParents getParents() {
-		return new CommitParents (this.handle, this.repository);
+		if (this.commitParents == null) {
+			this.commitParents = new CommitParents (this.handle, this.repository);
+		}
+		return this.commitParents;
 	}
 	
 	public class CommitParents
@@ -71,7 +92,7 @@ public class GitCommit extends GitObject {
 		private Pointer handle;
 		private IGitObjectLibrary lib;
 		
-		public CommitParents(Pointer handle, Repository repository) {
+		public CommitParents (Pointer handle, Repository repository) {
 			this.repository = repository;
 			this.handle = handle;
 			this.lib = IGitObjectLibrary.Instance;

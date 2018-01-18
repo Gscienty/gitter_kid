@@ -12,7 +12,7 @@ public class PersonLog {
 	 * 构造方法
 	 * @param handle person log指针
 	 */
-	public PersonLog(Pointer handle) {
+	public PersonLog (Pointer handle) {
 		this.handle = handle;
 		this.lib = IGitObjectLibrary.Instance;
 	}
@@ -21,7 +21,7 @@ public class PersonLog {
 	 * 获取person log的名称
 	 * @return person log的名称
 	 */
-	public String getName() {
+	public String getName () {
 		return this.lib.gitperson_get_name (this.handle);
 	}
 	
@@ -29,7 +29,7 @@ public class PersonLog {
 	 * 获取person log的mail
 	 * @return person log的mail
 	 */
-	public String getMail() {
+	public String getMail () {
 		return this.lib.gitperson_get_mail (this.handle);
 	}
 	
@@ -37,7 +37,7 @@ public class PersonLog {
 	 * 获取person log的时区
 	 * @return person log的时区
 	 */
-	public String getTimeZone() {
+	public String getTimeZone () {
 		return this.lib.gitperson_get_timezone (this.handle);
 	}
 	
@@ -45,7 +45,7 @@ public class PersonLog {
 	 * 获取person log的时间戳
 	 * @return person log的时间戳
 	 */
-	public long getTimestamp() {
+	public long getTimestamp () {
 		return this.lib.gitperson_get_timestamp (this.handle);
 	}
 }

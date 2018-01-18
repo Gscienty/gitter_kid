@@ -5,8 +5,20 @@ import indi.gscienty.gitterkid.repo.GitBlob;
 public class GitBlobCompare {
 	
 	public static int getLinesCount(GitBlob blob) {
-		String content = new String(blob.getContent());
-		return content.split("\n|\r").length;
+		byte[] bytes = blob.getContent();
+		int count = 0;
+		boolean state = false;
+		for (int pointer = 0, size = blob.getLength(); pointer < size; pointer++) {
+			if ((bytes[pointer] == 13 || bytes[pointer] == 10) && state == false) {
+				state = true;
+				count++;
+			}
+			else {
+				state = false;
+			}
+		}
+		
+		return count;
 	}
 	
 	/**
@@ -64,7 +76,7 @@ public class GitBlobCompare {
 	 * @return
 	 */
 	private static String[] getLines(GitBlob blob) {
-		String content = new String(blob.getContent());
+		String content = new String(blob.getContent(), 0, blob.getLength());
 		return content.split("\n|\r");
 	}
 }

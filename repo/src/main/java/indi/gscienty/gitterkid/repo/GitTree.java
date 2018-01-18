@@ -87,7 +87,7 @@ public class GitTree
 	 * 将Tree内的元素映射成为新的集合
 	 */
 	public <R> List<R> filter (Function<Item, R> transfer) {
-		List<R> result = new Vector<>();
+		List<R> result = new Vector<> ();
 		for (Item item : this) {
 			result.add (transfer.apply (item));
 		}
@@ -142,10 +142,12 @@ public class GitTree
 	 */
 	public class TreeItem extends Item {
 		private Repository repository;
+		private GitTree tree;
 		
 		public TreeItem (Repository repository, String name, String signture) {
 			super (GitObjectType.Tree, name, signture);
 			this.repository = repository;
+			this.tree = null;
 		}
 		
 		/**
@@ -153,7 +155,10 @@ public class GitTree
 		 * @return Tree实体
 		 */
 		public GitTree getTree () {
-			return new GitTree (this.repository, this.getSignture ());
+			if (this.tree == null) {
+				this.tree = new GitTree (this.repository, this.getSignture ());
+			}
+			return this.tree;
 		}
 	}
 	
@@ -164,10 +169,12 @@ public class GitTree
 	 */
 	public class BlobItem extends Item {
 		private Repository repository;
+		private GitBlob blob;
 		
 		public BlobItem (Repository repository, String name, String signture) {
 			super (GitObjectType.Blob, name, signture);
 			this.repository = repository;
+			this.blob = null;
 		}
 		
 		/**
@@ -175,7 +182,10 @@ public class GitTree
 		 * @return Blob实体
 		 */
 		public GitBlob getBlob () {
-			return new GitBlob (this.repository, this.getSignture ());
+			if (this.blob == null) {
+				this.blob = new GitBlob (this.repository, this.getSignture ());
+			}
+			return this.blob;
 		}
 	}
 }

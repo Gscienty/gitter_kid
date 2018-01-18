@@ -12,6 +12,7 @@ import indi.gscienty.gitterkid.repo.nativelib.IRepositoryLibrary;
 public class Repository {
     private Pointer handle;
     private IRepositoryLibrary lib;
+    private GitBranches branches;
     
     /**
      * 构造方法
@@ -20,6 +21,7 @@ public class Repository {
     public Repository (Pointer repositoryPointer) {
         this.handle = repositoryPointer;
         this.lib = IRepositoryLibrary.Instance;
+        this.branches = null;
     }
 
     /**
@@ -78,7 +80,10 @@ public class Repository {
      * @return Branches
      */
     public GitBranches getBranches () {
-    	return new GitBranches (this, this.lib.gitrepo_get_branches(this.handle));
+    	if (this.branches == null) {
+    		this.branches = new GitBranches (this, this.lib.gitrepo_get_branches (this.handle));
+    	}
+    	return this.branches;
     }
     
 }

@@ -1,7 +1,5 @@
 package indi.gscienty.gitterkid.repo;
 
-import java.io.UnsupportedEncodingException;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -19,24 +17,21 @@ public class BlobTest extends TestCase {
     }
 
     public void testBlob() {
-        Market market = new Market("/home/m1231996c/repositories");
+        Market market = new Market("/home/ant");
+        assertNotNull (market);
         Repository repository = null;
 
         for (Repository item : market) {
-            if (item.getName().equals("repo")) {
+            if (item.getName().equals("gitterRepo")) {
                 repository = item;
                 break;
             }
         }
         
-        GitBlob blob = new GitBlob(repository, "ce013625030ba8dba906f756967f9e9ca394464a");
-        assertTrue(blob.getObjectType() == GitObjectType.Blob);
-        try {
-			assertTrue(new String(blob.getContent(), "ASCII").equals("hello\n"));
-			assertEquals(blob.getLength(), 6);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        assertNotNull (repository);
+        
+        GitBlob blob = repository.getBlob("997cc5e85aff5cc35e317cd993f9979c858b17fa");
+        
+        System.out.println(new String (blob.getContent(), 0, blob.getLength()));
     }
 }

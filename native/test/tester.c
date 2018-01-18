@@ -135,9 +135,9 @@ int test_pack () {
         struct gitrepo *repo = gitmarket_next (market);
         if (strcmp (gitrepo_get_name (repo), "gitterRepo") == 0) {
             struct gitobj *obj = gitrepo_get_gitobj (repo, "e02af234195f9bc4219aa705d9e7625cd0b54283");
-            printf ("%d\n", obj);
+            printf ("%d\n", (int) obj);
             obj = gitrepo_get_gitobj (repo, "3ff1e8785454b32f7dcadf3335bbd786ffa46d9c");
-            printf ("%d\n", obj);
+            printf ("%d\n", (int) obj);
             // gitrepo_get_gitobj (repo, "c49860eeec92d4477a57a7c58135a9b69b360f32");
             // gitrepo_get_gitobj (repo, "582a103bd9ed07676ebda0020ffe8ce97c0159e3");
             // gitrepo_get_gitobj (repo, "1dbadf22f5d1f0b534071dfbc16d47dda1941be1");
@@ -156,6 +156,25 @@ int test_pack () {
     return 0;
 }
 
+void test_tree () {
+    struct gitmarket *market = get_gitmarket ("/home/ant");
+    gitmarket_reset (market);
+
+    while (gitmarket_hasnext (market)) {
+        struct gitrepo *repo = gitmarket_next (market);
+        if (strcmp (gitrepo_get_name (repo), "gitterRepo") == 0) {
+            struct gitobj *obj = gitrepo_get_gitobj (repo, "37a86fe1c17821f5c9f761f5a690088085f226c2");
+            struct gitobj_tree *tree = gitobj_get_tree (obj);
+
+            gitobj_tree_reset (tree);
+            while (gitobj_tree_hasnext (tree)) {
+                struct gitobj_treeitem *item = gitobj_tree_next (tree);
+                printf ("%s\t%s\n", gitobj_treeitem_get_name (item), gitobj_treeitem_get_sign (item));
+            }
+        }
+    }
+}
+
 int main() {
     // test_enum_passwd ();
     // test_enum_group ();
@@ -164,6 +183,7 @@ int main() {
     // test_create_account ();
     // test_branches ();
     // test_commits_parent ();
-    test_pack ();
+    // test_pack ();
+    test_tree ();
     return 0;
 }

@@ -21,6 +21,8 @@ public class CompareTest extends TestCase {
 		
 		GitCommitService commService = new GitCommitService(bransService.getLastCommit("master"));
 		
-		commService.compareHistory();
+		commService.compareHistory().forEach(item -> item.getGitBlobCompares().forEach(c -> {
+			System.out.println(c.getBlobPath() + "\n" + c.getStatus() + "\tadd: " + c.getAddedLine() + "\tremove: " + c.getRemovedLine());
+		}));
 	}
 }

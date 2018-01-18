@@ -10,9 +10,9 @@ DIR *__gitrepo_get_branchesdir (const char *repopath, const size_t len) {
         DBG_LOG (DBG_ERROR, "__gitrepo_get_branchesdir: have not enough free memory");
         return NULL;
     }
+
     strcpy (refs_path, repopath);
     strcpy (refs_path + len, "refs/heads/");
-    
     DIR *ret = opendir (refs_path);
     free (refs_path);
 
@@ -54,8 +54,7 @@ struct gitbranches *gitrepo_get_branches (struct gitrepo *repo) {
         return NULL;
     }
 
-    size_t repopath_len = sizeof (repo->path);
-
+    size_t repopath_len = strlen (repo->path);
     // get branches's path
     DIR *dir = __gitrepo_get_branchesdir (repo->path, repopath_len);
     if (dir == NULL) {

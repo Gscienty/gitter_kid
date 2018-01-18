@@ -160,8 +160,8 @@ int main() {
     // test_user_create_account ();
     // test_market_init ();
     // test_create_account ();
-    // test_branches ();
+    test_branches ();
     // test_commits_parent ();
-    test_pack ();
+    // test_pack ();
     return 0;
 }

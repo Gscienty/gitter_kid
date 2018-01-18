@@ -129,7 +129,7 @@ char *gitbranch_get_name (struct gitbranch *branch) {
         DBG_LOG (DBG_ERROR, "gitbranch_get_name: branch is null");
         return NULL;
     }
-    return branch->lastcommit_sign;
+    return branch->name;
 }
 
 char *gitbranch_get_lastcommit_sign (struct gitbranch *branch) {

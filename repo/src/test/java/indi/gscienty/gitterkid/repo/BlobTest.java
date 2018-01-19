@@ -33,5 +33,9 @@ public class BlobTest extends TestCase {
         GitBlob blob = repository.getBlob("997cc5e85aff5cc35e317cd993f9979c858b17fa");
         
         System.out.println(new String (blob.getContent(), 0, blob.getLength()));
+        
+        repository.getBlob("997cc5e85aff5cc35e317cd993f9979c858b17fc"); // not exist
+        repository.getCommit("997cc5e85aff5cc35e317cd993f9979c858b17fa"); // error format
+        repository.getTree("997cc5e85aff5cc35e317cd993f9979c858b17fa"); // error format
     }
 }

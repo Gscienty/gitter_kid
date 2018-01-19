@@ -1,19 +1,13 @@
 package indi.gscienty.gitterkid.services;
 
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.Vector;
 
-import indi.gscienty.gitterkid.repo.GitBlob;
 import indi.gscienty.gitterkid.repo.GitBranch;
 import indi.gscienty.gitterkid.repo.GitCommit;
-import indi.gscienty.gitterkid.repo.GitObjectType;
-import indi.gscienty.gitterkid.repo.GitTree;
 import indi.gscienty.gitterkid.repo.Repository;
-import indi.gscienty.gitterkid.services.types.GitBlobCompareStatus;
 
 public class GitBranchesService {
 	private Repository repository;
@@ -78,8 +72,4 @@ public class GitBranchesService {
 	public List<String> getBranchesName() {
 		return this.repository.getBranches().filter(branch -> branch.getName());
 	}
-	
-	
-	
-	
 }

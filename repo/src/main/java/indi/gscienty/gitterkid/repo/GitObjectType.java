@@ -1,7 +1,7 @@
 package indi.gscienty.gitterkid.repo;
 
 public enum GitObjectType {
-    Unknow(0), Blob(1), Commit(2), Tree(3);
+    Unknow(0), Blob(1), Commit(2), Tree(3), Tag(4), NotExist(5);
 
     private int index;
     private GitObjectType(int index) {

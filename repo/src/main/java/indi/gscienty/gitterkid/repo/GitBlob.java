@@ -9,11 +9,17 @@ public class GitBlob extends GitObject {
 
     public GitBlob(Repository repository, String signture) {
         super(repository, signture);
-        this.blobHandle = this.lib.gitobj_get_blob (this.objHandle);
-        this.Initialize();
     }
-
-    private void Initialize() {
+    
+    @Override
+    protected GitObjectType entryObjectType() {
+    	return GitObjectType.Blob;
+    }
+    
+    @Override
+    protected void initialize() {
+        this.blobHandle = this.lib.gitobj_get_blob (this.objHandle);
+        
         this.length = this.lib.gitobj_blob_length (this.blobHandle);
         this.content = this.lib.gitobj_blob_content (this.blobHandle).getByteArray(0, this.length);
     }

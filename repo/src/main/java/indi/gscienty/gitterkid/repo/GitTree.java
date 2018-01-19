@@ -21,6 +21,15 @@ public class GitTree
 
 	public GitTree (Repository repository, String signture) {
 		super (repository, signture);
+	}
+	
+	@Override
+	protected GitObjectType entryObjectType() {
+		return GitObjectType.Tree;
+	}
+	
+	@Override
+	protected void initialize () {
 		this.handle = this.lib.gitobj_get_tree (this.objHandle);
 	}
 

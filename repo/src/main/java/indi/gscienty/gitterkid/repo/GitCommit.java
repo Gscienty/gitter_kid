@@ -24,7 +24,15 @@ public class GitCommit extends GitObject {
 	
 	public GitCommit (Repository repository, String signture) {
 		super (repository, signture);
-		
+	}
+	
+	@Override
+	protected GitObjectType entryObjectType() {
+		return GitObjectType.Commit;
+	}
+	
+	@Override
+	protected void initialize() {
 		this.handle = this.lib.gitobj_get_commit (this.objHandle);
 		this.tree = null;
 		this.author = null;

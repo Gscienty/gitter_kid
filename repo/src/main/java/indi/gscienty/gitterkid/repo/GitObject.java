@@ -14,13 +14,44 @@ public abstract class GitObject {
     protected Repository repository;
     private String signture;
     private GitObjectType objectType;
+    private boolean legal;
 
     public GitObject(Repository repository, String signture) {
+    	GitObject.logger.info("ctor git object");
         this.lib = IGitObjectLibrary.Instance;
         this.signture = signture;
         this.repository = repository;
         this.objHandle = this.lib.gitrepo_get_gitobj (repository.getHandle(), this.signture);
-        this.objectType = null;
+        
+        this.transferSpecific();
+    }
+    
+    protected abstract void initialize();
+    
+    protected abstract GitObjectType entryObjectType();
+    
+    private void transferSpecific() {
+        if (this.objHandle == Pointer.NULL) {
+        	GitObject.logger.warning("not exist this git object, sign: " + this.signture);
+        	this.objectType = GitObjectType.NotExist;
+        	this.legal = false;
+        	return;
+        }
+        
+    	GitObject.logger.info("get git object, sign: " + this.signture);
+    	
+    	if (this.getObjectType().equals(this.entryObjectType()) == false) {
+    		GitObject.logger.warning("type mismatch");
+    		this.legal = false;
+    		return;
+    	}
+    	
+		this.initialize();
+		this.legal = true;
+    }
+    
+    public boolean isLegal() {
+    	return this.legal;
     }
     
     public String getSignture() {
@@ -40,6 +71,7 @@ public abstract class GitObject {
                 case 1: this.objectType = GitObjectType.Blob; break;
                 case 2: this.objectType = GitObjectType.Commit; break;
                 case 3: this.objectType = GitObjectType.Tree; break;
+                case 4: this.objectType = GitObjectType.Tag; break;
                 default: this.objectType = GitObjectType.Unknow;
             }
         }
@@ -52,6 +84,7 @@ public abstract class GitObject {
      */
     @Override
     protected void finalize () throws Throwable {
+    	GitObject.logger.info("dtor gitobj");
         this.lib.gitobj_dtor (this.objHandle);
         super.finalize ();
     }

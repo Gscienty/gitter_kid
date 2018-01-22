@@ -15,7 +15,7 @@ import indi.gscienty.gitterkid.repo.GitTree;
 import indi.gscienty.gitterkid.services.types.GitBlobCompareStatus;
 
 public class GitCommitService {
-//	private static Logger logger = Logger.getLogger(GitCommitService.class.getName()); 
+	private static Logger logger = Logger.getLogger(GitCommitService.class.getName()); 
 	
 	private GitCommit commit;
 	
@@ -33,6 +33,7 @@ public class GitCommitService {
 		for (String val : this.splitPath(path)) {
 			GitTree.Item item = result.first(t -> t.getName().equals(val));
 			if (item == null || item.getGitObjectType() != GitObjectType.Tree) {
+				logger.warning(path + " not exist");
 				return null;
 			}
 			result = ((GitTree.TreeItem) item).getTree();
@@ -47,6 +48,7 @@ public class GitCommitService {
 		for (String val : this.splitPath(path)) {
 			GitTree.Item item = midTree.first(t -> t.getName().equals(val));
 			if (item == null) {
+				logger.warning(path + " not exist");
 				return null;
 			}
 			else if (item.getGitObjectType() == GitObjectType.Tree) {
@@ -57,6 +59,7 @@ public class GitCommitService {
 			}
 		}
 		
+		logger.warning(path + " is not a blob");
 		return null;
 	}
 

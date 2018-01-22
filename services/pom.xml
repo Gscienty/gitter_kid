@@ -3,13 +3,10 @@
 	 <modelVersion>4.0.0</modelVersion>
 	 <groupId>indi.gscienty.gitterkid</groupId>
 	 <artifactId>services</artifactId>
-	 <packaging>pom</packaging>
+	 <packaging>jar</packaging>
 	 <version>0.1</version>
 	 <name>services</name>
 	 <url>http://maven.apache.org</url>
-	<modules>
-		<module>../repo/</module>
-	</modules>
 	
 	 <dependencies>
 		 <dependency>

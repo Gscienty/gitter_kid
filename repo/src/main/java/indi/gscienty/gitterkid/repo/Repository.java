@@ -23,6 +23,10 @@ public class Repository {
         this.lib = IRepositoryLibrary.Instance;
         this.branches = null;
     }
+    
+    public boolean isLegal() {
+    	return this.handle.equals(Pointer.NULL);
+    }
 
     /**
      * 获取仓库路径

@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = { "/version" })
+@RequestMapping(value = { "/sysinfo" })
 public class VersionController {
 	
-	@RequestMapping(value = { "/", "" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/version" }, method = RequestMethod.GET)
 	public String getVersion() {
-		return "GitterKid 0.1 (alpha)";
+		return "0.1 (alpha)";
 	}
 }

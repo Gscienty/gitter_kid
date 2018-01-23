@@ -31,7 +31,7 @@ public abstract class GitObject {
     protected abstract GitObjectType entryObjectType();
     
     private void transferSpecific() {
-        if (this.objHandle == Pointer.NULL) {
+        if (this.objHandle.equals(Pointer.NULL)) {
         	GitObject.logger.warning("not exist this git object, sign: " + this.signture);
         	this.objectType = GitObjectType.NotExist;
         	this.legal = false;

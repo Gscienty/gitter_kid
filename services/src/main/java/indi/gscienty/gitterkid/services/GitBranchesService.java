@@ -16,6 +16,10 @@ public class GitBranchesService {
 		this.repository = repository;
 	}
 	
+	public void setRepository(Repository repository) {
+		this.repository = repository;
+	}
+	
 	/**
 	 * 获取与该分支关联的所有Commit
 	 * @param branchName 分支名称

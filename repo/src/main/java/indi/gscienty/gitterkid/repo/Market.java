@@ -41,6 +41,14 @@ public class Market
 
         super.finalize ();
     }
+    
+    public boolean isLegal() {
+    	return this.handle.equals(Pointer.NULL) == false;
+    }
+    
+    public String getPath() {
+    	return this.basePath;
+    }
 
 	public Iterator<Repository> iterator () {
         this.lib.gitmarket_reset (this.handle);

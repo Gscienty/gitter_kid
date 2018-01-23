@@ -41,6 +41,10 @@ public class Market
 
         super.finalize ();
     }
+    
+    public String getPath() {
+    	return this.basePath;
+    }
 
 	public Iterator<Repository> iterator () {
         this.lib.gitmarket_reset (this.handle);

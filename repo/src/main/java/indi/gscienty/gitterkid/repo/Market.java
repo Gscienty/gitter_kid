@@ -42,6 +42,10 @@ public class Market
         super.finalize ();
     }
     
+    public boolean isLegal() {
+    	return this.handle.equals(Pointer.NULL) == false;
+    }
+    
     public String getPath() {
     	return this.basePath;
     }

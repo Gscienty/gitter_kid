@@ -1,5 +1,6 @@
 package indi.gscienty.gitterkid.webapi.controllers;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import indi.gscienty.gitterkid.repo.GitBlob;
+import indi.gscienty.gitterkid.webapi.entities.BlobResult;
 import indi.gscienty.gitterkid.webapi.entities.CommitServiceWrapper;
 import indi.gscienty.gitterkid.webapi.entities.MarketWrapper;
 import indi.gscienty.gitterkid.webapi.entities.RepositoryWrapper;
@@ -37,7 +40,7 @@ public class RepositoryController {
 	}
 	
 	@RequestMapping(value = { "/{repository}/{branch}/tree/**" })
-	public List<Object> getTree(
+	public List<TreeItem> getTree(
 			HttpServletRequest request,
 			@PathVariable(name = "market") String market,
 			@PathVariable(name = "repository") String repositoryName,
@@ -53,5 +56,27 @@ public class RepositoryController {
 			
 			return result;
 		});
+	}
+
+	@RequestMapping(value = { "/{repository}/{branch}/blob/**" })
+	public Object getBlob(
+			HttpServletRequest request,
+			@PathVariable(name = "market") String market,
+			@PathVariable(name = "repository") String repositoryName,
+			@PathVariable(name = "branch") String branch,
+			@Valid String path,
+			@Valid CommitServiceWrapper commitService,
+			BindingResult bindingResult) {
+		
+		GitBlob blob = commitService.getService().getBlob(path);
+		byte[] resultContentBuffer = Arrays.copyOfRange(blob.getContent(), 0, blob.getLength());
+		
+		
+		BlobResult result = new BlobResult();
+		
+		result.setContent(resultContentBuffer);
+		result.setLength(blob.getLength());
+		
+		return result;
 	}
 }

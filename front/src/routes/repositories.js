@@ -5,28 +5,18 @@ import { Row, Col, Card, Icon, Button } from 'antd';
 
 class Page extends BasePage {
     componentDidMount() {
-        this.props.dispatch({
-            type: 'repository/query',
-            payload: { keyword: this.props.match.params.keyword }
-        });
+        this.props.dispatch({ type: 'repositories/repositories', payload: { name: this.props.match.params.repositoriesName } });
     }
     page() {
         return <div>
             <Row type="flex" gutter={ 32 }>
                 {
-                    this.props.repositories
-                        .map(repository => <Col xs={ 8 } lg={ 6 } key={ repository.name }>
+                    this.props.repositories.repositories
+                        .map(repository => <Col xs={ 8 } lg={ 6 } key={ repository }>
                             <Card
-                                title={ repository.name }
-                                extra={
-                                    <Button
-                                        shape="circle"
-                                        icon="right"
-                                        size="large"
-                                        onClick={ e => this.props.history.push(`/repository/${repository.name}/code`) }
-                                    />
-                                }
-                            >
+                                title={ repository }
+                                extra={ <Button shape="circle" icon="right" size="large"
+                                    onClick={ e => this.props.history.push(`/repository/${repository}/code`) } /> }>
                                 <div style={{ marginBottom: 20 }}>description</div>
                                 <div>
                                     <Button style={{ margin: '0 4px 0 0', border: 'none' }}>
@@ -47,5 +37,5 @@ class Page extends BasePage {
 }
 
 export default connect(
-    ({ repository }) => ({ repositories: repository.queryResult })
+    ({ repositories }) => ({ entryUnit: 'repositories', repositories })
 )(Page);

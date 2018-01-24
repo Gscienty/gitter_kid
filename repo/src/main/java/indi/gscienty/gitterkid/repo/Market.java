@@ -32,16 +32,6 @@ public class Market
         this.handle = this.lib.get_gitmarket (this.basePath);
     }
     
-    /**
-     * 析构方法
-     */
-    @Override
-    protected void finalize () throws Throwable {
-        this.lib.gitmarket_dtor (this.handle);
-
-        super.finalize ();
-    }
-    
     public boolean isLegal() {
     	return this.handle.equals(Pointer.NULL) == false;
     }
@@ -109,6 +99,16 @@ public class Market
 		}
 		return result;
 	}
+    
+    /**
+     * 析构方法
+     */
+    @Override
+    protected void finalize () throws Throwable {
+        this.lib.gitmarket_dtor (this.handle);
+
+        super.finalize ();
+    }
 }
 
 

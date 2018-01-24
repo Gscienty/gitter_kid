@@ -20,7 +20,7 @@ import indi.gscienty.gitterkid.webapi.entities.RepositoryWrapper;
 import indi.gscienty.gitterkid.webapi.entities.TreeItem;
 
 @RestController
-@RequestMapping(value = { "/{market}" })
+@RequestMapping(value = { "/api/git/{market}" })
 public class RepositoryController {
 	
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.GET)
@@ -59,7 +59,7 @@ public class RepositoryController {
 	}
 
 	@RequestMapping(value = { "/{repository}/{branch}/blob/**" })
-	public Object getBlob(
+	public BlobResult getBlob(
 			HttpServletRequest request,
 			@PathVariable(name = "market") String market,
 			@PathVariable(name = "repository") String repositoryName,
@@ -67,10 +67,8 @@ public class RepositoryController {
 			@Valid String path,
 			@Valid CommitServiceWrapper commitService,
 			BindingResult bindingResult) {
-		
 		GitBlob blob = commitService.getService().getBlob(path);
 		byte[] resultContentBuffer = Arrays.copyOfRange(blob.getContent(), 0, blob.getLength());
-		
 		
 		BlobResult result = new BlobResult();
 		

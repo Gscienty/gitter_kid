@@ -90,16 +90,17 @@ struct gitmarket *get_gitmarket (const char *basepath) {
 }
 
 void gitmarket_dtor (struct gitmarket *market) {
+    if (market == NULL) return;
     while (market->head) {
         struct gitrepo *next = market->head->next;
-        free (market->head->path);
-        free (market->head->name);
+        if (market->head->path != NULL) free (market->head->path);
+        if (market->head->name != NULL) free (market->head->name);
         __gitpack_collection_dtor (market->head->packes);
         free (market->head);
         market->head = next;
     }
 
-    free (market->path);
+    if (market->path != NULL) free (market->path);
     free (market);
 }
 

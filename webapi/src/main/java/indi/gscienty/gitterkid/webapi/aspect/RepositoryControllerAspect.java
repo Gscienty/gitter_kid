@@ -24,14 +24,12 @@ import indi.gscienty.gitterkid.webapi.services.RepositoryService;
 @Component
 public class RepositoryControllerAspect {
 	
-	@Around("execution(* indi.gscienty.gitterkid.webapi.controllers.RepositoryController.getRepositories(..)) && args(market, ..)")
+	@Around("execution(* indi.gscienty.gitterkid.webapi.controllers.RepositoryController.getRepositories(..))")
 	public Object aroundGetRepositories(
-			ProceedingJoinPoint point,
-			String market) throws Throwable {
+			ProceedingJoinPoint point) throws Throwable {
 		Object[] args = point.getArgs();
 		
-		RepositoryService service = App.getBean(RepositoryService.class);
-		((MarketWrapper) args[1]).setMarket(service.getMarket(market));
+		((MarketWrapper) args[1]).setMarket(this.getRepositories(args[0].toString()));
 		
 		return point.proceed(args);
 	}
@@ -39,11 +37,8 @@ public class RepositoryControllerAspect {
 	@Around("execution(* indi.gscienty.gitterkid.webapi.controllers.RepositoryController.getBranches(..))")
 	public Object aroundGetBranches(ProceedingJoinPoint point) throws Throwable {
 		Object[] args = point.getArgs();
-
-		RepositoryService service = App.getBean(RepositoryService.class);
-		Market repositories = service.getMarket(args[0].toString());
-		Repository repository = repositories.first(r -> r.getName().equals(args[1].toString()));
-		((RepositoryWrapper) args[2]).setRepository(repository);
+		
+		((RepositoryWrapper) args[2]).setRepository(this.getRepository(args[0].toString(), args[1].toString()));
 		
 		return point.proceed(args);
 	}
@@ -52,15 +47,14 @@ public class RepositoryControllerAspect {
 	public Object aroundGetTree(ProceedingJoinPoint point) throws Throwable {
 		Object[] args = point.getArgs();
 		
-		args[4] = this.getPathByServletRequest((HttpServletRequest) args[0]);
-		
-		RepositoryService repositoryService = App.getBean(RepositoryService.class);
-		Market repositories = repositoryService.getMarket(args[1].toString());
-		
-		Repository repository = repositories.first(r -> r.getName().equals(args[2].toString()));
-		GitBranch branch = repository.getBranches().first(b -> b.getName().equals(args[3].toString()));
-		
-		((CommitServiceWrapper) args[5]).setService(new GitCommitService(branch.getLastCommit()));
+		args[4] = this.getGitFSPathByServletRequest((HttpServletRequest) args[0]);
+		GitBranch branch = this.getBranch(args[1].toString(), args[2].toString(), args[3].toString());
+		if (branch == null) {
+			((CommitServiceWrapper) args[5]).setService(null);
+		}
+		else {
+			((CommitServiceWrapper) args[5]).setService(new GitCommitService(branch.getLastCommit()));
+		}
 		
 		return point.proceed(args);
 	}
@@ -69,20 +63,44 @@ public class RepositoryControllerAspect {
 	public Object aroundGetBlob(ProceedingJoinPoint point) throws Throwable {
 		Object[] args = point.getArgs();
 		
-		args[4] = this.getPathByServletRequest((HttpServletRequest) args[0]);
-		
-		RepositoryService repositoryService = App.getBean(RepositoryService.class);
-		Market repositories = repositoryService.getMarket(args[1].toString());
-		
-		Repository repository = repositories.first(r -> r.getName().equals(args[2].toString()));
-		GitBranch branch = repository.getBranches().first(b -> b.getName().equals(args[3].toString()));
-		
-		((CommitServiceWrapper) args[5]).setService(new GitCommitService(branch.getLastCommit()));
+		args[4] = this.getGitFSPathByServletRequest((HttpServletRequest) args[0]);
+		GitBranch branch = this.getBranch(args[1].toString(), args[2].toString(), args[3].toString());
+		if (branch == null) {
+			((CommitServiceWrapper) args[5]).setService(null);
+		}
+		else {
+			((CommitServiceWrapper) args[5]).setService(new GitCommitService(branch.getLastCommit()));
+		}
 		
 		return point.proceed(args);
 	}
 	
-	private String getPathByServletRequest(HttpServletRequest request) {
+	private GitBranch getBranch(String marketName, String repositoryName, String branchName) {
+		Repository repository = this.getRepository(marketName, repositoryName);
+		if (repository == null) {
+			return null;
+		}
+		
+		return repository.getBranches().first(b -> b.getName().equals(branchName));
+	}
+	
+	private Repository getRepository(String marketName, String repositoryName) {
+		Market repositories = this.getRepositories(marketName);
+		if (repositories == null || repositories.isLegal() == false) {
+			return null;
+		}
+		
+		return repositories.first(r -> r.getName().equals(repositoryName));
+	}
+	
+	private Market getRepositories(String marketName) {
+		RepositoryService service = App.getBean(RepositoryService.class);
+		Market repositories = service.getMarket(marketName);
+		
+		return repositories;
+	}
+	
+	private String getGitFSPathByServletRequest(HttpServletRequest request) {
 		String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
 		String bestMatchPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
 		

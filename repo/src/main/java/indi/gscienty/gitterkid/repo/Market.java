@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 /**
  * 仓库市场
@@ -17,6 +18,8 @@ import java.util.function.Predicate;
  */
 public class Market
 	implements Iterable<Repository>, Iterator<Repository>, IQueryable<Repository> {
+	private static Logger logger = Logger.getLogger(Market.class.getName());
+	
     private IMarketLibrary lib;
     private String basePath;
     private Pointer handle;
@@ -30,6 +33,7 @@ public class Market
         this.lib = IMarketLibrary.Instance;
 
         this.handle = this.lib.get_gitmarket (this.basePath);
+    	logger.info("ctor market: " + this.basePath);
     }
     
     public boolean isLegal() {
@@ -105,9 +109,10 @@ public class Market
      */
     @Override
     protected void finalize () throws Throwable {
-        this.lib.gitmarket_dtor (this.handle);
-
+    	logger.info("dtor market: " + this.basePath);
         super.finalize ();
+        
+        this.lib.gitmarket_dtor (this.handle);
     }
 }
 

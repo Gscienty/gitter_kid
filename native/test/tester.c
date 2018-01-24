@@ -173,6 +173,8 @@ void test_tree () {
             }
         }
     }
+
+    gitmarket_dtor (market);
 }
 
 int main() {

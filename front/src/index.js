@@ -5,10 +5,11 @@ import './style/code-syntax-highlight.css';
 
 let app = new App();
 
-app.addModel(require('./models/repository').default);
+app.addModel(require('./models/repositories').default);
+app.addModel(require('./models/tree').default);
 
-app.addPage({ path: '/', exact: true, component: require('./routes/index').default })
-app.addPage({ path: '/query/:keyword?', exact: true, component: require('./routes/query').default })
-app.addPage({ path: '/repository/:repository/:tag', exact: true, component: require('./routes/repository/index').default })
+app.addPage({ path: '/', exact: true, component: require('./routes/index').default });
+app.addPage({ path: '/repositories/:repositoriesName', exact: true, component: require('./routes/repositories').default });
+app.addPage({ path: '/repository/:repositoriesName/:repositoryName/:branchName/tree/*', exact: true, component: require('./routes/repository/tree').default });
 
 app.run(document.getElementById('root'), HashRouter)

@@ -171,6 +171,8 @@ void test_tree () {
                 struct gitobj_treeitem *item = gitobj_tree_next (tree);
                 printf ("%s\t%s\n", gitobj_treeitem_get_name (item), gitobj_treeitem_get_sign (item));
             }
+
+            gitobj_dtor (obj);
         }
     }
 

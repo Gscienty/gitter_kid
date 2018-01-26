@@ -91,6 +91,7 @@ struct gitmarket *get_gitmarket (const char *basepath) {
 
 void gitmarket_dtor (struct gitmarket *market) {
     if (market == NULL) return;
+    DBG_LOG (DBG_INFO, "gitmarket_dtor: begin destructor");
     while (market->head) {
         struct gitrepo *next = market->head->next;
         if (market->head->path != NULL) free (market->head->path);
@@ -102,6 +103,7 @@ void gitmarket_dtor (struct gitmarket *market) {
 
     if (market->path != NULL) free (market->path);
     free (market);
+    DBG_LOG (DBG_INFO, "gitmarket_dtor: end destructor");
 }
 
 void gitmarket_reset (struct gitmarket *market) {

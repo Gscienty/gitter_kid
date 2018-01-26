@@ -86,6 +86,7 @@ void __gitobj_tree_dtor (struct gitobj_tree *obj) {
     if (obj == NULL) {
         return ;
     }
+    DBG_LOG (DBG_INFO, "__gitobj_tree_dtor: begin destructor");
     while (obj->head != NULL) {
         struct gitobj_treeitem *next = obj->head->next;
         
@@ -96,6 +97,7 @@ void __gitobj_tree_dtor (struct gitobj_tree *obj) {
         obj->head = next;
     }
     free (obj);
+    DBG_LOG (DBG_INFO, "__gitopj_tree_dtor: end destructor");
 }
 
 struct gitobj_tree *gitobj_get_tree (struct gitobj *obj) {

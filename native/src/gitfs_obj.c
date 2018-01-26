@@ -209,15 +209,16 @@ struct gitobj *gitrepo_get_gitobj (struct gitrepo *repo, const char* signture) {
     }
     
     char *obj_path = __gitobj_path_get (repo, signture);
-
+    
     if (obj_path == NULL) {
+        DBG_LOG (DBG_INFO, "gitrepo_get_gitobj: this git object from gitpack");
         if (repo->packes == NULL) repo->packes = __gitpack_get_collection (repo);
         return __gitpack_getobj__charstring (repo, signture);
     }
     else{
          // get obj by loose
+         DBG_LOG (DBG_INFO, "gitrepo_get_gitobj: this git object from loose file");
         struct gitobj *ret = __gitobj_loose_get (obj_path, signture);
-        free (obj_path);
         return ret;
     }
 }
@@ -228,6 +229,7 @@ void gitobj_dtor (struct gitobj *obj) {
     if (obj == NULL) {
         return ;
     }
+    DBG_LOG (DBG_INFO, "gitobj_dtor: begin destructor");
     switch (obj->type) {
         case GIT_OBJ_TYPE_BLOB:
             __gitobj_blob_dtor ((struct gitobj_blob *) obj->ptr);
@@ -239,9 +241,11 @@ void gitobj_dtor (struct gitobj *obj) {
             __gitobj_tree_dtor ((struct gitobj_tree *) obj->ptr);
             break;
     }
-
     free (obj->buf);
+
     if (obj->path != NULL) free (obj->path);
     if (obj->sign != NULL) free (obj->sign);
     free (obj);
+
+    DBG_LOG (DBG_INFO, "gitobj_dtor: end destructor");
 }

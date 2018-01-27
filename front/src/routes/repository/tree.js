@@ -22,7 +22,6 @@ class Page extends ProjectTemplate {
         else { 
             this.setState({ path });
         }
-        console.log(path);
         this.props.dispatch({
             type: 'tree/getTree',
             payload: {
@@ -35,6 +34,10 @@ class Page extends ProjectTemplate {
     }
 
     componentDidMount() {
+        this.freshTree();
+    }
+
+    componentWillReceiveProps(props) {
         this.freshTree();
     }
 
@@ -56,7 +59,6 @@ class Page extends ProjectTemplate {
     ]
 
     unit() {
-
         return <div>
             <span>{ this.state.path }</span>
             <Table

@@ -21,7 +21,11 @@ public class TreeTest extends TestCase {
 		
 		GitCommitService commService = new GitCommitService(bransService.getLastCommit("master"));
 
-		GitTree tree = commService.getTree("/services/src/main/java/indi/gscienty/gitterkid/services/");
+		GitTree tree = commService.getTree("/");
+		
+		for (int i = 0; i < 65536; i++) {
+			tree = commService.getTree("/native");
+		}
 		
 		tree.forEach(i -> System.out.println(i.getName()));
 		

@@ -27,13 +27,14 @@ DIR *__gitpack_get_packdir (const char *path, size_t path_len) {
 }
 
 struct __gitpack *__get_gitpack (const char *path, size_t path_len, const char *idx_name) {
+    DBG_LOG (DBG_INFO, "__get_gitpack: malloc struct __gitpack");
     struct __gitpack *ret = (struct __gitpack *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__get_gitpack: have not enough free memory");
         return NULL;
     }
 
-    ret->sign = (char *) malloc (sizeof (char) * 41);
+    ret->sign = (char *) malloc (41);
     if (ret->sign == NULL) {
         DBG_LOG (DBG_ERROR, "__get_gitpack: have not enough free memory");
         free (ret);
@@ -41,7 +42,11 @@ struct __gitpack *__get_gitpack (const char *path, size_t path_len, const char *
     }
     strncpy (ret->sign, idx_name + 5, 40);
     
-    ret->idx_path = (char *) malloc (sizeof (char) * (path_len + 63));
+    DBG_LOG (DBG_INFO, "__get_gitpack: malloc idx_path");
+    if (strlen (path) == path_len) {
+        DBG_LOG (DBG_INFO, "__get_gitpack: path's string length legal");
+    }
+    ret->idx_path = (char *) malloc (path_len + 63);
     if (ret->idx_path == NULL) {
         DBG_LOG (DBG_ERROR, "__get_gitpack: have not enough free memory");
         free (ret->sign);
@@ -244,7 +249,10 @@ struct __gitpack_collection *__gitpack_get_collection (struct gitrepo *repo) {
         return NULL;
     }
     ret->head = ret->tail = NULL;
-
+    if (repo->path == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_get_collection: gitrepo's path is null");
+        return NULL;
+    }
     size_t path_len = strlen (repo->path);
 
     DIR *dir = __gitpack_get_packdir (repo->path, path_len);

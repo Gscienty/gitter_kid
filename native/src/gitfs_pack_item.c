@@ -29,6 +29,10 @@ struct __gitpack_item_findret *__gitpack_collection_find_rdtnode (collection, si
     const void *sign;
     struct rdt_node *(*find_func) (const struct rdt *tree, const void *key);
 {
+    if (collection == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_collection_find_rdtnode: collection is null");
+        return NULL;
+    }
     struct __gitpack *cursor = collection->head;
     while (cursor != NULL) {
         struct rdt_node *findednode = __gitpack_find_rdtnode (cursor, sign, find_func);
@@ -384,6 +388,23 @@ struct gitobj *__gitpack_getobj__bytestring (struct gitrepo *repo, const void *s
 }
 
 struct gitobj *__gitpack_getobj__charstring (struct gitrepo *repo, const char *sign) {
+    if (repo == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_getobj_charstring: repo is null");
+        return NULL;
+    }
+    if (sign == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_getobj__charstring: sign is null");
+        return NULL;
+    }
+    if (strlen (sign) != 40) {
+        DBG_LOG (DBG_ERROR, "__gitpack_getobj__charstring: sign length error");
+        return NULL;
+    }
+    if (repo->packes == NULL) {
+        DBG_LOG (DBG_INFO, "__gitpack_getobj__charstring: repo's packes is null");
+        repo->packes = __gitpack_get_collection (repo);
+    }
+
     struct __gitpack_item_findret *findret = __gitpack_collection_find_rdtnode (repo->packes, (const void *) sign, rdt_find__char_string);
     if (findret == NULL) return NULL;
 

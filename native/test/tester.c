@@ -127,39 +127,34 @@ int test_commits_parent () {
     return 0;
 }
 
-int test_pack () {
-    int i = 0;
-    struct gitmarket *market = get_gitmarket ("/home/ant");
-    for (i = 0; i < 0x10000; i++) {
-        gitmarket_reset (market);
-        while (gitmarket_hasnext (market)) {
-            struct gitrepo *repo = gitmarket_next (market);
-            if (strcmp (gitrepo_get_name (repo), "gitterRepo") == 0) {
-                struct gitobj *obj = gitrepo_get_gitobj (repo, "e02af234195f9bc4219aa705d9e7625cd0b54283");
-                printf ("%d\n", (int) obj);
-                gitobj_dtor (obj);
-                obj = gitrepo_get_gitobj (repo, "3ff1e8785454b32f7dcadf3335bbd786ffa46d9c");
-                printf ("%d\n", (int) obj);
-                // gitobj_dtor (obj);
-                // gitrepo_get_gitobj (repo, "c49860eeec92d4477a57a7c58135a9b69b360f32");
-                // gitrepo_get_gitobj (repo, "582a103bd9ed07676ebda0020ffe8ce97c0159e3");
-                // gitrepo_get_gitobj (repo, "1dbadf22f5d1f0b534071dfbc16d47dda1941be1");
-                // gitrepo_get_gitobj (repo, "f516d431df61f028aaa377c72bd42facc65ed1dc");
-                // gitrepo_get_gitobj (repo, "7e9c8b75c9d5157b4d8bcc3e90ad8ea53a943863");
-                // gitrepo_get_gitobj (repo, "7e9c8b75c9d5157b4d8bcc3e90ad8ea53a943863");
-                // gitrepo_get_gitobj (repo, "cae768c7cec368a47f82ae09f6579ca274a57d73");
-                // gitrepo_get_gitobj (repo, "ba5897fa37124e65d71424036163cc1f70b959bd");
-                // gitrepo_get_gitobj (repo, "1a8c597789f3376f72d59e726b45873fb982afad");
-                // gitrepo_get_gitobj (repo, "d3043090193f43eb5330b83f17c3e667ce9a3a40");
-                // gitrepo_get_gitobj (repo, "7b55b69c2a5b77e36b10377bc5d313e1091ea099");
-                // gitrepo_get_gitobj (repo, "cf395c1d48a5832d1a62041863d05e05c2045681");
-                // gitrepo_get_gitobj (repo, "3edb19b739762ea5fb1fa677e68e0b045e5748c2");
-            }
-        }
+struct gitrepo *__test_pack_getgitrepo(struct gitmarket *market) {
+    gitmarket_reset (market);
 
+    while (gitmarket_hasnext (market)) {
+        struct gitrepo *repo = gitmarket_next (market);
+        if (strcmp (gitrepo_get_name (repo), "gitterRepo") == 0) {
+            return repo;
+        }
     }
 
-    gitmarket_dtor (market);
+    return NULL;
+}
+
+int test_pack () {
+    int i = 0;
+    for (i = 0; i < 991; i++) {
+        struct gitmarket *market = get_gitmarket ("/home/ant");
+        if (market == NULL) return 0;
+
+        struct gitrepo *repo = __test_pack_getgitrepo (market);
+        struct gitobj *obj = gitrepo_get_gitobj (repo, "e02af234195f9bc4219aa705d9e7625cd0b54283");
+        printf ("%d\n", (int) obj);
+        gitobj_dtor (obj);
+        obj = gitrepo_get_gitobj (repo, "3ff1e8785454b32f7dcadf3335bbd786ffa46d9c");
+        printf ("%d\n", (int) obj);
+
+        gitmarket_dtor (market);
+    }
     return 0;
 }
 

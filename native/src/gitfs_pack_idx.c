@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 
 DIR *__gitpack_get_packdir (const char *path, size_t path_len) {
-    char *pack_path = (char *) malloc (sizeof (char) * (path_len + 14));
+    char *pack_path = (char *) malloc (path_len + 14);
     if (pack_path == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_get_packdir: have not enough free memory");
         return NULL;
@@ -18,9 +18,8 @@ DIR *__gitpack_get_packdir (const char *path, size_t path_len) {
 
     strcpy (pack_path, path);
     strcpy (pack_path + path_len, "objects/pack/");
-    
     DIR *ret = opendir (pack_path);
-
+    
     free (pack_path);
 
     return ret;
@@ -41,7 +40,7 @@ struct __gitpack *__get_gitpack (const char *path, size_t path_len, const char *
         return NULL;
     }
     strncpy (ret->sign, idx_name + 5, 40);
-    
+    ret->sign[40] = 0;
     DBG_LOG (DBG_INFO, "__get_gitpack: malloc idx_path");
     if (strlen (path) == path_len) {
         DBG_LOG (DBG_INFO, "__get_gitpack: path's string length legal");
@@ -120,7 +119,7 @@ struct __opend_mmap_file *__gitpack_idxfile_open (struct __gitpack *pack) {
         DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: pack is null");
         return NULL;
     }
-    struct __opend_mmap_file *ret = (struct __opend_mmap_file *) malloc (sizeof (ret));
+    struct __opend_mmap_file *ret = (struct __opend_mmap_file *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: have not enough free memory");
         return NULL;
@@ -199,7 +198,12 @@ void * __sign_dup (void *key) {
 }
 
 struct __gitpack_index *__gitpack_get_sortedindexes (unsigned char *val, struct __gitpack *pack, size_t packsize) {
+    // this malloc may occur error.
     struct __gitpack_index *ret = (struct __gitpack_index *) malloc (sizeof (*ret) * pack->count);
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_get_sortedindexes: have not enough free memory");
+        return NULL;
+    }
     int i = 0;
     for (i = 0; i < pack->count; i++) {
         struct __gitpack_index index = { i, __GITPACK_NTH_OFF(val, pack->count, i), 0, NULL };
@@ -279,7 +283,6 @@ struct __gitpack_collection *__gitpack_get_collection (struct gitrepo *repo) {
                 closedir (dir);
                 return NULL;
             }
-
             // get count
             pack->count = __gitpack_get_count (idx_mmaped);
             // build linear indexes

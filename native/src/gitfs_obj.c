@@ -179,7 +179,6 @@ struct gitobj *__gitobj_loose_get (const char *obj_path, const char *signture) {
         default:
             obj_type_occur_error:
             DBG_LOG (DBG_ERROR, "get_gitobj: cannot transfer special object");
-            // occur error.
             free (ret->buf);
             free (ret->path);
             free (ret->sign);
@@ -212,7 +211,9 @@ struct gitobj *gitrepo_get_gitobj (struct gitrepo *repo, const char* signture) {
     
     if (obj_path == NULL) {
         DBG_LOG (DBG_INFO, "gitrepo_get_gitobj: this git object from gitpack");
-        if (repo->packes == NULL) repo->packes = __gitpack_get_collection (repo);
+        if (repo->packes == NULL) {
+            repo->packes = __gitpack_get_collection (repo);
+        }
         return __gitpack_getobj__charstring (repo, signture);
     }
     else{

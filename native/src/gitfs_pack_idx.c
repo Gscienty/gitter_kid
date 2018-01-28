@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include <errno.h>
 
 DIR *__gitpack_get_packdir (const char *path, size_t path_len) {
     char *pack_path = (char *) malloc (path_len + 14);
@@ -111,7 +112,11 @@ struct __opend_mmap_file {
 void __gitpack_idxfile_close (struct __opend_mmap_file *mmaped) {
     if (mmaped == NULL) return;
     munmap (mmaped->val, mmaped->len);
-    close (mmaped->fd);
+    if (close (mmaped->fd) == -1) {
+        DBG_LOG (DBG_ERROR, "__gitpack_idx_file_close: ");
+        DBG_LOG (DBG_ERROR, strerror (errno));
+    }
+    free (mmaped);
 }
 
 struct __opend_mmap_file *__gitpack_idxfile_open (struct __gitpack *pack) {
@@ -128,9 +133,11 @@ struct __opend_mmap_file *__gitpack_idxfile_open (struct __gitpack *pack) {
     ret->fd = open (pack->idx_path, O_RDONLY);
     if (ret->fd == -1) {
         DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: idx file cannot opend");
+        DBG_LOG (DBG_ERROR, strerror (errno));
         free (ret);
         return NULL;
     }
+    printf ("%d\n", ret->fd);
     struct stat idx_st;
     if (fstat (ret->fd, &idx_st) != 0) {
         DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: idx file cannot get st");

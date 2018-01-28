@@ -86,6 +86,8 @@ struct gitmarket *get_gitmarket (const char *basepath) {
         }
     }
 
+    closedir (dir);
+
     return ret;
 }
 

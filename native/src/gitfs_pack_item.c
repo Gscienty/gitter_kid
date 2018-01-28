@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <limits.h>
+#include <errno.h>
 
 // find node (segment's offset & len) by red black tree (idx)
 struct rdt_node *__gitpack_find_rdtnode (pack, sign, find_func)
@@ -64,6 +65,7 @@ struct __gitpack_file *__gitpack_fileopen (struct __gitpack *pack) {
     ret->fd = open (pack->pack_path, O_RDONLY);
     if (ret->fd == -1) {
         DBG_LOG (DBG_ERROR, "__gitpack_fileopen: cannot open fd");
+        DBG_LOG (DBG_ERROR, strerror (errno));
         free (ret);
         return NULL;
     }
@@ -82,7 +84,10 @@ struct __gitpack_file *__gitpack_fileopen (struct __gitpack *pack) {
 
 void __gitpack_dtor_file (struct __gitpack_file *obj) {
     if (obj == NULL) return;
-    if (obj->fd != -1) close (obj->fd);
+    if (obj->fd != -1 && close (obj->fd) == -1) {
+        DBG_LOG (DBG_ERROR, "__gitpack_dtor_file:");
+        DBG_LOG (DBG_ERROR, strerror (errno));
+    };
     free (obj);
 }
 

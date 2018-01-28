@@ -3,6 +3,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <stdio.h>
+#include <errno.h>
 
 DIR *__gitrepo_get_branchesdir (const char *repopath, const size_t len) {
     char *refs_path = (char *) malloc (sizeof (char) * (len + 12));
@@ -100,7 +101,10 @@ struct gitbranches *gitrepo_get_branches (struct gitrepo *repo) {
             FILE *head = fopen (ref_path, "r");
             fread(branch->lastcommit_sign, sizeof (char), 40, head);
             branch->lastcommit_sign[40] = 0;
-            fclose (head);
+            if (fclose (head) != 0) {
+                DBG_LOG (DBG_ERROR, "gitrepo_get_branches:");
+                DBG_LOG (DBG_ERROR, strerror (errno));
+            }
             free (ref_path);
 
             __gitbranches_append (branches, branch);

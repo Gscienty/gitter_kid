@@ -8,9 +8,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include <errno.h>
 
 DIR *__gitpack_get_packdir (const char *path, size_t path_len) {
-    char *pack_path = (char *) malloc (sizeof (char) * (path_len + 14));
+    char *pack_path = (char *) malloc (path_len + 14);
     if (pack_path == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_get_packdir: have not enough free memory");
         return NULL;
@@ -18,30 +19,34 @@ DIR *__gitpack_get_packdir (const char *path, size_t path_len) {
 
     strcpy (pack_path, path);
     strcpy (pack_path + path_len, "objects/pack/");
-    
     DIR *ret = opendir (pack_path);
-
+    
     free (pack_path);
 
     return ret;
 }
 
 struct __gitpack *__get_gitpack (const char *path, size_t path_len, const char *idx_name) {
+    DBG_LOG (DBG_INFO, "__get_gitpack: malloc struct __gitpack");
     struct __gitpack *ret = (struct __gitpack *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__get_gitpack: have not enough free memory");
         return NULL;
     }
 
-    ret->sign = (char *) malloc (sizeof (char) * 41);
+    ret->sign = (char *) malloc (41);
     if (ret->sign == NULL) {
         DBG_LOG (DBG_ERROR, "__get_gitpack: have not enough free memory");
         free (ret);
         return NULL;
     }
     strncpy (ret->sign, idx_name + 5, 40);
-    
-    ret->idx_path = (char *) malloc (sizeof (char) * (path_len + 63));
+    ret->sign[40] = 0;
+    DBG_LOG (DBG_INFO, "__get_gitpack: malloc idx_path");
+    if (strlen (path) == path_len) {
+        DBG_LOG (DBG_INFO, "__get_gitpack: path's string length legal");
+    }
+    ret->idx_path = (char *) malloc (path_len + 63);
     if (ret->idx_path == NULL) {
         DBG_LOG (DBG_ERROR, "__get_gitpack: have not enough free memory");
         free (ret->sign);
@@ -107,7 +112,11 @@ struct __opend_mmap_file {
 void __gitpack_idxfile_close (struct __opend_mmap_file *mmaped) {
     if (mmaped == NULL) return;
     munmap (mmaped->val, mmaped->len);
-    close (mmaped->fd);
+    if (close (mmaped->fd) == -1) {
+        DBG_LOG (DBG_ERROR, "__gitpack_idx_file_close: ");
+        DBG_LOG (DBG_ERROR, strerror (errno));
+    }
+    free (mmaped);
 }
 
 struct __opend_mmap_file *__gitpack_idxfile_open (struct __gitpack *pack) {
@@ -115,7 +124,7 @@ struct __opend_mmap_file *__gitpack_idxfile_open (struct __gitpack *pack) {
         DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: pack is null");
         return NULL;
     }
-    struct __opend_mmap_file *ret = (struct __opend_mmap_file *) malloc (sizeof (ret));
+    struct __opend_mmap_file *ret = (struct __opend_mmap_file *) malloc (sizeof (*ret));
     if (ret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: have not enough free memory");
         return NULL;
@@ -124,9 +133,11 @@ struct __opend_mmap_file *__gitpack_idxfile_open (struct __gitpack *pack) {
     ret->fd = open (pack->idx_path, O_RDONLY);
     if (ret->fd == -1) {
         DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: idx file cannot opend");
+        DBG_LOG (DBG_ERROR, strerror (errno));
         free (ret);
         return NULL;
     }
+    printf ("%d\n", ret->fd);
     struct stat idx_st;
     if (fstat (ret->fd, &idx_st) != 0) {
         DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: idx file cannot get st");
@@ -194,7 +205,12 @@ void * __sign_dup (void *key) {
 }
 
 struct __gitpack_index *__gitpack_get_sortedindexes (unsigned char *val, struct __gitpack *pack, size_t packsize) {
+    // this malloc may occur error.
     struct __gitpack_index *ret = (struct __gitpack_index *) malloc (sizeof (*ret) * pack->count);
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_get_sortedindexes: have not enough free memory");
+        return NULL;
+    }
     int i = 0;
     for (i = 0; i < pack->count; i++) {
         struct __gitpack_index index = { i, __GITPACK_NTH_OFF(val, pack->count, i), 0, NULL };
@@ -244,7 +260,10 @@ struct __gitpack_collection *__gitpack_get_collection (struct gitrepo *repo) {
         return NULL;
     }
     ret->head = ret->tail = NULL;
-
+    if (repo->path == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_get_collection: gitrepo's path is null");
+        return NULL;
+    }
     size_t path_len = strlen (repo->path);
 
     DIR *dir = __gitpack_get_packdir (repo->path, path_len);
@@ -271,7 +290,6 @@ struct __gitpack_collection *__gitpack_get_collection (struct gitrepo *repo) {
                 closedir (dir);
                 return NULL;
             }
-
             // get count
             pack->count = __gitpack_get_count (idx_mmaped);
             // build linear indexes

@@ -33,7 +33,7 @@ public class GitCommitService {
 		for (String val : this.splitPath(path)) {
 			GitTree.Item item = result.first(t -> t.getName().equals(val));
 			if (item == null || item.getGitObjectType() != GitObjectType.Tree) {
-				logger.warning(path + " not exist");
+				logger.warning(path + " not exist, signture: " + item.getSignture());
 				return null;
 			}
 			result = ((GitTree.TreeItem) item).getTree();

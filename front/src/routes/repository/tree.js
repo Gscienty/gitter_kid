@@ -59,15 +59,9 @@ class Page extends ProjectTemplate {
 
     renderPath() {
         let pathItems = this.state.path.substring(0, this.state.path.length - 1).split('/');
-        pathItems[0] = {
-            name: '',
-            path: ''
-        }
+        pathItems[0] = { name: '', path: '' };
         for (let i = 1; i < pathItems.length; i++) {
-            pathItems[i] = {
-                name: pathItems[i],
-                path: pathItems[i - 1].path + '/' + pathItems[i]
-            };
+            pathItems[i] = { name: pathItems[i], path: pathItems[i - 1].path + '/' + pathItems[i] };
         }
 
         pathItems[0].name = this.props.match.params.repositoryName;

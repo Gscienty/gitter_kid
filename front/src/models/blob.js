@@ -1,16 +1,16 @@
 export default {
-    namespace: 'tree',
+    namespace: 'blob',
     state: {
         path: '',
-        content: []
+        content: { content: '', length: '' }
     },
     effects: {
-        async getTree({ get }, { payload: { repositoriesName, repositoryName, branchName, path } }) {
-            let result = await get(`/api/git/${repositoriesName}/${repositoryName}/${branchName}/tree${path}`);
+        async getBlob({ get }, { payload: { repositoriesName, repositoryName, branchName, path } }) {
+            let result = await get(`/api/git/${repositoriesName}/${repositoryName}/${branchName}/blob${path}`);
 
             if (result.status === 200) {
                 this.dispatch({
-                    type: 'tree/reduce',
+                    type: 'blob/reduce',
                     payload: { path, content: result.payload }
                 });
             }

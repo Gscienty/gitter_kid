@@ -1,6 +1,6 @@
 import React from 'react';
 import ProjectTemplate from './_project';
-import { Table, Icon, Card } from 'antd';
+import { Table, Icon, Card, Dropdown, Button, Menu } from 'antd';
 import { connect } from 'react-redux';
 
 class Page extends ProjectTemplate {
@@ -12,7 +12,7 @@ class Page extends ProjectTemplate {
         if (pathItems.length === 2) {
             path = pathItems[1];
         }
-        
+
         if (path[path.length - 1] !== '/') {
             path = path + '/';
         }
@@ -23,9 +23,15 @@ class Page extends ProjectTemplate {
     }
 
     componentDidMount() {
-        this.setState({ prefixURI: this.props.match.url.split('/tree')[0] + '/tree' });
-
+        this.setState({ prefixURI: this.props.match.url.split('/tree')[0] });
         this.entryTreeInitialize();
+        this.props.dispatch({
+            type: 'branches/getBranches',
+            payload: {
+                repositoriesName: this.props.match.params.repositoriesName,
+                repositoryName: this.props.match.params.repositoryName
+            }
+        });
     }
 
     componentWillReceiveProps(props) {
@@ -33,7 +39,7 @@ class Page extends ProjectTemplate {
     }
 
     freshTree(path, branchName) {
-        this.props.history.push(this.state.prefixURI + path);
+        this.props.history.push(this.state.prefixURI  + '/tree' + path);
         this.props.dispatch({
             type: 'tree/getTree',
             payload: {
@@ -65,14 +71,11 @@ class Page extends ProjectTemplate {
         }
 
         pathItems[0].name = this.props.match.params.repositoryName;
-        pathItems[0].path = '';
+        pathItems[0].path = '/';
 
-        return pathItems.map((item, index) => <span style={{ fontSize: 21 }}>
+        return pathItems.map((item, index) => <span style={{ fontSize: 21 }} key={ index }>
             { index === 0 ? '' : '/' }
-            <a onClick={() => {
-                this.props.history.push(this.state.prefixURI + item.path + '/');
-                this.freshTree(item.path + '/', this.props.match.params.branchName);
-            }}
+            <a onClick={() => this.freshTree(item.path, this.props.match.params.branchName)}
             style={{ margin: '0 4px' }}>{ item.name }</a>
         </span>);
     }
@@ -87,10 +90,22 @@ class Page extends ProjectTemplate {
         }
     ]
 
-    unit() {
-        
+    branchesSelectRender() {
+        return <Menu onClick={ e => this.freshTree('/', e.key) }>
+            { this.props.branches.map((branch, index) => <Menu.Item
+                key={ branch }
+                style={{ textAlign: 'center' }}>{ branch }</Menu.Item>) }
+        </Menu>;
+    }
+
+    unit() {    
         return <Card
             title={ <span>{ this.renderPath() }</span> }
+            extra={ <div>
+                <Dropdown overlay={ this.branchesSelectRender() } trigger={['click']}>
+                    <Button>{ this.props.match.params.branchName } <Icon type="down" /></Button>
+                </Dropdown>
+            </div> }
             bodyStyle={{ padding: 0 }}>
             <Table
                 columns={ this.columns }
@@ -103,8 +118,10 @@ class Page extends ProjectTemplate {
 }
 
 export default connect(
-    ({ tree }) => ({
-        entryUnit: 'repositories', projectEntryUnit: 'code',
-        tree
+    ({ tree, branches }) => ({
+        entryUnit: 'repositories',
+        projectEntryUnit: 'code',
+        tree,
+        branches: branches.branches
     })
 )(Page);

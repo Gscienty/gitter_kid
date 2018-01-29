@@ -137,7 +137,6 @@ struct __opend_mmap_file *__gitpack_idxfile_open (struct __gitpack *pack) {
         free (ret);
         return NULL;
     }
-    printf ("%d\n", ret->fd);
     struct stat idx_st;
     if (fstat (ret->fd, &idx_st) != 0) {
         DBG_LOG (DBG_ERROR, "__gitpack_idxfile_open: idx file cannot get st");

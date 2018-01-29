@@ -24,7 +24,7 @@ public class TreeTest extends TestCase {
 		GitTree tree = commService.getTree("/");
 		
 		for (int i = 0; i < 65536; i++) {
-			tree = commService.getTree("/native");
+			tree = commService.getTree("/front/scripts");
 		}
 		
 		tree.forEach(i -> System.out.println(i.getName()));

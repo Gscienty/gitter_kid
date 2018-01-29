@@ -142,7 +142,7 @@ struct gitrepo *__test_pack_getgitrepo(struct gitmarket *market) {
 
 int test_pack () {
     int i = 0;
-    for (i = 0; i < 991; i++) {
+    for (i = 0; i < 65536; i++) {
         struct gitmarket *market = get_gitmarket ("/home/ant");
         if (market == NULL) return 0;
 
@@ -159,29 +159,62 @@ int test_pack () {
 }
 
 void test_tree () {
-    struct gitmarket *market = get_gitmarket ("/home/ant");
-    gitmarket_reset (market);
 
-    while (gitmarket_hasnext (market)) {
-        struct gitrepo *repo = gitmarket_next (market);
-        if (strcmp (gitrepo_get_name (repo), "gitterRepo") == 0) {
-            int i;
-            for (i = 0; i < 65536; i++) {
-                struct gitobj *obj = gitrepo_get_gitobj (repo, "37a86fe1c17821f5c9f761f5a690088085f226c2");
-                struct gitobj_tree *tree = gitobj_get_tree (obj);
+    int i;
+    for (i = 0; i < 65536; i++) {
+        struct gitmarket *market = get_gitmarket ("/home/ant");
+        gitmarket_reset (market);
+        while (gitmarket_hasnext (market)) {
+            struct gitrepo *repo = gitmarket_next (market);
 
-                gitobj_tree_reset (tree);
-                while (gitobj_tree_hasnext (tree)) {
-                    struct gitobj_treeitem *item = gitobj_tree_next (tree);
-                    printf ("%s\t%s\n", gitobj_treeitem_get_name (item), gitobj_treeitem_get_sign (item));
+            if (strcmp (gitrepo_get_name (repo), "gitterRepo") == 0) {
+                struct gitbranches *branches = gitrepo_get_branches(repo);
+                gitbranches_reset (branches);
+                while (gitbranches_hasnext (branches)) {
+                    struct gitbranch *branch = gitbranches_next (branches);
+
+                    struct gitobj *commit_obj = gitrepo_get_gitobj (repo, gitbranch_get_lastcommit_sign (branch));
+                    struct gitobj *tree_obj = gitrepo_get_gitobj (repo, gitobj_commit_get_treesign (gitobj_get_commit (commit_obj)));
+
+                    struct gitobj_tree *trees = gitobj_get_tree (tree_obj);
+
+                    gitobj_tree_reset (trees);
+                    while (gitobj_tree_hasnext (trees)) {
+                        struct gitobj_treeitem *item = gitobj_tree_next (trees);
+
+                        if (strcmp (gitobj_treeitem_get_name (item), "front") == 0) {
+                            struct gitobj *front_trees_obj = gitrepo_get_gitobj (repo, gitobj_treeitem_get_sign (item));
+
+                            gitobj_tree_reset (gitobj_get_tree (front_trees_obj));
+                            while (gitobj_tree_hasnext (gitobj_get_tree (front_trees_obj))) {
+                                struct gitobj_treeitem *front_item = gitobj_tree_next (gitobj_get_tree (front_trees_obj));
+
+                                if (strcmp (gitobj_treeitem_get_name (front_item), "scripts") == 0) {
+                                    struct gitobj *scripts_trees_obj = gitrepo_get_gitobj (repo, gitobj_treeitem_get_sign (front_item));
+
+                                    gitobj_tree_reset (gitobj_get_tree (scripts_trees_obj));
+                                    while (gitobj_tree_hasnext (gitobj_get_tree (scripts_trees_obj))) {
+                                        struct gitobj_treeitem *scripts_item = gitobj_tree_next (gitobj_get_tree (scripts_trees_obj));
+
+                                        printf ("%s, %s\n", gitobj_treeitem_get_name (scripts_item), gitobj_treeitem_get_sign (scripts_item));
+                                    }
+                                    gitobj_dtor (scripts_trees_obj);
+                                }
+                            }
+
+                            gitobj_dtor (front_trees_obj);
+                        }
+                    }
+
+                    gitobj_dtor (commit_obj);
+                    gitobj_dtor (tree_obj);
                 }
-
-                gitobj_dtor (obj);
+                gitbranches_dtor (branches);
             }
         }
-    }
 
-    gitmarket_dtor (market);
+        gitmarket_dtor (market);
+    }
 }
 
 int main() {
@@ -192,7 +225,7 @@ int main() {
     // test_create_account ();
     // test_branches ();
     // test_commits_parent ();
-    test_pack ();
-    // test_tree ();
+    // test_pack ();
+    test_tree ();
     return 0;
 }

@@ -12,13 +12,19 @@ class Page extends ProjectTemplate {
         if (pathItems.length === 2) {
             path = pathItems[1];
         }
+        
+        if (path[path.length - 1] !== '/') {
+            path = path + '/';
+        }
 
         if (path !== this.state.path) {
-            this.setState({ path }, () => this.freshTree(path));
+            this.setState({ path }, () => this.freshTree(path, this.props.match.params.branchName));
         }
     }
 
     componentDidMount() {
+        this.setState({ prefixURI: this.props.match.url.split('/tree')[0] + '/tree' });
+
         this.entryTreeInitialize();
     }
 
@@ -26,13 +32,14 @@ class Page extends ProjectTemplate {
         this.entryTreeInitialize();
     }
 
-    freshTree(path) {
+    freshTree(path, branchName) {
+        this.props.history.push(this.state.prefixURI + path);
         this.props.dispatch({
             type: 'tree/getTree',
             payload: {
                 repositoriesName: this.props.match.params.repositoriesName,
                 repositoryName: this.props.match.params.repositoryName,
-                branchName: this.props.match.params.branchName,
+                branchName,
                 path
             }
         });
@@ -40,8 +47,7 @@ class Page extends ProjectTemplate {
 
     treeItemOnClick(record) {
         if (record.type === 'Tree') {
-            this.props.history.push(this.state.prefixURI + this.state.path + record.name + '/');
-            this.freshTree(this.state.path + record.name + '/');
+            this.freshTree(this.state.path + record.name + '/', this.props.match.params.branchName);
         }
     }
 
@@ -65,7 +71,7 @@ class Page extends ProjectTemplate {
             { index === 0 ? '' : '/' }
             <a onClick={() => {
                 this.props.history.push(this.state.prefixURI + item.path + '/');
-                this.freshTree(item.path + '/');
+                this.freshTree(item.path + '/', this.props.match.params.branchName);
             }}
             style={{ margin: '0 4px' }}>{ item.name }</a>
         </span>);

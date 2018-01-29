@@ -37,7 +37,7 @@ public class Market
     }
     
     public boolean isLegal() {
-    	return this.handle.equals(Pointer.NULL) == false;
+    	return this.handle != Pointer.NULL;
     }
     
     public String getPath() {

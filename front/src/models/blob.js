@@ -2,11 +2,15 @@ export default {
     namespace: 'blob',
     state: {
         path: '',
-        content: { content: '', length: '' }
+        content: ''
     },
     effects: {
-        async getBlob({ get }, { payload: { repositoriesName, repositoryName, branchName, path } }) {
-            let result = await get(`/api/git/${repositoriesName}/${repositoryName}/${branchName}/blob${path}`);
+        async getTextBlob({ get }, { payload: { repositoriesName, repositoryName, branchName, path } }) {
+            let result = await get(
+                `/api/git/${repositoriesName}/${repositoryName}/${branchName}/blob${path}`, {
+                    'Content-Type': 'text/plain'
+                }
+            );
 
             if (result.status === 200) {
                 this.dispatch({

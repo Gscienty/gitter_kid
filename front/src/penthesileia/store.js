@@ -1,15 +1,14 @@
 import { createStore } from 'redux';
 
 function __common_transfer_result(response) {
-    return response.text()
-        .then(jsonString => {
-            if (jsonString.length === 0) {
-                return { status: response.status };
-            }
-            else {
-                return ({ status: response.status, payload: JSON.parse(jsonString) });
-            }
-        });
+    if (response.headers.get('content-type').startsWith('text/plain')) {
+        return response.text()
+            .then(text => ({ status: response.status, payload: text }))
+    }
+    else if (response.headers.get('content-type').startsWith('application/json')) {
+        return response.json()
+            .then(json => ({ status: response.status, payload: json }));
+    }
 }
 
 function __build_submit_body(entity, headers) {

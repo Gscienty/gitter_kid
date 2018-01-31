@@ -55,6 +55,9 @@ class Page extends ProjectTemplate {
         if (record.type === 'Tree') {
             this.freshTree(this.state.path + record.name + '/', this.props.match.params.branchName);
         }
+        else {
+            this.props.history.push(this.state.prefixURI + '/blob' + this.state.path + record.name);
+        }
     }
 
     renderPath() {
@@ -103,7 +106,7 @@ class Page extends ProjectTemplate {
             bodyStyle={{ padding: 0 }}>
             <Table
                 columns={ this.columns }
-                dataSource={ this.props.tree.content.map(e => ({ ...e, key: e.name })) }
+                dataSource={ this.props.treeItems.map(e => ({ ...e, key: e.name })) }
                 showHeader={ false }
                 pagination={ false }
             />
@@ -115,7 +118,7 @@ export default connect(
     ({ tree, branches }) => ({
         entryUnit: 'repositories',
         projectEntryUnit: 'code',
-        tree,
+        treeItems: tree.content,
         branches: branches.branches
     })
 )(Page);

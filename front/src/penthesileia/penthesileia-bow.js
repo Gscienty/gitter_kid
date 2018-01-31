@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { StoreManager } from './store';
 import { Provider } from 'react-redux';
 import { Route } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 
 export default class PenthesileiaBow {
     _storeManager = new StoreManager();

@@ -35,13 +35,13 @@ class Page extends ProjectTemplate {
 
     calculateLinesCount(content) {
         let lines = 0;
-        let contentCount = content;
-        for (let i = 0; i < contentCount; i++) {
+        for (let i = 0; i < content.length; i++) {
             if (content[i] === '\n')
             {
                 lines += 1;
             }
         }
+        return lines;
     }
 
     componentDidMount() {
@@ -52,7 +52,6 @@ class Page extends ProjectTemplate {
         if (pathItems.length === 2) {
             path = pathItems[1];
         }
-
         this.setState({
             path,
             prefixURI: pathItems[0],
@@ -60,16 +59,21 @@ class Page extends ProjectTemplate {
             type: this.getBlobType(path)
         }, () => this.freshBlob(path, this.props.match.params.branchName));
     }
+
+    componentWillReceiveProps(props) {
+        this.setState({ linesCount: this.calculateLinesCount(props.content) });
+    }
     
     getBlobType(path) {
         let middleCutResult = path.split('.');
         if (middleCutResult.length > 1) {
             switch (middleCutResult[middleCutResult.length - 1]) {
                 case 'cs': return 'csharp';
+                case 'xml': return 'xml';
                 case 'html': return 'html';
                 case 'json': return 'json';
                 case 'md': return 'markdown';
-                default: return 'default';
+                default: return middleCutResult[middleCutResult.length - 1];
             }
         }
         return 'default';
@@ -87,17 +91,24 @@ class Page extends ProjectTemplate {
 
         return pathItems.map((item, index) => <span style={{ fontSize: 21 }} key={ index }>
             { index === 0 ? '' : '/' }
-            <a onClick={() => this.freshTree(item.path, this.props.match.params.branchName)}
-            style={{ margin: '0 4px' }}>{ item.name }</a>
+            <span style={{ margin: '0 4px' }}>
+                {
+                    index === pathItems.length - 1 && index !== 0
+                    ? item.name
+                    : <a
+                        onClick={() => this.freshTree(item.path, this.props.match.params.branchName)}>
+                        { item.name }
+                    </a>
+                }
+            </span>
         </span>);
     }
 
 
     unit() {
-        console.log(this.state);
         return <Card        
             title={ <span>{ this.renderPath() }</span> }
-            bodyStyle={{ padding: 5 }}>
+            bodyStyle={{ padding: 20 }}>
             {(() => {
                 switch (this.state.type) {
                     case 'markdown': return <ReactMarkdown source={ this.props.content } />
@@ -118,7 +129,7 @@ class Page extends ProjectTemplate {
                             }
                             </ul>
                         </div>
-                        <HighLight lang={ this.state.type } value={ this.props.content } />;
+                        <HighLight lang={ this.state.type } value={ this.props.content } />
                     </div>
                 }
             })()}

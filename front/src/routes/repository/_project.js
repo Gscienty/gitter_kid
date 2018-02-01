@@ -5,10 +5,6 @@ import BaseComponent from '../../components/BasePage'
 export default class ProjectTemplate extends BaseComponent {
     unit() { }
 
-    handleMenuOnClick(e) {
-
-    }
-
     page() {
         return <div>
             <Row type="flex" justify="center">

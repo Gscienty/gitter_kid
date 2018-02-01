@@ -27,9 +27,11 @@ export default class BasePage extends Component {
                         theme="dark"
                         mode="horizontal"
                         style={{ lineHeight: '64px' }}
-                        onSelect={ this.handleMenuOnClick.bind(this) }
-                        selectedKeys={[ this.props.entryUnit ]}>
-                        <Menu.Item key="repositories">Repositories</Menu.Item>
+                        onClick={ this.handleMenuOnClick.bind(this) }
+                        selectedKeys={[ 
+                            this.props.entryUnit
+                        ]}>
+                        <Menu.Item key="repositories" onClick={ () => console.log ('HERE') }>Repositories</Menu.Item>
                     </Menu>
                 </div>
             </Layout.Header>

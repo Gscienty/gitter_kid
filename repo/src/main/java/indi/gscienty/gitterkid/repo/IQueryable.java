@@ -29,4 +29,10 @@ public interface IQueryable<T> {
 	 * @return 集合
 	 */
 	<R> List<R> filter(Function<T, R> transfer);
+	/**
+	 * 判断集合中所有满足要求的元素个数
+	 * @param predicate 要求
+	 * @return 满足要求的元素个数
+	 */
+	int count(Predicate<T> predicate);
 }

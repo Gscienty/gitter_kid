@@ -1,11 +1,15 @@
 import { createStore } from 'redux';
 
 function __common_transfer_result(response) {
-    if (response.headers.get('content-type').startsWith('text/plain')) {
+    let contentType = response.headers.get('content-type');
+    if (contentType === null) {
+        contentType = 'text/plain';
+    }
+    if (contentType.startsWith('text/plain')) {
         return response.text()
             .then(text => ({ status: response.status, payload: text }))
     }
-    else if (response.headers.get('content-type').startsWith('application/json')) {
+    else if (contentType.startsWith('application/json')) {
         return response.json()
             .then(json => ({ status: response.status, payload: json }));
     }

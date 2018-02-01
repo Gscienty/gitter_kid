@@ -31,7 +31,7 @@ export default class BasePage extends Component {
                         selectedKeys={[ 
                             this.props.entryUnit
                         ]}>
-                        <Menu.Item key="repositories" onClick={ () => console.log ('HERE') }>Repositories</Menu.Item>
+                        <Menu.Item key="repositories">Repositories</Menu.Item>
                     </Menu>
                 </div>
             </Layout.Header>

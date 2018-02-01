@@ -2,6 +2,8 @@ import React from 'react';
 import ProjectTemplate from './_project';
 import { Table, Icon, Card, Dropdown, Button, Menu } from 'antd';
 import { connect } from 'react-redux';
+import  FolderIcon from 'react-icons/lib/io/folder';
+import  FileIcon from 'react-icons/lib/go/file-code';
 
 class Page extends ProjectTemplate {
     state = { path: '', prefixURI: '' }
@@ -72,17 +74,40 @@ class Page extends ProjectTemplate {
 
         return pathItems.map((item, index) => <span style={{ fontSize: 21 }} key={ index }>
             { index === 0 ? '' : '/' }
-            <a onClick={() => this.freshTree(item.path, this.props.match.params.branchName)}
-            style={{ margin: '0 4px' }}>{ item.name }</a>
+            <span style={{ margin: '0 4px' }}>
+                {
+                    index === pathItems.length - 1 && index !== 0
+                    ? item.name
+                    : <a
+                        onClick={() => this.freshTree(item.path, this.props.match.params.branchName)}>
+                        { item.name }
+                    </a>
+                }
+            </span>
         </span>);
+    }
+
+    folderNameRender(name) {
+        if (name.indexOf('/') === -1) {
+            return name;
+        }
+        else {
+            let nameItems = name.split('/');
+            let prefixName = ''
+            for (let i = 0; i < nameItems.length - 1; i++) {
+                prefixName += nameItems[i] + '/';
+            }
+
+            return <span><span style={{ color: '#6a737d' }}>{ prefixName }</span>{ nameItems[nameItems.length - 1] }</span>
+        }
     }
 
     columns = [
         {
             key: 'fileName',
             render: (text, record) => <a onClick={ () => this.treeItemOnClick(record) }>
-                <span>{ record.type === 'Blob' ? <Icon type="file-text" /> : <Icon type="folder" /> }</span>
-                <span style={{ marginLeft: 8 }}>{ record.name }</span>
+                <span style={{ fontSize: 18 }}>{ record.type === 'Blob' ? <FileIcon /> : <FolderIcon /> }</span>
+                <span style={{ marginLeft: 8 }}>{ this.folderNameRender(record.name) }</span>
             </a>
         }
     ]
@@ -109,6 +134,7 @@ class Page extends ProjectTemplate {
                 dataSource={ this.props.treeItems.map(e => ({ ...e, key: e.name })) }
                 showHeader={ false }
                 pagination={ false }
+                size="small"
             />
         </Card>;
     }

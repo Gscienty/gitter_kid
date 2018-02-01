@@ -59,7 +59,7 @@ public class RepositoryControllerAspect {
 		return point.proceed(args);
 	}
 
-	@Around("execution(* indi.gscienty.gitterkid.webapi.controllers.RepositoryController.getBlob(..))")
+	@Around("execution(* indi.gscienty.gitterkid.webapi.controllers.RepositoryController.getBlob*(..))")
 	public Object aroundGetBlob(ProceedingJoinPoint point) throws Throwable {
 		Object[] args = point.getArgs();
 		
@@ -74,6 +74,7 @@ public class RepositoryControllerAspect {
 		
 		return point.proceed(args);
 	}
+	
 	
 	private GitBranch getBranch(String marketName, String repositoryName, String branchName) {
 		Repository repository = this.getRepository(marketName, repositoryName);

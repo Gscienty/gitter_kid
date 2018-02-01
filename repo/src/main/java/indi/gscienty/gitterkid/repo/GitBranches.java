@@ -62,6 +62,17 @@ public class GitBranches
 		}
 		return result;
 	}
+	
+	@Override
+	public int count(Predicate<GitBranch> predicate) {
+		int result = 0;
+		for (GitBranch branch : this) {
+			if (predicate.test(branch)) {
+				result++;
+			}
+		}
+		return result;
+	}
 
 	@Override
 	public boolean hasNext () {

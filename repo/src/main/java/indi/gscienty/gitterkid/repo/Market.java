@@ -103,6 +103,17 @@ public class Market
 		}
 		return result;
 	}
+	
+	@Override
+	public int count(Predicate<Repository> predicate) {
+		int result = 0;
+		for (Repository repository : this) {
+			if (predicate.test(repository)) {
+				result++;
+			}
+		}
+		return result;
+	}
     
     /**
      * 析构方法

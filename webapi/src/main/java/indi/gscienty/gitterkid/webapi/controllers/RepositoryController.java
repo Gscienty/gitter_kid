@@ -1,11 +1,12 @@
 package indi.gscienty.gitterkid.webapi.controllers;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import indi.gscienty.gitterkid.repo.GitBlob;
-import indi.gscienty.gitterkid.webapi.entities.BlobResult;
+import indi.gscienty.gitterkid.repo.GitObjectType;
+import indi.gscienty.gitterkid.repo.GitTree;
 import indi.gscienty.gitterkid.webapi.entities.CommitServiceWrapper;
 import indi.gscienty.gitterkid.webapi.entities.MarketWrapper;
 import indi.gscienty.gitterkid.webapi.entities.RepositoryWrapper;
@@ -30,7 +32,7 @@ public class RepositoryController {
 		return repositories.getMarket().filter(r -> r.getName());
 	}
 	
-	@RequestMapping(value = {"/{repository}"}, method = RequestMethod.GET )
+	@RequestMapping(value = {"/{repository}"}, method = RequestMethod.GET)
 	public List<String> getBranches(
 			@PathVariable(name = "market") String market,
 			@PathVariable(name = "repository") String repositoryName,
@@ -51,30 +53,43 @@ public class RepositoryController {
 		return commitService.getService().getTree(path).filter(i -> {
 			TreeItem result = new TreeItem();
 			
-			result.setName(i.getName());
 			result.setType(i.getGitObjectType().name());
+			
+			if (i.getGitObjectType().equals(GitObjectType.Tree)) {
+				StringBuffer buffer = new StringBuffer(i.getName());
+				
+				GitTree currentTree = ((GitTree.TreeItem) i).getTree();
+				while (currentTree.count(childItem -> true) == 1
+						&& currentTree.first(childItem -> true).getGitObjectType().equals(GitObjectType.Tree)) {
+					GitTree.TreeItem tempTreeItem = (GitTree.TreeItem) currentTree.first(childItem -> true);
+					buffer.append("/");
+					buffer.append(tempTreeItem.getName());
+					
+					currentTree = tempTreeItem.getTree();
+				}
+				result.setName(buffer.toString());
+			}
+			else {
+				result.setName(i.getName());
+			}
+			
 			
 			return result;
 		});
 	}
 
-	@RequestMapping(value = { "/{repository}/{branch}/blob/**" })
-	public BlobResult getBlob(
+	@RequestMapping(value = { "/{repository}/{branch}/blob/**" }, method = RequestMethod.GET, consumes = { "text/plain" }, produces = { "text/plain" })
+	public String getBlobText(
 			HttpServletRequest request,
 			@PathVariable(name = "market") String market,
 			@PathVariable(name = "repository") String repositoryName,
 			@PathVariable(name = "branch") String branch,
 			@Valid String path,
 			@Valid CommitServiceWrapper commitService,
+			HttpServletResponse response,
 			BindingResult bindingResult) {
+		response.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		GitBlob blob = commitService.getService().getBlob(path);
-		byte[] resultContentBuffer = Arrays.copyOfRange(blob.getContent(), 0, blob.getLength());
-		
-		BlobResult result = new BlobResult();
-		
-		result.setContent(resultContentBuffer);
-		result.setLength(blob.getLength());
-		
-		return result;
+		return new String(blob.getContent(), 0, blob.getLength());
 	}
 }

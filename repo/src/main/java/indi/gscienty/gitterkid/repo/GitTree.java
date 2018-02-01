@@ -103,6 +103,17 @@ public class GitTree
 		return result;
 	}
 	
+	@Override
+	public int count(Predicate<Item> predicate) {
+		int result = 0;
+		for (Item item : this) {
+			if (predicate.test(item)) {
+				result++;
+			}
+		}
+		return result;
+	}
+	
 	/**
 	 * Tree Item 实体
 	 * @author ant

@@ -141,6 +141,17 @@ public class GitCommit extends GitObject {
 			}
 			return result;
 		}
+		
+		@Override
+		public int count(Predicate<GitCommit> predicate) {
+			int result = 0;
+			for (GitCommit parent : this) {
+				if (predicate.test(parent)) {
+					result++;
+				}
+			}
+			return result;
+		}
 
 		public boolean hasNext () {
 			return this.lib.gitobj_commitparents_hasnext(this.handle) != 0;

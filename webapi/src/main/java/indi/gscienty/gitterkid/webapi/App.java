@@ -9,13 +9,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.context.ApplicationContext;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
  * Hello world!
  *
  */
 @SpringBootApplication
-public class App implements EmbeddedServletContainerCustomizer
+public class App extends WebMvcConfigurerAdapter implements EmbeddedServletContainerCustomizer
 {
 	private static ApplicationContext context;
 	
@@ -42,8 +44,11 @@ public class App implements EmbeddedServletContainerCustomizer
 			
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
-		}
-		
-		
+		}	
+	}
+	
+	@Override
+	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+		configurer.favorPathExtension(false);
 	}
 }

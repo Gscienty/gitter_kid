@@ -28,39 +28,72 @@ public class GitCommitService {
 	}
 	
 	public GitTree getTree (String path) {
-		GitTree result = this.commit.getTree();
-
-		for (String val : this.splitPath(path)) {
-			GitTree.Item item = result.first(t -> t.getName().equals(val));
-			if (item == null || item.getGitObjectType() != GitObjectType.Tree) {
-				logger.warning(path + " not exist, signture: " + item.getSignture());
+		GitTree.Item finedeItem = this.getObjectFromCommitByPath(this.commit, path);
+		if (finedeItem == null) {
+			logger.warning("not find the object, path: " + path);
+			return null;
+		}
+		if (finedeItem.getGitObjectType().equals(GitObjectType.Blob)) {
+			logger.warning("this object's type is blob, path: " + path);
+			return null;
+		}
+		
+		return ((GitTree.TreeItem) finedeItem).getTree();
+	}
+	
+	public GitBlob getBlob (String path) {
+		GitTree.Item findedItem = this.getObjectFromCommitByPath(this.commit, path);
+		if (findedItem == null) {
+			logger.warning("not find the object, path: " + path);
+		}
+		else if (findedItem.getGitObjectType().equals(GitObjectType.Tree)) {
+			logger.warning("this object's type is tree, path: " + path);
+			return null;
+		}
+		
+		return ((GitTree.BlobItem) findedItem).getBlob();
+	}
+	
+	/**
+	 * 获取某文件最新的提交日志
+	 * @param path
+	 * @return
+	 */
+	public String getNewestCommitMessage(String path) {
+		GitTree.Item treeItem = null;
+		
+		return "";
+	}
+	
+	private GitTree.Item getObjectFromCommitByPath(GitCommit commit, String path) {
+		GitTree.Item result = null;
+		GitTree currentTree = commit.getTree();
+		for (String pathItem : this.splitPath(path)) {
+			if (currentTree == null) {
 				return null;
 			}
-			result = ((GitTree.TreeItem) item).getTree();
+			
+			result = currentTree.first(i -> i.getName().equals(pathItem));
+			if (result == null) {
+				return null;
+			}
+			else if (result.getGitObjectType().equals(GitObjectType.Blob)) {
+				currentTree = null;
+			}
+			else {
+				currentTree = ((GitTree.TreeItem) result).getTree();
+			}
 		}
 		
 		return result;
 	}
 	
-	public GitBlob getBlob (String path) {
-		GitTree midTree = this.commit.getTree();
-		
-		for (String val : this.splitPath(path)) {
-			GitTree.Item item = midTree.first(t -> t.getName().equals(val));
-			if (item == null) {
-				logger.warning(path + " not exist");
-				return null;
-			}
-			else if (item.getGitObjectType() == GitObjectType.Tree) {
-				midTree = ((GitTree.TreeItem) item).getTree();
-			}
-			else {
-				return ((GitTree.BlobItem) item).getBlob();
-			}
+	private boolean judgeSamePathObjectEqual(GitCommit commit, String path, String signture) {
+		GitTree.Item findedItem = this.getObjectFromCommitByPath(commit, path);
+		if (findedItem == null) {
+			return false;
 		}
-		
-		logger.warning(path + " is not a blob");
-		return null;
+		return findedItem.getSignture().equals(signture);
 	}
 
 	private List<String> splitPath (String path) {

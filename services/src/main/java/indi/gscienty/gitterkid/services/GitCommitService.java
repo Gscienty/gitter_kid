@@ -60,6 +60,7 @@ public class GitCommitService {
 	 * @return
 	 */
 	public String getNewestCommitMessage(String path) {
+		// 根据path获取当前commit中的object
 		GitTree.Item newerObject = this.getObjectFromCommitByPath(this.commit, path);
 		if (newerObject == null) {
 			return "";
@@ -67,6 +68,7 @@ public class GitCommitService {
 		String newerObjectSignture = newerObject.getSignture();
 		String currentMessage = this.commit.getMessage();
 		
+		// 构造上游commit遍历临时队列
 		Queue<GitCommit> comparedList = new LinkedList<>();
 		this.commit.getParents().forEach(parent -> comparedList.add(parent));
 		
@@ -75,7 +77,7 @@ public class GitCommitService {
 			if (currentCommit == null) {
 				return currentMessage;
 			}
-			
+			// 比对上游commit中相同path下的object是否为同一个object
 			if (this.judgeSamePathObjectEqual(currentCommit, path, newerObjectSignture)) {
 				currentMessage = currentCommit.getMessage();			
 				currentCommit.getParents().forEach(parent -> comparedList.add(parent));
@@ -96,7 +98,7 @@ public class GitCommitService {
 				return null;
 			}
 			
-			result = currentTree.first(i -> i.getName().equals(pathItem));
+			result = currentTree.get(pathItem);
 			if (result == null) {
 				return null;
 			}

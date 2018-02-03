@@ -50,17 +50,16 @@ public class RepositoryController {
 			@Valid String path,
 			@Valid CommitServiceWrapper commitService,
 			BindingResult bindingResult) {
+		
 		List<TreeItem> result = commitService.getService().getTree(path).filter(i -> {
 			TreeItem resultItem = new TreeItem();
 			resultItem.setSignture(i.getSignture());
-			
+			resultItem.setPath(path + i.getName());
 			resultItem.setType(i.getGitObjectType().name());
-			if (i.getGitObjectType().equals(GitObjectType.Tree)) {
-				resultItem.setName(this.constructTreeName((GitTree.TreeItem) i));
-			}
-			else {
-				resultItem.setName(i.getName());
-			}
+			resultItem.setMessage(commitService.getService().getNewestCommitMessage(resultItem.getPath()));
+			resultItem.setName(i.getGitObjectType().equals(GitObjectType.Tree)
+					? this.constructTreeName((GitTree.TreeItem) i)
+					: i.getName());
 			
 			return resultItem;
 		});

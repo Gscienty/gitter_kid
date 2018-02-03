@@ -5,6 +5,7 @@ public class TreeItem {
 	private String type;
 	private String path;
 	private String signture;
+	private String message;
 	
 	public String getName() {
 		return name;
@@ -29,5 +30,11 @@ public class TreeItem {
 	}
 	public void setSignture(String sign) {
 		this.signture = sign;
+	}
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
 	}
 }

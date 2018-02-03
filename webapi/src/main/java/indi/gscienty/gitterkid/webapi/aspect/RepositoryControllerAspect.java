@@ -48,6 +48,10 @@ public class RepositoryControllerAspect {
 		Object[] args = point.getArgs();
 		
 		args[4] = this.getGitFSPathByServletRequest((HttpServletRequest) args[0]);
+		if (((String) args[4]).endsWith("/") == false) {
+			args[4] = ((String) args[4]) + "/";
+		}
+		
 		GitBranch branch = this.getBranch(args[1].toString(), args[2].toString(), args[3].toString());
 		if (branch == null) {
 			((CommitServiceWrapper) args[5]).setService(null);
@@ -82,7 +86,7 @@ public class RepositoryControllerAspect {
 			return null;
 		}
 		
-		return repository.getBranches().first(b -> b.getName().equals(branchName));
+		return repository.getBranches().get(branchName);
 	}
 	
 	private Repository getRepository(String marketName, String repositoryName) {

@@ -1,7 +1,9 @@
 package indi.gscienty.gitterkid.repo;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -15,13 +17,22 @@ public class GitBranches
 	private Repository repository;
 	private Pointer handle;
 	private IRepositoryLibrary lib;
+	private Map<String, GitBranch> branchesMap;
 	
 	public GitBranches (Repository repository, Pointer branchesPointer) {
 		this.handle = branchesPointer;
 		this.lib = IRepositoryLibrary.Instance;
 		this.repository = repository;
 		
-		this.lib.gitbranches_reset (this.handle);
+		this.branchesMap = new HashMap<>();
+		this.forEach(branch -> this.branchesMap.put(branch.getName(), branch));
+	}
+	
+	public GitBranch get(String name) {
+		if (this.branchesMap.containsKey(name) == false) {
+			return null;
+		}
+		return this.branchesMap.get(name);
 	}
 	
 	@Override

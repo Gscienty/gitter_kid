@@ -28,9 +28,7 @@ public class GitBranchesService {
 	public List<GitCommit> getCommits(String branchName) {
 		List<GitCommit> result = new Vector<>();
 		// 通过分支名称获取分支
-		GitBranch branch = this.repository
-				.getBranches()
-				.first(b -> b.getName().equals(branchName));
+		GitBranch branch = this.repository.getBranches().get(branchName);
 		
 		if (branch != null) {
 			Queue<GitCommit> enumQueue = new LinkedList<>();
@@ -60,9 +58,7 @@ public class GitBranchesService {
 	 * @return Commit
 	 */
 	public GitCommit getLastCommit(String branchName) {
-		GitBranch branch = this.repository
-				.getBranches()
-				.first(b -> b.getName().equals(branchName));
+		GitBranch branch = this.repository.getBranches().get(branchName);
 		if (branch == null) {
 			return null;
 		}

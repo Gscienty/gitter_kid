@@ -10,3 +10,4 @@ tester
 target/
 .classpath
 .project
+test_store/

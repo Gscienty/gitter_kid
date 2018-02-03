@@ -1,7 +1,9 @@
 package indi.gscienty.gitterkid.repo;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -17,6 +19,7 @@ public class GitTree
 	extends GitObject
 	implements Iterable<GitTree.Item>, Iterator<GitTree.Item>, IQueryable<GitTree.Item> {
 	
+	private Map<String, GitTree.Item> itemsMap;
 	private Pointer handle;
 
 	public GitTree (Repository repository, String signture) {
@@ -31,6 +34,17 @@ public class GitTree
 	@Override
 	protected void initialize () {
 		this.handle = this.lib.gitobj_get_tree (this.objHandle);
+		
+		this.itemsMap = new HashMap<>();
+		this.forEach(item -> this.itemsMap.put(item.getName(), item));
+	}
+	
+	public GitTree.Item get(String name) {
+		if (this.itemsMap.containsKey(name) == false) {
+			return null;
+		}
+		
+		return this.itemsMap.get(name);
 	}
 
 	public Iterator<Item> iterator () {

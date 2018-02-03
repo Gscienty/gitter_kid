@@ -25,7 +25,7 @@ SOURCES = $(patsubst\
 		$(wildcard $(PWD)/src/*.c) \
 	) \
 )
-LINKS = pam pam_misc z
+LINKS = z
 OUT_LIBRARY = libgkid.so
 
 all: $(OUT_LIBRARY)

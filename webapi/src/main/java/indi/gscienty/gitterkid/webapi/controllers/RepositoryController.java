@@ -50,32 +50,37 @@ public class RepositoryController {
 			@Valid String path,
 			@Valid CommitServiceWrapper commitService,
 			BindingResult bindingResult) {
-		return commitService.getService().getTree(path).filter(i -> {
-			TreeItem result = new TreeItem();
+		
+		List<TreeItem> result = commitService.getService().getTree(path).filter(i -> {
+			TreeItem resultItem = new TreeItem();
+			resultItem.setSignture(i.getSignture());
+			resultItem.setPath(path + i.getName());
+			resultItem.setType(i.getGitObjectType().name());
+			// resultItem.setMessage(commitService.getService().getNewestCommitMessage(resultItem.getPath()));
+			resultItem.setName(i.getGitObjectType().equals(GitObjectType.Tree)
+					? this.constructTreeName((GitTree.TreeItem) i)
+					: i.getName());
 			
-			result.setType(i.getGitObjectType().name());
-			
-			if (i.getGitObjectType().equals(GitObjectType.Tree)) {
-				StringBuffer buffer = new StringBuffer(i.getName());
-				
-				GitTree currentTree = ((GitTree.TreeItem) i).getTree();
-				while (currentTree.count(childItem -> true) == 1
-						&& currentTree.first(childItem -> true).getGitObjectType().equals(GitObjectType.Tree)) {
-					GitTree.TreeItem tempTreeItem = (GitTree.TreeItem) currentTree.first(childItem -> true);
-					buffer.append("/");
-					buffer.append(tempTreeItem.getName());
-					
-					currentTree = tempTreeItem.getTree();
-				}
-				result.setName(buffer.toString());
-			}
-			else {
-				result.setName(i.getName());
-			}
-			
-			
-			return result;
+			return resultItem;
 		});
+		
+		return result;
+	}
+	
+	private String constructTreeName(GitTree.TreeItem treeItem) {
+		StringBuffer buffer = new StringBuffer(treeItem.getName());
+		
+		GitTree currentTree = treeItem.getTree();
+		while (currentTree.count(childItem -> true) == 1
+				&& currentTree.first(childItem -> true).getGitObjectType().equals(GitObjectType.Tree)) {
+			GitTree.TreeItem tempTreeItem = (GitTree.TreeItem) currentTree.first(childItem -> true);
+			buffer.append("/");
+			buffer.append(tempTreeItem.getName());
+			
+			currentTree = tempTreeItem.getTree();
+		}
+		
+		return buffer.toString();
 	}
 
 	@RequestMapping(value = { "/{repository}/{branch}/blob/**" }, method = RequestMethod.GET, consumes = { "text/plain" }, produces = { "text/plain" })

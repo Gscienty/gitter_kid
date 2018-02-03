@@ -1,5 +1,7 @@
 package indi.gscienty.gitterkid.webapi.aspect;
 
+import java.util.logging.Logger;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -23,6 +25,8 @@ import indi.gscienty.gitterkid.webapi.services.RepositoryService;
 @Aspect
 @Component
 public class RepositoryControllerAspect {
+	private static Logger logger = Logger.getLogger(RepositoryControllerAspect.class.getName());
+	
 	
 	@Around("execution(* indi.gscienty.gitterkid.webapi.controllers.RepositoryController.getRepositories(..))")
 	public Object aroundGetRepositories(
@@ -54,6 +58,7 @@ public class RepositoryControllerAspect {
 		
 		GitBranch branch = this.getBranch(args[1].toString(), args[2].toString(), args[3].toString());
 		if (branch == null) {
+			logger.warning("cannot find '" + args[3].toString() + "' branch from '" + args[2].toString() + "' repository");
 			((CommitServiceWrapper) args[5]).setService(null);
 		}
 		else {

@@ -56,7 +56,7 @@ public class RepositoryController {
 			resultItem.setSignture(i.getSignture());
 			resultItem.setPath(path + i.getName());
 			resultItem.setType(i.getGitObjectType().name());
-			resultItem.setMessage(commitService.getService().getNewestCommitMessage(resultItem.getPath()));
+			// resultItem.setMessage(commitService.getService().getNewestCommitMessage(resultItem.getPath()));
 			resultItem.setName(i.getGitObjectType().equals(GitObjectType.Tree)
 					? this.constructTreeName((GitTree.TreeItem) i)
 					: i.getName());

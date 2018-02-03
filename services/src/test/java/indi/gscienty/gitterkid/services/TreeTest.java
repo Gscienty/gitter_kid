@@ -23,4 +23,12 @@ public class TreeTest extends TestCase {
 		commService.getTree("/");
 		
 	}
+	
+	public void testNewestMessage() {
+		GitRepositoriesService reposService = new GitRepositoriesService("/home/ant");
+		GitBranchesService bransService = new GitBranchesService(reposService.getRepository("gitterRepo"));
+		
+		
+		GitCommitService commService = new GitCommitService(bransService.getLastCommit("master"));
+	}
 }

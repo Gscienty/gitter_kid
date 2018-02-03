@@ -1,6 +1,5 @@
 package indi.gscienty.gitterkid.services;
 
-import indi.gscienty.gitterkid.repo.GitTree;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -21,13 +20,7 @@ public class TreeTest extends TestCase {
 		
 		GitCommitService commService = new GitCommitService(bransService.getLastCommit("master"));
 
-		GitTree tree = commService.getTree("/");
-		
-		for (int i = 0; i < 65536; i++) {
-			tree = commService.getTree("/front/scripts");
-		}
-		
-		tree.forEach(i -> System.out.println(i.getName()));
+		commService.getTree("/");
 		
 	}
 }

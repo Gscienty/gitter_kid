@@ -28,6 +28,10 @@ public class GitCommitService {
 	}
 	
 	public GitTree getTree (String path) {
+		if (path.equals("/")) {
+			return this.commit.getTree();
+		}
+		
 		GitTree.Item finedeItem = this.getObjectFromCommitByPath(this.commit, path);
 		if (finedeItem == null) {
 			logger.warning("not find the object, path: " + path);
@@ -94,6 +98,9 @@ public class GitCommitService {
 		GitTree.Item result = null;
 		GitTree currentTree = commit.getTree();
 		for (String pathItem : this.splitPath(path)) {
+			if (pathItem.isEmpty()) {
+				continue;
+			}
 			if (currentTree == null) {
 				return null;
 			}
@@ -140,7 +147,6 @@ public class GitCommitService {
 				result.add(val);
 			}
 		}
-		
 		return result;
 	}
 	

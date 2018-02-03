@@ -60,9 +60,32 @@ public class GitCommitService {
 	 * @return
 	 */
 	public String getNewestCommitMessage(String path) {
-		GitTree.Item treeItem = null;
+		GitTree.Item newerObject = this.getObjectFromCommitByPath(this.commit, path);
+		if (newerObject == null) {
+			return "";
+		}
+		String newerObjectSignture = newerObject.getSignture();
+		String currentMessage = this.commit.getMessage();
 		
-		return "";
+		Queue<GitCommit> comparedList = new LinkedList<>();
+		this.commit.getParents().forEach(parent -> comparedList.add(parent));
+		
+		while (comparedList.isEmpty() == false) {
+			GitCommit currentCommit = comparedList.poll();
+			if (currentCommit == null) {
+				return currentMessage;
+			}
+			
+			if (this.judgeSamePathObjectEqual(currentCommit, path, newerObjectSignture)) {
+				currentMessage = currentCommit.getMessage();			
+				currentCommit.getParents().forEach(parent -> comparedList.add(parent));
+			}
+			else {
+				return currentMessage;
+			}
+		}
+		
+		return currentMessage;
 	}
 	
 	private GitTree.Item getObjectFromCommitByPath(GitCommit commit, String path) {

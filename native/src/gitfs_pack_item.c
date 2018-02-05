@@ -229,6 +229,7 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
 void __gitpack_dtor_item (struct __gitpack_item *item) {
     if (item == NULL) return;
     if (item->base_sign != NULL) free (item->base_sign);
+    // tips: this bytes.buf may a random number, because construct method have not initialize this field to 'NULL'
     if (item->bytes.buf != NULL) free (item->bytes.buf);
     free (item);
 }

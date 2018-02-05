@@ -83,17 +83,17 @@ struct gitrepo *__test_pack_getgitrepo(struct gitmarket *market) {
 
 int test_pack () {
     int i = 0;
-    for (i = 0; i < 65536; i++) {
+    for (i = 0; i < 5; i++) {
         struct gitmarket *market = get_gitmarket ("/home/ant");
         if (market == NULL) return 0;
 
         struct gitrepo *repo = __test_pack_getgitrepo (market);
-        struct gitobj *obj = gitrepo_get_gitobj (repo, "e02af234195f9bc4219aa705d9e7625cd0b54283");
+        struct gitobj *obj = gitrepo_get_gitobj (repo, "859a284f07a885350dfb4c03be413777d7b8a4f9");
         printf ("%d\n", (int) obj);
         gitobj_dtor (obj);
-        obj = gitrepo_get_gitobj (repo, "3ff1e8785454b32f7dcadf3335bbd786ffa46d9c");
+        obj = gitrepo_get_gitobj (repo, "88c6fb4c2b7a8963b9ab485234600ea1fa8e2543");
         printf ("%d\n", (int) obj);
-
+        gitobj_dtor (obj);
         gitmarket_dtor (market);
     }
     return 0;
@@ -166,7 +166,7 @@ int main() {
     // test_create_account ();
     // test_branches ();
     // test_commits_parent ();
-    // test_pack ();
+    test_pack ();
     // test_tree ();
     return 0;
 }

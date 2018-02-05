@@ -416,11 +416,13 @@ struct gitobj *__gitpack_get_obj__common (struct gitrepo *repo, struct __gitpack
             break;
 
         case 0x06:
+            DBG_LOG (DBG_INFO, "__gitpack_get_obj__common: this is ofs delta object");
             tmp_packitem = __gitpack_ofsdelta_patch (repo, packfile, *packitem);
             __gitpack_item_dtor (packitem);
             packitem = tmp_packitem;
             goto apply_delta;
         case 0x07:
+            DBG_LOG (DBG_INFO, "__gitpack_get_obj__common: this is ref delta object");
             tmp_packitem = __gitpack_refdelta_patch (repo, *packitem);
             __gitpack_item_dtor (packitem);
             packitem = tmp_packitem;

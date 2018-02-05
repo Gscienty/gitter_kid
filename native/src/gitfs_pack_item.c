@@ -292,14 +292,20 @@ struct __gitpack_item *__gitpack_refdelta_patch (struct gitrepo *repo, struct __
         return NULL;
     }
     struct __bytes *patched_buf = __gitpack_delta_patch (base_packitem->bytes, packitem);
-    __gitpack_item_dtor (base_packitem);
     if (patched_buf == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_refdelta_patch: cannot patch delta object");
+        __gitpack_item_dtor (base_packitem);
         return NULL;
     }
     ret->base_sign = NULL;
     ret->bytes = *patched_buf;
+    ret->negative_off = 0;
+    ret->off = 0;
+    ret->origin_len = ret->bytes.len;
+    ret->type = base_packitem->type;
     free (patched_buf);
+    __gitpack_item_dtor (base_packitem);
+
     return ret;
 }
 
@@ -374,12 +380,12 @@ struct __gitpack_item *__gitpack_ofsdelta_patch (struct gitrepo *repo, struct __
     }
 
     ret->bytes = *patched_buf;
-    free (patched_buf);
     ret->base_sign = NULL;
     ret->negative_off = 0;
     ret->off = 0;
     ret->origin_len = ret->bytes.len;
     ret->type = base_packitem->type;
+    free (patched_buf);
     __gitpack_dtor_item (base_packitem);
     return ret;
 }

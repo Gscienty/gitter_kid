@@ -168,6 +168,8 @@ struct __gitpack_item *__gitpack_get_item (struct __gitpack_segment segment) {
     ret->off = segment.off;
     ret->negative_off = 0;
     ret->base_sign = NULL;
+    ret->bytes.buf = NULL;
+    ret->bytes.len = 0;
 
     if (segment.type < 5) {
         struct __bytes deflate_obj = { segment.bytes.buf, segment.bytes.len };
@@ -295,6 +297,7 @@ struct __gitpack_item *__gitpack_refdelta_patch (struct gitrepo *repo, struct __
         DBG_LOG (DBG_ERROR, "__gitpack_refdelta_patch: cannot patch delta object");
         return NULL;
     }
+    ret->base_sign = NULL;
     ret->bytes = *patched_buf;
     free (patched_buf);
     return ret;

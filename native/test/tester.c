@@ -88,11 +88,8 @@ int test_pack () {
         if (market == NULL) return 0;
 
         struct gitrepo *repo = __test_pack_getgitrepo (market);
-        struct gitobj *obj = gitrepo_get_gitobj (repo, "859a284f07a885350dfb4c03be413777d7b8a4f9");
-        printf ("%d\n", (int) obj);
-        gitobj_dtor (obj);
-        obj = gitrepo_get_gitobj (repo, "88c6fb4c2b7a8963b9ab485234600ea1fa8e2543");
-        printf ("%d\n", (int) obj);
+        struct gitobj *obj = gitrepo_get_gitobj (repo, "33e85d3ce7b4000b451956804c9600c25ae432bf");
+        // printf ("%s\n", gitobj_blob_content (gitobj_get_blob (obj)));
         gitobj_dtor (obj);
         gitmarket_dtor (market);
     }

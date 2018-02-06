@@ -108,7 +108,7 @@ struct __bytes *__gitobj_get_content (const char *path) {
         return NULL;
     }
     // inflate origin object file's content
-    struct __bytes *inflated_buffer = __inflate (deflated_obj, deflated_obj->len * 3 + 1024);
+    struct __bytes *inflated_buffer = __inflate (deflated_obj, 4096);
     // clear object file's used memory
     free (deflated_obj->buf);
     free (deflated_obj);

@@ -108,7 +108,7 @@ struct __bytes *__gitobj_get_content (const char *path) {
         return NULL;
     }
     // inflate origin object file's content
-    struct __bytes *inflated_buffer = __inflate (deflated_obj, deflated_obj->len * 3 + 1024);
+    struct __bytes *inflated_buffer = __inflate (deflated_obj, 4096);
     // clear object file's used memory
     free (deflated_obj->buf);
     free (deflated_obj);
@@ -195,6 +195,8 @@ struct gitobj *gitrepo_get_gitobj (struct gitrepo *repo, const char* signture) {
     if (signture == NULL) {
         return NULL;
     }
+    DBG_LOG (DBG_INFO, "gitrepo_get_gitobj: signture is: ");
+    DBG_LOG (DBG_INFO, signture);
     if (strlen (signture) != 40) {
         // sign illegal
         return NULL;
@@ -214,6 +216,7 @@ struct gitobj *gitrepo_get_gitobj (struct gitrepo *repo, const char* signture) {
         if (repo->packes == NULL) {
             repo->packes = __gitpack_get_collection (repo);
         }
+        
         return __gitpack_getobj__charstring (repo, signture);
     }
     else{

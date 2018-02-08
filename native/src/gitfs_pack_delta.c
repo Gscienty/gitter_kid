@@ -21,7 +21,10 @@ struct __bytes *__gitpack_delta_patch (struct __bytes base, struct __gitpack_ite
     // printf ("[BASE] size: %d\n", base.len);
     // printf ("%s\n", base.buf);
     struct __bytes *ret = __bytes_ctor (size);
-    if (ret == NULL) return NULL;
+    if (ret == NULL) {
+        DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: have not free memory");
+        return NULL;
+    }
 
     char *out = ret->buf;
     while (data < top) {
@@ -54,11 +57,18 @@ struct __bytes *__gitpack_delta_patch (struct __bytes base, struct __gitpack_ite
             data += cmd;
             size -= cmd;
         }
+        else {
+            DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: format error");
+            __bytes_dtor (ret);
+            return NULL;
+        }
     }
 
     if (data != top || size != 0) {
         DBG_LOG (DBG_ERROR, "__gitpack_delta_patch: format error");
         // printf ("[INNER] top - data: %d\t size: %d\n", top - data, size);
+        __bytes_dtor (ret);
+        return NULL;
     }
 
     // for (i = 0; i < ret->len; i++) printf ("%c", ret->buf[i]);

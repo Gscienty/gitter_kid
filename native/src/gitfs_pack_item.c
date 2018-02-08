@@ -240,7 +240,8 @@ struct __gitpack_item *__gitpack_refdelta_patch (struct gitrepo *repo, struct __
             return NULL;
         }
     }
-    struct __gitpack_item_findret *findret = __gitpack_collection_find_rdtnode (*(repo->packes), packitem.base_sign, rdt_find__byte_string);
+    struct __gitpack_item_findret *findret = __gitpack_collection_find_rdtnode (
+        *(repo->packes), packitem.base_sign, rdt_find__byte_string);
     if (findret == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_refdelta_patch: cannot find base item (from red black tree)");
         return NULL;
@@ -251,7 +252,8 @@ struct __gitpack_item *__gitpack_refdelta_patch (struct gitrepo *repo, struct __
         free (findret);
         return NULL;
     }
-    struct __gitpack_segment *base_segment = __gitpack_get_segment (*base_packfile, findret->node->off, findret->node->len);
+    struct __gitpack_segment *base_segment = __gitpack_get_segment (
+        *base_packfile, findret->node->off, findret->node->len);
     if (base_segment == NULL) {
         DBG_LOG (DBG_ERROR, "__gitpack_refdelta_patch: cannot get base segment");
         free (findret);
@@ -395,8 +397,12 @@ struct __gitpack_item *__gitpack_ofsdelta_patch (struct gitrepo *repo, struct __
 
 struct gitobj *__gitpack_get_obj__common (struct gitrepo *repo, struct __gitpack_item_findret *findret) {
     struct __gitpack_file *packfile = __gitpack_fileopen (findret->pack);
-    if (packfile == NULL) return NULL;
-    struct __gitpack_segment *segment = __gitpack_get_segment (*packfile, findret->node->off, findret->node->len);
+    if (packfile == NULL) {
+        DBG_LOG (DBG_INFO, "__gitpack_get_obj__common: cannot open pack file");
+        return NULL;
+    }
+    struct __gitpack_segment *segment = __gitpack_get_segment (
+        *packfile, findret->node->off, findret->node->len);
     struct __gitpack_item *packitem = __gitpack_get_item (*segment);
     struct __gitpack_item *tmp_packitem = NULL;
     __gitpack_dtor_segment (segment);
@@ -448,8 +454,12 @@ struct gitobj *__gitpack_getobj__bytestring (struct gitrepo *repo, const void *s
             return NULL;
         }
     }
-    struct __gitpack_item_findret *findret = __gitpack_collection_find_rdtnode (*(repo->packes), sign, rdt_find__byte_string);
-    if (findret == NULL) return NULL;
+    struct __gitpack_item_findret *findret = __gitpack_collection_find_rdtnode (
+        *(repo->packes), sign, rdt_find__byte_string);
+    if (findret == NULL) {
+        DBG_LOG (DBG_INFO, "__gitpack_getobj__bytestring: cannot find node");
+        return NULL;
+    }
 
     struct gitobj *ret = __gitpack_get_obj__common (repo, findret);
     free (findret);
@@ -465,22 +475,17 @@ struct gitobj *__gitpack_getobj__charstring (struct gitrepo *repo, const char *s
         DBG_LOG (DBG_ERROR, "__gitpack_getobj__charstring: sign is null");
         return NULL;
     }
-    if (strlen (sign) != 40) {
-        DBG_LOG (DBG_ERROR, "__gitpack_getobj__charstring: sign length error");
+
+    struct __gitpack_item_findret *findret = __gitpack_collection_find_rdtnode (
+        *(repo->packes), (const void *) sign, rdt_find__char_string);
+
+    if (findret == NULL) {
+        DBG_LOG (DBG_INFO, "__gitpack_getobj_charstring: not find item");
         return NULL;
     }
-    if (repo->packes == NULL) {
-        DBG_LOG (DBG_INFO, "__gitpack_getobj__charstring: repo's packes is null");
-        repo->packes = __gitpack_get_collection (repo);
-        if (repo->packes == NULL) {
-            DBG_LOG (DBG_ERROR, "__gitpack_get_obj__charstring: repo cannot get pack collection");
-            return NULL;
-        }
-    }
-    struct __gitpack_item_findret *findret = __gitpack_collection_find_rdtnode (*(repo->packes), (const void *) sign, rdt_find__char_string);
-    if (findret == NULL) return NULL;
 
     struct gitobj *ret = __gitpack_get_obj__common (repo, findret);
+    
     free (findret);
     return ret;
 }

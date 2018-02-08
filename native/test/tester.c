@@ -91,6 +91,8 @@ int test_pack () {
         struct gitobj *obj = gitrepo_get_gitobj (repo, "33e85d3ce7b4000b451956804c9600c25ae432bf");
         // printf ("%s\n", gitobj_blob_content (gitobj_get_blob (obj)));
         gitobj_dtor (obj);
+
+        obj = gitrepo_get_gitobj (repo, "5f5b768c8bb0b811bb8c886b6ef56fc0c7304c8f");
         gitmarket_dtor (market);
     }
     return 0;

@@ -194,11 +194,15 @@ void rdt_insert (struct rdt *tree, void *key, int offset, int len) {
 struct rdt_node *__rdt_find (tree, key, compare)
     const struct rdt *tree;
     const void *key;
-    int (*compare) (const void *key, const void *node_tree);
+    int (*compare) (const void *, const void *);
 {
+    if (tree == NULL) {
+        DBG_LOG (DBG_ERROR, "__rdt_find: tree is null");
+        return NULL;
+    }
     struct rdt_node *retnode = tree->root;
     
-    while (retnode != &tree->nil) {
+    while (retnode != NULL && retnode != &tree->nil) {
         int compare_result = compare (key, retnode->key);
         if (compare_result == 0) {
             return retnode;

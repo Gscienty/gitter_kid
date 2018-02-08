@@ -1,70 +1,46 @@
 import React from 'react';
 import ProjectTemplate from './_project';
-import { Table, Icon, Card, Dropdown, Button, Menu } from 'antd';
+import { Table, Card } from 'antd';
 import { connect } from 'react-redux';
 import  FolderIcon from 'react-icons/lib/io/folder';
 import  FileIcon from 'react-icons/lib/go/file-code';
-import ReactMarkdown from 'react-markdown';
 
 class Page extends ProjectTemplate {
-    state = { path: '', prefixURI: '' }
+    state = { initialized: false }
 
-    entryTreeInitialize() {
-        let pathItems = window.location.hash.substring(1).split('/tree');
-        let path = '/';
-        if (pathItems.length === 2) {
-            path = pathItems[1];
-        }
-
-        if (path[path.length - 1] !== '/') {
-            path = path + '/';
-        }
-
-        if (path !== this.state.path) {
-            this.setState({ path }, () => this.freshTree(path, this.props.match.params.branchName));
-        }
-    }
-
-    componentDidMount() {
-        this.setState({ prefixURI: this.props.match.url.split('/tree')[0] });
-        this.entryTreeInitialize();
-        this.props.dispatch({
-            type: 'branches/getBranches',
-            payload: {
-                repositoriesName: this.props.match.params.repositoriesName,
-                repositoryName: this.props.match.params.repositoryName
-            }
-        });
-    }
-
-    componentWillReceiveProps(props) {
-        this.entryTreeInitialize();
-    }
-
-    freshTree(path, branchName) {
-        this.props.history.push(this.state.prefixURI  + '/tree' + path);
+    freshTreeItems () {
         this.props.dispatch({
             type: 'tree/getTree',
             payload: {
                 repositoriesName: this.props.match.params.repositoriesName,
                 repositoryName: this.props.match.params.repositoryName,
-                branchName,
-                path
-            }
+                branchName: this.props.match.params.branchName,
+            },
+            after: () => this.setState({ initialized: true })
         });
     }
 
-    treeItemOnClick(record) {
-        if (record.type === 'Tree') {
-            this.freshTree(record.path + '/', this.props.match.params.branchName);
-        }
-        else {
-            this.props.history.push(this.state.prefixURI + '/blob' + record.path);
-        }
+    componentWillMount () { this.freshTreeItems (); }
+    componentWillReceiveProps() { this.setState ({ initialized: false }, () => this.freshTreeItems ()); }
+
+    waitingRender () {
+        return <span>waiting...</span>;
+    }
+
+    treeItemOnClick (record) {
+        this.setState({ initialized: false }, () => this.props.dispatch({
+            type: 'tree/enterSubTree',
+            payload: record,
+            after: () => this.setState({ initialized: true })
+        }));
     }
 
     renderPath() {
-        let pathItems = this.state.path.substring(0, this.state.path.length - 1).split('/');
+        let treePath = this.props.treePath;
+        if (treePath.endsWith('/')) {
+            treePath = treePath.substring (0, treePath.length - 1);
+        }
+        let pathItems = treePath.split('/');
         pathItems[0] = { name: '', path: '' };
         for (let i = 1; i < pathItems.length; i++) {
             pathItems[i] = { name: pathItems[i], path: pathItems[i - 1].path + '/' + pathItems[i] };
@@ -80,7 +56,7 @@ class Page extends ProjectTemplate {
                     index === pathItems.length - 1 && index !== 0
                     ? item.name
                     : <a
-                        onClick={() => this.freshTree(item.path, this.props.match.params.branchName)}>
+                        onClick={() => this.treeItemOnClick ({ path: item.path, type: 'Tree' }) }>
                         { item.name }
                     </a>
                 }
@@ -88,77 +64,30 @@ class Page extends ProjectTemplate {
         </span>);
     }
 
-    folderNameRender(name) {
-        if (name.indexOf('/') === -1) {
-            return name;
-        }
-        else {
-            let nameItems = name.split('/');
-            let prefixName = ''
-            for (let i = 0; i < nameItems.length - 1; i++) {
-                prefixName += nameItems[i] + '/';
-            }
-
-            return <span><span style={{ color: '#6a737d' }}>{ prefixName }</span>{ nameItems[nameItems.length - 1] }</span>
-        }
-    }
-
-    columns = [
-        {
-            key: 'fileName',
-            render: (text, record) => <a onClick={ () => this.treeItemOnClick(record) }>
-                <span style={{ fontSize: 18 }}>{ record.type === 'Blob' ? <FileIcon /> : <FolderIcon /> }</span>
-                <span style={{ marginLeft: 8 }}>{ this.folderNameRender(record.name) }</span>
-            </a>
-        }
-    ]
-
-    branchesSelectRender() {
-        return <Menu onClick={ e => this.freshTree('/', e.key) }>
-            { this.props.branches.map((branch, index) => <Menu.Item
-                key={ branch }
-                style={{ textAlign: 'center' }}>{ branch }</Menu.Item>) }
-        </Menu>;
-    }
-
-    renderDescriptDocument() {
-        let filtedArr = this.props.treeItems.reduce((outArr, currentDoc) => {
-            if (currentDoc.name.endsWith('.md')) {
-                outArr.push(currentDoc);
-            }
-
-            return outArr;
-        }, []);
-
-        if (filtedArr.length === 0) {
-            return null;
-        }
-
-        console.log (filtedArr);
-
-        return null;
-    }
-
-    unit() {    
+    treeRender () {
         return <div>
             <Card
-                title={ <span>{ this.renderPath() }</span> }
-                extra={ <div>
-                    <Dropdown overlay={ this.branchesSelectRender() } trigger={['click']}>
-                        <Button>{ this.props.match.params.branchName } <Icon type="down" /></Button>
-                    </Dropdown>
-                </div> }
+                title={ this.renderPath () }
                 bodyStyle={{ padding: 0 }}>
                 <Table
-                    columns={ this.columns }
+                    columns={[{
+                        key: 'fileName',
+                        render: (text, record) => <a onClick={ () => this.treeItemOnClick (record) }>
+                            <span style={{ fontSize: 18 }}>{ record.type === 'Blob' ? <FileIcon /> : <FolderIcon /> }</span>
+                            <span style={{ marginLeft: 8 }}>{ record.name }</span>
+                        </a>
+                    }]}
                     dataSource={ this.props.treeItems.map(e => ({ ...e, key: e.name })) }
                     showHeader={ false }
                     pagination={ false }
                     size="small"
                 />
             </Card>
-            { this.renderDescriptDocument() }
         </div>;
+    }
+
+    unit() {
+        return this.state.initialized ? this.treeRender() : this.waitingRender();
     }
 }
 
@@ -166,7 +95,8 @@ export default connect(
     ({ tree, branches }) => ({
         entryUnit: 'repositories',
         projectEntryUnit: 'code',
-        treeItems: tree.content,
+        treeItems: tree.items,
+        treePath: tree.path,
         branches: branches.branches
     })
 )(Page);

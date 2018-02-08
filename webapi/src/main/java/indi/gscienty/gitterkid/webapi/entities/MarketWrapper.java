@@ -12,4 +12,8 @@ public class MarketWrapper {
 	public void setMarket(Market market) {
 		this.market = market;
 	}
+
+	public boolean isExist() {
+		return this.market != null;
+	}
 }

@@ -14,8 +14,8 @@ export default class PenthesileiaBow {
 
     addPage(pageMeta) { this._pages.push(pageMeta); }
 
-    run(dom, Router, submitMime = 'application/json') {
-        ReactDOM.render(<Provider store={ this._storeManager.build(submitMime) }>
+    run(dom, Router) {
+        ReactDOM.render(<Provider store={ this._storeManager.build() }>
             <Router>
                 <div>
                     { this._pages.map((page, key) => <Route key={ key } { ...page } />) }

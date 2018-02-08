@@ -4,7 +4,6 @@ import { StoreManager } from './store';
 import { Provider } from 'react-redux';
 import { Route } from 'react-router-dom';
 
-
 export default class PenthesileiaBow {
     _storeManager = new StoreManager();
     _pages = []

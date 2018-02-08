@@ -16,7 +16,7 @@ class Page extends BasePage {
                             <Card
                                 title={ repository }
                                 extra={ <Button shape="circle" icon="right" size="large"
-                                    onClick={ e => this.props.history.push(`/repository/${repository}/code`) } /> }>
+                                    onClick={ e => this.props.history.push(`/repository/${this.props.match.params.repositoriesName}/${repository}/master/tree/`) } /> }>
                                 <div style={{ marginBottom: 20 }}>description</div>
                                 <div>
                                     <Button style={{ margin: '0 4px 0 0', border: 'none' }}>

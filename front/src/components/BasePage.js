@@ -5,7 +5,6 @@ export default class BasePage extends Component {
     page() { return <div></div> }
 
     handleMenuOnClick(e) {
-        console.log(e);
         switch (e.key) {
             case 'repositories':
                 this.props.history.push('/repositories/default');
@@ -29,7 +28,9 @@ export default class BasePage extends Component {
                         mode="horizontal"
                         style={{ lineHeight: '64px' }}
                         onClick={ this.handleMenuOnClick.bind(this) }
-                        selectedKeys={[ this.props.entryUnit ]}>
+                        selectedKeys={[ 
+                            this.props.entryUnit
+                        ]}>
                         <Menu.Item key="repositories">Repositories</Menu.Item>
                     </Menu>
                 </div>

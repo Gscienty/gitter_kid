@@ -4,6 +4,7 @@ import { Table, Icon, Card, Dropdown, Button, Menu } from 'antd';
 import { connect } from 'react-redux';
 import  FolderIcon from 'react-icons/lib/io/folder';
 import  FileIcon from 'react-icons/lib/go/file-code';
+import ReactMarkdown from 'react-markdown';
 
 class Page extends ProjectTemplate {
     state = { path: '', prefixURI: '' }
@@ -55,10 +56,10 @@ class Page extends ProjectTemplate {
 
     treeItemOnClick(record) {
         if (record.type === 'Tree') {
-            this.freshTree(this.state.path + record.name + '/', this.props.match.params.branchName);
+            this.freshTree(record.path + '/', this.props.match.params.branchName);
         }
         else {
-            this.props.history.push(this.state.prefixURI + '/blob' + this.state.path + record.name);
+            this.props.history.push(this.state.prefixURI + '/blob' + record.path);
         }
     }
 
@@ -120,23 +121,44 @@ class Page extends ProjectTemplate {
         </Menu>;
     }
 
+    renderDescriptDocument() {
+        let filtedArr = this.props.treeItems.reduce((outArr, currentDoc) => {
+            if (currentDoc.name.endsWith('.md')) {
+                outArr.push(currentDoc);
+            }
+
+            return outArr;
+        }, []);
+
+        if (filtedArr.length === 0) {
+            return null;
+        }
+
+        console.log (filtedArr);
+
+        return null;
+    }
+
     unit() {    
-        return <Card
-            title={ <span>{ this.renderPath() }</span> }
-            extra={ <div>
-                <Dropdown overlay={ this.branchesSelectRender() } trigger={['click']}>
-                    <Button>{ this.props.match.params.branchName } <Icon type="down" /></Button>
-                </Dropdown>
-            </div> }
-            bodyStyle={{ padding: 0 }}>
-            <Table
-                columns={ this.columns }
-                dataSource={ this.props.treeItems.map(e => ({ ...e, key: e.name })) }
-                showHeader={ false }
-                pagination={ false }
-                size="small"
-            />
-        </Card>;
+        return <div>
+            <Card
+                title={ <span>{ this.renderPath() }</span> }
+                extra={ <div>
+                    <Dropdown overlay={ this.branchesSelectRender() } trigger={['click']}>
+                        <Button>{ this.props.match.params.branchName } <Icon type="down" /></Button>
+                    </Dropdown>
+                </div> }
+                bodyStyle={{ padding: 0 }}>
+                <Table
+                    columns={ this.columns }
+                    dataSource={ this.props.treeItems.map(e => ({ ...e, key: e.name })) }
+                    showHeader={ false }
+                    pagination={ false }
+                    size="small"
+                />
+            </Card>
+            { this.renderDescriptDocument() }
+        </div>;
     }
 }
 

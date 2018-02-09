@@ -36,32 +36,32 @@ class Page extends ProjectTemplate {
     }
 
     renderPath() {
-        let treePath = this.props.treePath;
-        if (treePath.endsWith('/')) {
-            treePath = treePath.substring (0, treePath.length - 1);
-        }
-        let pathItems = treePath.split('/');
-        pathItems[0] = { name: '', path: '' };
-        for (let i = 1; i < pathItems.length; i++) {
-            pathItems[i] = { name: pathItems[i], path: pathItems[i - 1].path + '/' + pathItems[i] };
-        }
-
-        pathItems[0].name = this.props.match.params.repositoryName;
-        pathItems[0].path = '/';
-
-        return pathItems.map((item, index) => <span style={{ fontSize: 21 }} key={ index }>
+        return this.props.treePathItems.map((item, index) => <span style={{ fontSize: 21 }} key={ index }>
             { index === 0 ? '' : '/' }
             <span style={{ margin: '0 4px' }}>
                 {
-                    index === pathItems.length - 1 && index !== 0
+                    index === this.props.treePathItems.length - 1 && index !== 0
                     ? item.name
                     : <a
+                        style={{ color: '#0366d6' }}
                         onClick={() => this.treeItemOnClick ({ path: item.path, type: 'Tree' }) }>
                         { item.name }
                     </a>
                 }
             </span>
         </span>);
+    }
+
+    displayItemName (name) {
+        if (name.indexOf ('/') !== -1) {
+            let lastPosition = name.lastIndexOf('/');
+            return  <span style={{ color: '#0366d6' }}>
+                <span style={{ color: '#6a737d' }}>{ name.substring(0, lastPosition) + '/'}</span>
+                { name.substring(lastPosition + 1) }
+            </span>;
+
+        }
+        return <span style={{ color: '#0366d6' }}>{ name }</span>;
     }
 
     treeRender () {
@@ -74,7 +74,7 @@ class Page extends ProjectTemplate {
                         key: 'fileName',
                         render: (text, record) => <a onClick={ () => this.treeItemOnClick (record) }>
                             <span style={{ fontSize: 18 }}>{ record.type === 'Blob' ? <FileIcon /> : <FolderIcon /> }</span>
-                            <span style={{ marginLeft: 8 }}>{ record.name }</span>
+                            <span style={{ marginLeft: 8 }}>{ this.displayItemName (record.name) }</span>
                         </a>
                     }]}
                     dataSource={ this.props.treeItems.map(e => ({ ...e, key: e.name })) }
@@ -97,6 +97,7 @@ export default connect(
         projectEntryUnit: 'code',
         treeItems: tree.items,
         treePath: tree.path,
+        treePathItems: tree.pathItems,
         branches: branches.branches
     })
 )(Page);

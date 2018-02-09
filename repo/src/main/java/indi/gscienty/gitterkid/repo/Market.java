@@ -54,7 +54,7 @@ public class Market
 	}
 
 	public Repository next () {
-		return new Repository (this.lib.gitmarket_next (this.handle));
+		return new Repository (this, this.lib.gitmarket_next (this.handle));
 	}
 	
 	/**

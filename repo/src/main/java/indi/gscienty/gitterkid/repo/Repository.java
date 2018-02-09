@@ -13,12 +13,14 @@ public class Repository {
     private Pointer handle;
     private IRepositoryLibrary lib;
     private GitBranches branches;
+    private Market storeMarket;
     
     /**
      * 构造方法
      * @param repositoryPointer 仓库路径
      */
-    public Repository (Pointer repositoryPointer) {
+    public Repository (Market market, Pointer repositoryPointer) {
+    	this.storeMarket = market;
         this.handle = repositoryPointer;
         this.lib = IRepositoryLibrary.Instance;
         this.branches = null;
@@ -88,6 +90,10 @@ public class Repository {
     		this.branches = new GitBranches (this, this.lib.gitrepo_get_branches (this.handle));
     	}
     	return this.branches;
+    }
+    
+    public Market getBaseMarket () {
+    	return this.storeMarket;
     }
     
 }

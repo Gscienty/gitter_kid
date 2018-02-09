@@ -1,14 +1,3 @@
-
-function __getTreePathFromHash () {
-    let treeUriPosition = window.location.hash.indexOf ('/tree');
-    let path = window.location.hash.substring (treeUriPosition + '/tree'.length);
-    return path;
-}
-
-function __getPrefixHash () {
-    return window.location.hash.split('/tree', 1)[0];
-}
-
 export default {
     namespace: 'tree',
     state: {
@@ -17,29 +6,27 @@ export default {
         items: []
     },
     effects: {
-        async getTree ({ get }, { payload: { repositoriesName, repositoryName, branchName }, state: { path } }) {
-            let currentPath = __getTreePathFromHash();
-            if (currentPath === path) {
+        async getTree ({ get }, { payload: { repositoriesName, repositoryName, branchName, path }, state }) {
+            if (path === state.path) {
                 return;
             }
-            let result = await get (`/api/git/${repositoriesName}/${repositoryName}/${branchName}/tree${currentPath}`);
+            let result = await get (`/api/git/${repositoriesName}/${repositoryName}/${branchName}/tree${path}`);
 
             if (result.status === 200) {
                 this.dispatch({ type: 'tree/reduce', payload: {
-                    path: currentPath,
                     content: result.payload,
+                    path,
                     repositoryName
                 }});
             }
         },
 
-        enterSubTree (method, { payload: { path, type }, state }) {
-            let prefix = __getPrefixHash ();
+        enterSubTree (method, { payload: { repositoriesName, repositoryName, branchName, path, type }, state }) {
             if (type === 'Tree') {
-                window.location.hash = prefix + '/tree' + path;
+                window.location.hash = `/repository/${repositoriesName}/${repositoryName}/${branchName}/tree${path}`;
             }
             else if (type === 'Blob') {
-                window.location.hash = prefix + '/blob' + path;
+                window.location.hash = `/repository/${repositoriesName}/${repositoryName}/${branchName}/blob${path}`;
             }
         }
     },

@@ -4,6 +4,13 @@ import { Table, Card } from 'antd';
 import { connect } from 'react-redux';
 import  FolderIcon from 'react-icons/lib/io/folder';
 import  FileIcon from 'react-icons/lib/go/file-code';
+import CodeTemplate from './_code';
+
+function __getTreePathFromHash () {
+    let treeUriPosition = window.location.hash.indexOf ('/tree');
+    let path = window.location.hash.substring (treeUriPosition + '/tree'.length);
+    return path;
+}
 
 class Page extends ProjectTemplate {
     state = { initialized: false }
@@ -15,12 +22,14 @@ class Page extends ProjectTemplate {
                 repositoriesName: this.props.match.params.repositoriesName,
                 repositoryName: this.props.match.params.repositoryName,
                 branchName: this.props.match.params.branchName,
+                path: __getTreePathFromHash ()
             },
             after: () => this.setState({ initialized: true })
         });
     }
 
     componentWillMount () { this.freshTreeItems (); }
+
     componentWillReceiveProps() { this.setState ({ initialized: false }, () => this.freshTreeItems ()); }
 
     waitingRender () {
@@ -30,7 +39,12 @@ class Page extends ProjectTemplate {
     treeItemOnClick (record) {
         this.setState({ initialized: false }, () => this.props.dispatch({
             type: 'tree/enterSubTree',
-            payload: record,
+            payload: {
+                ...record,
+                repositoriesName: this.props.match.params.repositoriesName,
+                repositoryName: this.props.match.params.repositoryName,
+                branchName: this.props.match.params.branchName
+            },
             after: () => this.setState({ initialized: true })
         }));
     }
@@ -64,6 +78,24 @@ class Page extends ProjectTemplate {
         return <span style={{ color: '#0366d6' }}>{ name }</span>;
     }
 
+    renderReadmeBlock () {
+        let markdowns = this.props.treeItems.filter(item => item.name.endsWith ('.md'));
+
+        if (markdowns.length === 0) {
+            return null;
+        }
+        
+        return <CodeTemplate
+            dispatch={ this.props.dispatch }
+            repositoriesName={ this.props.match.params.repositoriesName }
+            repositoryName={ this.props.match.params.repositoryName }
+            branchName={ this.props.match.params.branchName }
+            path={ markdowns[0].path }
+            name={ markdowns[0].name }
+            content={ this.props.readmeContent }
+        />;
+    }
+
     treeRender () {
         return <div>
             <Card
@@ -83,6 +115,9 @@ class Page extends ProjectTemplate {
                     size="small"
                 />
             </Card>
+            <div style={{ marginTop: '21px' }}>
+                { this.renderReadmeBlock () }
+            </div>
         </div>;
     }
 
@@ -92,12 +127,13 @@ class Page extends ProjectTemplate {
 }
 
 export default connect(
-    ({ tree, branches }) => ({
+    ({ tree, blob, branches }) => ({
         entryUnit: 'repositories',
         projectEntryUnit: 'code',
         treeItems: tree.items,
         treePath: tree.path,
         treePathItems: tree.pathItems,
+        readmeContent: blob.content,
         branches: branches.branches
     })
 )(Page);

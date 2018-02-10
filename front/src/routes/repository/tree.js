@@ -50,20 +50,22 @@ class Page extends ProjectTemplate {
     }
 
     renderPath() {
-        return this.props.treePathItems.map((item, index) => <span style={{ fontSize: 21 }} key={ index }>
-            { index === 0 ? '' : '/' }
-            <span style={{ margin: '0 4px' }}>
-                {
-                    index === this.props.treePathItems.length - 1 && index !== 0
-                    ? item.name
-                    : <a
-                        style={{ color: '#0366d6' }}
-                        onClick={() => this.treeItemOnClick ({ path: item.path, type: 'Tree' }) }>
-                        { item.name }
-                    </a>
-                }
-            </span>
-        </span>);
+        return  <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{
+            this.props.treePathItems.map((item, index) => <span style={{ fontSize: 18 }} key={ index }>
+                { index === 0 ? '' : '/' }
+                <span style={{ margin: '0 4px' }}>
+                    {
+                        index === this.props.treePathItems.length - 1 && index !== 0
+                        ? <span style={{ color: '#00000' }}>{ item.name }</span>
+                        : <a
+                            style={{ color: '#0366d6' }}
+                            onClick={() => this.treeItemOnClick ({ path: item.path, type: 'Tree' }) }>
+                            { item.name }
+                        </a>
+                    }
+                </span>
+            </span>)
+        }</div>;
     }
 
     displayItemName (name) {
@@ -80,7 +82,6 @@ class Page extends ProjectTemplate {
 
     renderReadmeBlock () {
         let markdowns = this.props.treeItems.filter(item => item.name.endsWith ('.md'));
-
         if (markdowns.length === 0) {
             return null;
         }

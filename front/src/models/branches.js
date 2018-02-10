@@ -4,7 +4,7 @@ export default {
         name: '',
         branches: []
     },
-    effects: {
+    asyncEffects: {
         async getBranches({ get }, { payload: { repositoriesName, repositoryName } }) {
             let result = await get(`/api/git/${repositoriesName}/${repositoryName}`);
 

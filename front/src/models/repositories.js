@@ -4,7 +4,7 @@ export default {
         name: 'default',
         repositories: []
     },
-    effects: {
+    asyncEffects: {
         async repositories({ get }, { payload: { name } }) {
             let result = await get(`/api/git/${name}`);
 

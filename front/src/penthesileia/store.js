@@ -68,11 +68,10 @@ function _reducer(store, state, { type, payload, after }) {
         let direct = type.split('/', 2);
         let namespace = direct[0];
         let action = direct[1];
-        if (namespace in this._effects && action in this._effects[namespace]) {
-            this._effects[namespace][action]
-                .call(store, { create, update, remove, get }, { payload, state: state[namespace] });
-            
-            after && after (state[namespace]);
+        if (namespace in this._asyncEffects && action in this._asyncEffects[namespace]) {
+            this._asyncEffects[namespace][action]
+                .call(store, { create, update, remove, get }, { payload, state: state[namespace] })
+                .then(result => after && after (state[namespace]));
         }
         else if (namespace in this._reduces && action in this._reduces[namespace]) {
             let next = this._reduces[namespace][action]
@@ -84,6 +83,12 @@ function _reducer(store, state, { type, payload, after }) {
 
             return tempState;
         }
+        else if (namespace in this._syncEffects && action in this._syncEffects[namespace]) {
+            this._syncEffects[namespace][action]
+                .call(store, { create, update, remove, get }, { payload, state: state[namespace] })
+            
+            after && after (state[namespace]);
+        }
     }
 
     return state;
@@ -91,12 +96,14 @@ function _reducer(store, state, { type, payload, after }) {
 
 export class StoreManager {
     _initializeStore = { }
-    _effects = { }
+    _asyncEffects = { }
+    _syncEffects = { }
     _reduces = { }
 
-    register({ namespace, state, effects, reduces }) {
+    register({ namespace, state, asyncEffects, syncEffects, reduces }) {
         // register effects
-        this._effects[namespace] = effects;
+        this._asyncEffects[namespace] = asyncEffects;
+        this._syncEffects[namespace] = syncEffects;
         // register reduces
         this._reduces[namespace] = reduces;
         // register store

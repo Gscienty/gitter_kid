@@ -28,6 +28,7 @@ struct __passwd_item {
 struct __passwd_collection {
     struct __passwd_item *head;
     struct __passwd_item *tail;
+    struct __passwd_item *cursor;
 };
 
 static struct __store __passwd_store = {
@@ -41,5 +42,10 @@ static struct __store __passwd_store = {
         __passwd_store_data_dtor
     }
 };
+
+G_KID_USER_EXTERN struct __passwd_collection *passwd_get_collection ();
+G_KID_USER_EXTERN void passwd_collection_reset (struct __passwd_collection *collection);
+G_KID_USER_EXTERN int passwd_collection_has_next (struct __passwd_collection *collection);
+G_KID_USER_EXTERN struct __passwd_record *passwd_collection_next (struct __passwd_collection *collection);
 
 #endif

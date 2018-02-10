@@ -100,7 +100,7 @@ void *__passwd_store_read_data () {
     if (ret == NULL) {
         return NULL;
     }
-    ret->head = ret->tail = NULL;
+    ret->head = ret->tail = ret->cursor = NULL;
 
     struct __bytes *content = __read_content (__passwd_store.fields.fd);
 
@@ -163,4 +163,32 @@ void __passwd_store_data_dtor (void *data) {
     }
 
     free (collection);
+}
+
+struct __passwd_collection *passwd_get_collection () {
+    return (struct __passwd_collection *) __passwd_store.operations.store_read_data ();
+}
+
+void passwd_collection_reset (struct __passwd_collection *collection) {
+    if (collection == NULL) {
+        return;
+    }
+    collection->cursor = NULL;
+}
+
+int passwd_collection_has_next (struct __passwd_collection *collection) {
+    if (collection == NULL) {
+        return 0;
+    }
+
+    return (collection->cursor == NULL ? collection->head : collection->cursor->next) != NULL;
+}
+
+struct __passwd_record *passwd_collection_next (struct __passwd_collection *collection) {
+    if (collection == NULL) {
+        return NULL;
+    }
+
+    collection->cursor = collection->cursor == NULL ? collection->head : collection->cursor->next;
+    return &(collection->cursor->record);
 }

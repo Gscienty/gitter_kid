@@ -176,6 +176,10 @@ void passwd_collection_reset (struct __passwd_collection *collection) {
     collection->cursor = NULL;
 }
 
+void passwd_collection_dtor (struct __passwd_collection *collection) {
+    __passwd_store.operations.store_data_dtor (collection);
+}
+
 int passwd_collection_has_next (struct __passwd_collection *collection) {
     if (collection == NULL) {
         return 0;
@@ -184,11 +188,122 @@ int passwd_collection_has_next (struct __passwd_collection *collection) {
     return (collection->cursor == NULL ? collection->head : collection->cursor->next) != NULL;
 }
 
-struct __passwd_record *passwd_collection_next (struct __passwd_collection *collection) {
+struct __passwd_item *passwd_collection_next (struct __passwd_collection *collection) {
     if (collection == NULL) {
         return NULL;
     }
 
     collection->cursor = collection->cursor == NULL ? collection->head : collection->cursor->next;
-    return &(collection->cursor->record);
+    return collection->cursor;
+}
+
+
+char *passwd_item_get_username (struct __passwd_item *item) {
+    if (item == NULL) {
+        return NULL;
+    }
+    return item->record.username;
+}
+
+char *passwd_item_get_password (struct __passwd_item *item) {
+    if (item == NULL) {
+        return NULL;
+    }
+    return item->record.password;
+}
+
+unsigned int passwd_item_get_user_id (struct __passwd_item *item) {
+    if (item == NULL) {
+        return NULL;
+    }
+    return item->record.user_id;
+}
+
+unsigned int passwd_item_get_group_id (struct __passwd_item *item) {
+    if (item == NULL) {
+        return NULL;
+    }
+    return item->record.group_id;
+}
+
+char *passwd_item_get_description (struct __passwd_item *item) {
+    if (item == NULL) {
+        return NULL;
+    }
+    return item->record.description;
+}
+
+char *passwd_item_get_home (struct __passwd_item *item) {
+    if (item == NULL) {
+        return NULL;
+    }
+    return item->record.home;
+}
+
+char *passwd_item_get_shell (struct __passwd_item *item) {
+    if (item == NULL) {
+        return NULL;
+    }
+    return item->record.shell;
+}
+
+void passwd_item_set_username (struct __passwd_item *item, const char *username) {
+    if (item == NULL) {
+        return;
+    }
+    if (item->record.username != NULL) free (item->record.username);
+    item->record.username = username == NULL ? NULL : strdup (username);
+    item->modify_flag = 1;
+}
+
+void passwd_item_set_password (struct __passwd_item *item, const char *password) {
+    if (item == NULL) {
+        return;
+    }
+    if (item->record.password != NULL) free (item->record.password);
+    item->record.password = password == NULL ? NULL : strdup (password);
+    item->modify_flag = 1;
+}
+
+void passwd_item_set_user_id (struct __passwd_item *item, unsigned int user_id) {
+    if (item == NULL) {
+        return;
+    }
+    item->record.user_id = user_id;
+    item->modify_flag = 1;
+}
+
+void passwd_item_set_group_id (struct __passwd_item *item, unsigned int group_id) {
+    if (item == NULL) {
+        return;
+    }
+    item->record.group_id = group_id;
+    item->modify_flag = 1;
+}
+
+void passwd_item_set_description (struct __passwd_item *item, const char *description) {
+    if (item == NULL) {
+        return;
+    }
+    if (item->record.description != NULL) free (item->record.description);
+    item->record.description = description == NULL ? NULL : strdup (description);
+    item->modify_flag = 1;
+}
+
+void passwd_item_set_home (struct __passwd_item *item, const char *home) {
+    if (item == NULL) {
+        return;
+    }
+    if (item->record.home != NULL) free (item->record.home);
+    item->record.home = home == NULL ? NULL : strdup (home);
+    item->modify_flag = 1;
+}
+
+void passwd_item_set_shell (struct __passwd_item *item, const char *shell) {
+    if (item == NULL) {
+        return; 
+    }
+    if (item->record.shell != NULL) free (item->record.shell);
+    item->record.shell = shell == NULL ? NULL : strdup (shell);
+    item->modify_flag = 1;
 }

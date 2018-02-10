@@ -157,6 +157,22 @@ void test_tree () {
     }
 }
 
+void test_crash () {
+    struct gitmarket *market = get_gitmarket ("/home/ant");
+
+    gitmarket_reset (market);
+    while (gitmarket_hasnext (market)) {
+        struct gitrepo *repo = gitmarket_next (market);
+
+
+        if (strcmp (gitrepo_get_name (repo), "gitterRepo") == 0) {
+            struct gitobj *obj = gitrepo_get_gitobj (repo, "5281bbd9f52c0e9bb2f1a2bc5e1c2482589e8cdd");
+        }
+    }
+
+    gitmarket_dtor (market);
+}
+
 int main() {
     // test_enum_passwd ();
     // test_enum_group ();
@@ -165,7 +181,9 @@ int main() {
     // test_create_account ();
     // test_branches ();
     // test_commits_parent ();
-    test_pack ();
+    // test_pack ();
     // test_tree ();
+
+    test_crash ();
     return 0;
 }

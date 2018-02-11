@@ -16,7 +16,6 @@ LOG_FLAG = -D DBG=1
 $(shell mkdir -p ${BIN_DIR})
 $(shell mkdir -p ${OBJS_DIR})
 
-# this module need setup pam-devel - centos OR libpam0g-dev - ubuntu
 # this module need setup zlib-devel -centos OR zlib1g.dev - ubuntu
 
 SOURCES = $(patsubst\

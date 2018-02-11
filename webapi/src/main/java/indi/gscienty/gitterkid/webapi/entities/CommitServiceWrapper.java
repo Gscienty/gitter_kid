@@ -12,4 +12,8 @@ public class CommitServiceWrapper {
 	public GitCommitService getService() {
 		return this.service;
 	}
+	
+	public boolean isExist() {
+		return this.service != null;
+	}
 }

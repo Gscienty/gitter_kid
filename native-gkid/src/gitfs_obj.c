@@ -195,12 +195,12 @@ struct gitobj *gitrepo_get_gitobj (struct gitrepo *repo, const char* signture) {
     if (signture == NULL) {
         return NULL;
     }
-    DBG_LOG (DBG_INFO, "gitrepo_get_gitobj: signture is: ");
-    DBG_LOG (DBG_INFO, signture);
-    if (strlen (signture) != 40) {
-        // sign illegal
-        return NULL;
-    }
+    // DBG_LOG (DBG_INFO, "gitrepo_get_gitobj: signture is: ");
+    // DBG_LOG (DBG_INFO, signture);
+    // if (strlen (signture) != 40) {
+    //     // sign illegal
+    //     return NULL;
+    // }
     char *sign_ch;
     for (sign_ch = (char *) signture; *sign_ch; sign_ch++) {
         if (!(('0' <= *sign_ch && *sign_ch <= '9') || ('a' <= *sign_ch && *sign_ch <= 'f'))) {

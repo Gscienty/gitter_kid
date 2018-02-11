@@ -12,4 +12,8 @@ public class RepositoryWrapper {
 	public Repository getRepository() {
 		return this.repository;
 	}
+	
+	public boolean isExist() {
+		return this.repository != null;
+	}
 }

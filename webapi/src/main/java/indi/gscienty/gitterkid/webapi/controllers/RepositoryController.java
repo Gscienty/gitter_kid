@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +29,12 @@ public class RepositoryController {
 	@RequestMapping(value = { "", "/" }, method = RequestMethod.GET)
 	public List<String> getRepositories(
 			@PathVariable(name = "market") String market,
-			MarketWrapper repositories) {
+			MarketWrapper repositories,
+			HttpServletResponse response) {
+		if (repositories.isExist() == false) {
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			return null;
+		}
 		return repositories.getMarket().filter(r -> r.getName());
 	}
 	
@@ -37,7 +43,12 @@ public class RepositoryController {
 			@PathVariable(name = "market") String market,
 			@PathVariable(name = "repository") String repositoryName,
 			@Valid RepositoryWrapper repository,
+			HttpServletResponse response,
 			BindingResult bindingResult) {
+		if (repository.isExist() == false) {
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			return null;
+		}
 		return repository.getRepository().getBranches().filter(b -> b.getName());
 	}
 	
@@ -49,8 +60,12 @@ public class RepositoryController {
 			@PathVariable(name = "branch") String branch,
 			@Valid String path,
 			@Valid CommitServiceWrapper commitService,
+			HttpServletResponse response,
 			BindingResult bindingResult) {
-		
+		if (commitService.isExist() == false) {
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			return null;
+		}
 		List<TreeItem> result = commitService.getService().getTree(path).filter(i -> {
 			TreeItem resultItem = new TreeItem();
 			resultItem.setSignture(i.getSignture());
@@ -93,6 +108,10 @@ public class RepositoryController {
 			@Valid CommitServiceWrapper commitService,
 			HttpServletResponse response,
 			BindingResult bindingResult) {
+		if (commitService.isExist() == false) {
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			return null;
+		}
 		response.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		GitBlob blob = commitService.getService().getBlob(path);
 		return new String(blob.getContent(), 0, blob.getLength());

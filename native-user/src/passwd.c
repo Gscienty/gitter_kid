@@ -5,26 +5,20 @@
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "util.h"
 #include "passwd.h"
 
 int __passwd_open_store () {
-    if (__passwd_store.fields.path == NULL) {
-        return 0;
+    if (access (__passwd_path, F_OK) != 0) {
+        return -1;
     }
-    if (__passwd_store.fields.fd != 0) {
-        return 0;
-    }
-    if (access (__passwd_store.fields.path, F_OK) != 0) {
-        return 0;
-    }
-    int fd = open (__passwd_store.fields.path, O_RDWR, S_IRUSR | S_IWUSR);
+    int fd = open (__passwd_path, O_RDONLY, S_IRUSR);
     if (fd == -1) {
-        return 0;
+        return -1;
     }
-    __passwd_store.fields.fd = fd;
-
-    return 1;
+    
+    return fd;
 }
 
 struct __bytes *__read_content (int fd) {    
@@ -78,8 +72,45 @@ struct __passwd_record *__parse (const char *line) {
     return ret;
 }
 
+struct __bytes *__serialize (struct __passwd_record record) {
+    size_t count_size = 5;
+
+    count_size += record.username == NULL ? 0 : strlen (record.username);
+    count_size += record.password == NULL ? 0 : strlen (record.password);
+    count_size += 16;// user_id & group_id
+    count_size += record.description == NULL ? 0 : strlen (record.description);
+    count_size += record.home == NULL ? 0 : strlen (record.home);
+    count_size += record.shell == NULL ? 0 : strlen (record.shell);
+    struct __bytes *ret = __bytes_ctor (count_size);
+    snprintf (ret->buf, ret->len, "%s:%s:%d:%d:%s:%s:%s\n",
+        record.username == NULL ? "" : record.username,
+        record.password == NULL ? "" : record.password,
+        record.user_id,
+        record.group_id,
+        record.description == NULL ? "" : record.description,
+        record.home == NULL ? "" : record.home,
+        record.shell == NULL ? "" : record.shell
+    );
+
+    return ret;
+}
+
+void passwd_save_collection (struct __passwd_collection *collection) {
+    if (collection == NULL) {
+        return;
+    }
+    passwd_collection_reset (collection);
+    while (passwd_collection_has_next (collection)) {
+        struct __passwd_item *item = passwd_collection_next (collection);
+
+        struct __bytes *line = __serialize (item->record);
+        printf ("%s", line->buf);
+        __bytes_dtor (line);
+    }
+}
+
 struct __passwd_item *__passwd_item_wrap (struct __passwd_record record) {
-    struct __passwd_item *ret = (struct __passwd_item *) malloc (sizeof (ret));
+    struct __passwd_item *ret = (struct __passwd_item *) malloc (sizeof (*ret));
     if (ret == NULL) {
         return NULL;
     }
@@ -92,8 +123,9 @@ struct __passwd_item *__passwd_item_wrap (struct __passwd_record record) {
     return ret;
 }
 
-void *__passwd_store_read_data () {
-    if (__passwd_store.fields.fd == 0 && __passwd_open_store () == 0) {
+struct __passwd_collection *passwd_get_collection () {
+    int fd = __passwd_open_store ();
+    if (fd == -1) {
         return NULL;
     }
     struct __passwd_collection *ret = (struct __passwd_collection *) malloc (sizeof (ret));
@@ -102,7 +134,7 @@ void *__passwd_store_read_data () {
     }
     ret->head = ret->tail = ret->cursor = NULL;
 
-    struct __bytes *content = __read_content (__passwd_store.fields.fd);
+    struct __bytes *content = __read_content (fd);
 
     register char *ch = content->buf;
     const char *limit = content->buf + content->len;
@@ -115,14 +147,14 @@ void *__passwd_store_read_data () {
         struct __passwd_record *record = __parse (ch);
         if (record != NULL) {
             struct __passwd_item *item = __passwd_item_wrap (*record);
-            item->prev = ret->tail;
+
             if (ret->head == NULL) {
                 ret->head = item;
             }
-
             if (ret->tail != NULL) {
                 ret->tail->next = item;
             }
+            item->prev = ret->tail;
             ret->tail = item;
 
             free (record);
@@ -137,17 +169,15 @@ void *__passwd_store_read_data () {
     }
 
     __bytes_dtor (content);
+    close (fd);
 
     return ret;
 }
 
-void __passwd_store_data_dtor (void *data) {
-    if (data == NULL) {
+void passwd_collection_dtor (struct __passwd_collection *collection) {
+    if (collection == NULL) {
         return;
     }
-
-    struct __passwd_collection *collection = (struct __passwd_collection *) data;
-
     while (collection->head != NULL) {
         struct __passwd_record record = collection->head->record;
 
@@ -165,19 +195,11 @@ void __passwd_store_data_dtor (void *data) {
     free (collection);
 }
 
-struct __passwd_collection *passwd_get_collection () {
-    return (struct __passwd_collection *) __passwd_store.operations.store_read_data ();
-}
-
 void passwd_collection_reset (struct __passwd_collection *collection) {
     if (collection == NULL) {
         return;
     }
     collection->cursor = NULL;
-}
-
-void passwd_collection_dtor (struct __passwd_collection *collection) {
-    __passwd_store.operations.store_data_dtor (collection);
 }
 
 int passwd_collection_has_next (struct __passwd_collection *collection) {
@@ -193,7 +215,7 @@ struct __passwd_item *passwd_collection_next (struct __passwd_collection *collec
         return NULL;
     }
 
-    collection->cursor = collection->cursor == NULL ? collection->head : collection->cursor->next;
+    collection->cursor = (collection->cursor == NULL ? collection->head : collection->cursor->next);
     return collection->cursor;
 }
 
@@ -240,14 +262,14 @@ char *passwd_item_get_password (struct __passwd_item *item) {
 
 unsigned int passwd_item_get_user_id (struct __passwd_item *item) {
     if (item == NULL) {
-        return NULL;
+        return 0;
     }
     return item->record.user_id;
 }
 
 unsigned int passwd_item_get_group_id (struct __passwd_item *item) {
     if (item == NULL) {
-        return NULL;
+        return 0;
     }
     return item->record.group_id;
 }

@@ -197,6 +197,32 @@ struct __passwd_item *passwd_collection_next (struct __passwd_collection *collec
     return collection->cursor;
 }
 
+struct __passwd_item *passwd_collection_append (struct __passwd_collection *collection) {
+    if (collection == NULL) {
+        return NULL;
+    }
+
+    struct __passwd_item *ret = (struct __passwd_item *) malloc (sizeof (*ret));
+
+    ret->modify_flag = 1;
+    ret->record.username = ret->record.password = ret->record.description = ret->record.home = ret->record.shell = NULL;
+    ret->record.user_id = ret->record.group_id = 0;
+
+    ret->prev = collection->tail;
+    ret->next = NULL;
+
+    if (collection->head == NULL) {
+        collection->head = ret;
+    }
+
+    if (collection->tail != NULL) {
+        collection->tail->next = ret;
+    }
+    collection->tail = ret;
+
+    return ret;
+}
+
 
 char *passwd_item_get_username (struct __passwd_item *item) {
     if (item == NULL) {

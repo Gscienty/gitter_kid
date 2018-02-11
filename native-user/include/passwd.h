@@ -64,6 +64,6 @@ G_KID_USER_EXTERN void passwd_collection_dtor (struct __passwd_collection *colle
 G_KID_USER_EXTERN void passwd_collection_reset (struct __passwd_collection *collection);
 G_KID_USER_EXTERN int passwd_collection_has_next (struct __passwd_collection *collection);
 G_KID_USER_EXTERN struct __passwd_item *passwd_collection_next (struct __passwd_collection *collection);
-
+G_KID_USER_EXTERN struct __passwd_item *passwd_collection_append (struct __passwd_collection *collection);
 
 #endif

@@ -60,7 +60,7 @@ void PasswdStore::Initialize () {
     }
     std::string line;
     while (std::getline (passwdFile, line)) {
-        this->items.push_back (PasswdItem (line));
+        this->items.push_back (line);
     }
 }
 

@@ -47,7 +47,7 @@ void GroupStore::Initialize () {
 
     std::string line;
     while (std::getline (groupFile, line)) {
-        this->items.push_back (GroupItem (line));
+        this->items.push_back (line);
     }
 }
 

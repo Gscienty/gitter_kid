@@ -10,6 +10,7 @@ SHARE = -shared
 $(shell mkdir -p ${BIN_DIR})
 $(shell mkdir -p ${OBJS_DIR})
 
+LINKS = crypt
 OUT_LIBRARY = libgkiduser.so
 
 SOURCES = $(patsubst %.cpp, %, $(notdir $(wildcard $(PWD)/src/*.cpp)))
@@ -17,11 +18,11 @@ SOURCES = $(patsubst %.cpp, %, $(notdir $(wildcard $(PWD)/src/*.cpp)))
 all: $(OUT_LIBRARY)
 
 test: $(SOURCES) comp_test
-	$(CC) $(SOURCES:%=$(OBJS_DIR)%.o) $(OBJS_DIR)tester.o -o test/tester
+	$(CC) $(SOURCES:%=$(OBJS_DIR)%.o) $(OBJS_DIR)tester.o -o test/tester $(LINKS:%=-l%)
 	test/tester
 
 $(OUT_LIBRARY): $(SOURCES)
-	$(CC) $(SOURCES:%=$(OBJS_DIR)%.o) $(SHARE) $(FPIC) -o $(BIN_DIR)$(OUT_LIBRARY) 
+	$(CC) $(SOURCES:%=$(OBJS_DIR)%.o) $(SHARE) $(FPIC) -o $(BIN_DIR)$(OUT_LIBRARY) $(LINKS:%=-l%)
 
 comp_test:
 	$(CC) -g -c test/tester.cpp -I $(INCLUDE_DIR) -o $(OBJS_DIR)tester.o

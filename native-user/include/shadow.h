@@ -5,6 +5,9 @@
 #include <vector>
 #include "data_store.h"
 
+class ShadowPasswd {
+    
+};
 
 class ShadowItem : public BaseItem {
 private:

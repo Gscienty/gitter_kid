@@ -19,4 +19,15 @@ public:
     GroupItem ();
 };
 
+class GroupStore : public DataStore<GroupItem> {
+private:
+    const std::string path = "./test/etc/group";
+    vector<GroupItem> items;
+public:
+    void Initialize ();
+    std::string GetName () const;
+    std::vector<GroupItem>& Get ();
+    void Put (std::vector<GroupItem> items) const;
+};
+
 #endif

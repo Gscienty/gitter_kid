@@ -1,4 +1,5 @@
 #include "group.h"
+#include <fstream>
 
 std::string GroupItem::Serialize () const {
     return this->name + ":"
@@ -33,4 +34,51 @@ GroupItem::GroupItem () {
     this->name = "";
     this->passwd = "";
     this->gid = 0;
+}
+
+
+void GroupStore::Initialize () {
+    std::ifstream groupFile (GroupStore::path);
+    if (groupFile.is_open () == false) {
+        return;
+    }
+
+    std::string line;
+    while (std::getline (groupFile, line)) {
+        this->items.push_back (GroupItem (line));
+    }
+}
+
+std::string GroupStore::GetName () const { return "group"; }
+
+std::vector<GroupItem>& GroupStore::Get () { return this->items; }
+
+inline void Backup (const std::string& path) {
+    std::ifstream originFile (path);
+    std::ofstream backupFile (path + "_");
+    std::string line;
+    while (std::getline (originFile, line)) {
+        backupFile << line << std::endl;
+    }
+
+    originFile.close ();
+    backupFile.close ();
+}
+
+inline void RemoveBackup (const std::string& path) {
+    std::remove ((path + "_").c_str ());
+}
+
+void GroupStore::Put (std::vector<GroupItem> items) const {
+    Backup (GroupStore::path);
+
+    std::ofstream writer (GroupStore::path);
+
+    std::for_each (items.begin (), item.end (), [&] (const GroupItem& item) -> void {
+        writer << item << std::endl;
+    });
+
+    writer.close ();
+
+    RemoveBackup (GroupStore::path);
 }

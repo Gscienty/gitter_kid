@@ -5,7 +5,7 @@
 #include <vector>
 #include "data_store.h"
 
-class PasswdItem : protected BaseItem {
+class PasswdItem : public BaseItem {
 private:
     std::string username;
     std::string home;
@@ -14,12 +14,22 @@ private:
     unsigned int gid;
     std::string passwd;
     std::string shell;
-protected:
 public:
-    std::string Serialize ();
+    std::string Serialize () const;
     void Parse (std::string line);
+
     PasswdItem (std::string line);
     PasswdItem ();
+};
+
+class PasswdStore : public DataStore <PasswdItem> {
+private:
+    std::string path = "./test/etc/passwd";
+
+public:
+    std::string GetName () const;
+    std::vector <PasswdItem> Get () const;
+    void Put (std::vector <PasswdItem> items) const;
 };
 
 #endif

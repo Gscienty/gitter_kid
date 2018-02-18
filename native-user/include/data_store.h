@@ -5,17 +5,17 @@
 #include <vector>
 
 class BaseItem {
-protected:
+public:
     virtual void Parse (std::string line) = 0;
-    virtual std::string Serialize () = 0;
+    virtual std::string Serialize () const = 0;
 };
 
 template <class T>
-class data_store {
+class DataStore {
 public:
-    std::string GetName () const = 0;
-    std::vector<T> Get () const = 0;
-    void Put (std::vector<T> items) const = 0;
+    virtual std::string GetName () const = 0;
+    virtual std::vector <T> Get () const = 0;
+    virtual void Put (std::vector <T> items) const = 0;
 };
 
 #endif

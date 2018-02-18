@@ -1,5 +1,7 @@
 #include "group.h"
+#include <iostream>
 #include <fstream>
+#include <algorithm>
 
 std::string GroupItem::Serialize () const {
     return this->name + ":"
@@ -74,8 +76,8 @@ void GroupStore::Put (std::vector<GroupItem> items) const {
 
     std::ofstream writer (GroupStore::path);
 
-    std::for_each (items.begin (), item.end (), [&] (const GroupItem& item) -> void {
-        writer << item << std::endl;
+    std::for_each (items.begin (), items.end (), [&] (const GroupItem& item) -> void {
+        writer << item.Serialize () << std::endl;
     });
 
     writer.close ();

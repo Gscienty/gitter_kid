@@ -6,10 +6,10 @@
 
 void PasswdItem::Parse (std::string line) {
     std::vector<std::string> vec;
-    std::size_t offset = 0;
-    std::size_t itemEnd = std::string::npos;
+    off_t offset = 0;
+    off_t itemEnd = line.npos;
 
-    while ((itemEnd = line.find (':', offset)) != std::string::npos) {
+    while ((itemEnd = line.find (':', offset)) != line.npos) {
         vec.push_back (line.substr (offset, itemEnd - offset));
         offset = itemEnd + 1;
     }

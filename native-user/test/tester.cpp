@@ -7,13 +7,9 @@ int main () {
     PasswdStore store;
     store.Initialize ();
     std::vector<PasswdItem>& items = store.Get ();
-
     std::for_each (items.begin (), items.end (), [] (const PasswdItem& item) -> void {
         std::cout << item.Serialize () << std::endl;
     });
-
-    items.pop_back ();
-
     store.Put (items);
 
     return 0;

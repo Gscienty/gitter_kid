@@ -15,6 +15,22 @@ private:
     std::string passwd;
     std::string shell;
 public:
+    void SetUserName (const std::string& value) { this->username = value; }
+    void SetHome (const std::string& value) { this->home = value; }
+    void SetGecos (const std::string& value) { this->gecos = value; }
+    void SetUID (unsigned int value) { this->uid = value; }
+    void SetGID (unsigned int value) { this->gid = value; }
+    void SetPasswd (const std::string& value) { this->passwd = value; }
+    void SetShell (const std::string& value) { this->shell = value; }
+
+    std::string GetUserName () { return this->username; }
+    std::string GetHome () { return this->home; }
+    std::string GetGecos () { return this->gecos; }
+    std::string GetPasswd () { return this->passwd; }
+    std::string GetShell () { return this->shell; }
+    unsigned int GetGID () { return this->gid; }
+    unsigned int GetUID () { return this->uid; }
+
     std::string Serialize () const;
     void Parse (std::string line);
 

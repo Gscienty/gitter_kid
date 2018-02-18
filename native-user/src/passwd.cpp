@@ -53,19 +53,19 @@ PasswdItem::PasswdItem () {
 
 std::string PasswdStore::GetName () const { return "passwd"; }
 
-std::vector <PasswdItem> PasswdStore::Get () const {
-    std::vector <PasswdItem> result;
-
+void PasswdStore::Initialize () {
     std::ifstream passwdFile (this->path);
     if (passwdFile.is_open () == false) {
-        return result;
+        return;
     }
     std::string line;
     while (std::getline (passwdFile, line)) {
-        result.push_back (PasswdItem (line));
+        this->items.push_back (PasswdItem (line));
     }
+}
 
-    return result;
+std::vector<PasswdItem>& PasswdStore::Get () {
+    return this->items;
 }
 
 inline void Backup (const std::string& path) {

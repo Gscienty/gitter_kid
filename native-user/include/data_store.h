@@ -13,9 +13,10 @@ public:
 template <class T>
 class DataStore {
 public:
+    virtual void Initialize () = 0;
     virtual std::string GetName () const = 0;
-    virtual std::vector <T> Get () const = 0;
-    virtual void Put (std::vector <T> items) const = 0;
+    virtual std::vector<T>& Get () = 0;
+    virtual void Put (std::vector<T> items) const = 0;
 };
 
 #endif

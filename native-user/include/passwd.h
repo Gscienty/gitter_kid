@@ -25,11 +25,13 @@ public:
 class PasswdStore : public DataStore <PasswdItem> {
 private:
     std::string path = "./test/etc/passwd";
+    std::vector <PasswdItem> items;
 
 public:
+    void Initialize ();
     std::string GetName () const;
-    std::vector <PasswdItem> Get () const;
-    void Put (std::vector <PasswdItem> items) const;
+    std::vector<PasswdItem>& Get ();
+    void Put (std::vector<PasswdItem> items) const;
 };
 
 #endif

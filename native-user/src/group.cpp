@@ -9,7 +9,7 @@ std::string GroupItem::Serialize () const {
         + std::to_string (this->gid);
 }
 
-void GroupItem::Parse (std::string line) {
+void GroupItem::Parse (const std::string& line) {
     std::vector<std::string> vec;
     off_t offset = 0;
     off_t itemEnd = line.npos;
@@ -28,10 +28,10 @@ void GroupItem::Parse (std::string line) {
     this->gid = std::stoi (vec[2], nullptr);
 }
 
-
-GroupItem::GroupItem (std::string line) {
+GroupItem::GroupItem (const std::string& line) {
     this->Parse (line);
 }
+
 GroupItem::GroupItem () {
     this->name = "";
     this->passwd = "";

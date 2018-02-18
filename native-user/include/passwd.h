@@ -32,9 +32,10 @@ public:
     unsigned int GetUID () { return this->uid; }
 
     std::string Serialize () const;
-    void Parse (std::string line);
+    void Parse (const std::string& line);
 
-    PasswdItem (std::string line);
+    PasswdItem (const char *line) : PasswdItem (std::string (line)) { }
+    PasswdItem (const std::string& line);
     PasswdItem ();
 };
 

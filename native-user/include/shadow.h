@@ -18,7 +18,7 @@ private:
     int invaild;
 
 public:
-    void Parse (std::string line);
+    void Parse (const std::string& line);
     std::string Serialize () const;
 
     ShadowItem (const char *line) : ShadowItem (std::string (line)) { }

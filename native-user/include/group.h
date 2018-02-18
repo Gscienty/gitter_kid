@@ -13,9 +13,10 @@ private:
 
 public:
     std::string Serialize () const;
-    void Parse (std::string line);
+    void Parse (const std::string& line);
 
-    GroupItem (std::string line);
+    GroupItem (const char *line) : GroupItem (std::string (line)) { }
+    GroupItem (const std::string& line);
     GroupItem ();
 };
 

@@ -6,7 +6,7 @@
 
 class BaseItem {
 public:
-    virtual void Parse (std::string line) = 0;
+    virtual void Parse (const std::string& line) = 0;
     virtual std::string Serialize () const = 0;
 };
 

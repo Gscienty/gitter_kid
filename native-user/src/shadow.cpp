@@ -10,7 +10,7 @@ inline int ParseTime (const std::string& timeStr) {
     return std::stoi (timeStr);
 }
 
-void ShadowItem::Parse (std::string line) {
+void ShadowItem::Parse (const std::string& line) {
     std::vector<std::string> vec;
     off_t offset = 0;
     off_t itemEnd = line.npos;

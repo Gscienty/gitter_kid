@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <functional>
 
-void PasswdItem::Parse (std::string line) {
+void PasswdItem::Parse (const std::string& line) {
     std::vector<std::string> vec;
     off_t offset = 0;
     off_t itemEnd = line.npos;
@@ -36,7 +36,7 @@ std::string PasswdItem::Serialize () const {
     + this->shell;
 }
 
-PasswdItem::PasswdItem (std::string line) {
+PasswdItem::PasswdItem (const std::string& line) {
     this->Parse (line);
 }
 

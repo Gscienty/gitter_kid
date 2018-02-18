@@ -38,9 +38,9 @@ public:
     PasswdItem ();
 };
 
-class PasswdStore : public DataStore <PasswdItem> {
+class PasswdStore : public DataStore<PasswdItem> {
 private:
-    std::string path = "./test/etc/passwd";
+    const std::string path = "./test/etc/passwd";
     std::vector <PasswdItem> items;
 
 public:

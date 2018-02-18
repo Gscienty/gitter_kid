@@ -54,7 +54,7 @@ PasswdItem::PasswdItem () {
 std::string PasswdStore::GetName () const { return "passwd"; }
 
 void PasswdStore::Initialize () {
-    std::ifstream passwdFile (this->path);
+    std::ifstream passwdFile (PasswdStore::path);
     if (passwdFile.is_open () == false) {
         return;
     }
@@ -64,9 +64,7 @@ void PasswdStore::Initialize () {
     }
 }
 
-std::vector<PasswdItem>& PasswdStore::Get () {
-    return this->items;
-}
+std::vector<PasswdItem>& PasswdStore::Get () { return this->items; }
 
 inline void Backup (const std::string& path) {
     std::ifstream originFile (path);
@@ -85,9 +83,9 @@ inline void RemoveBackup (const std::string& path) {
 }
 
 void PasswdStore::Put (std::vector <PasswdItem> items) const {
-    Backup (this->path);
+    Backup (PasswdStore::path);
 
-    std::ofstream writer (this->path);
+    std::ofstream writer (PasswdStore::path);
 
     std::for_each (items.begin (), items.end (), [&] (const PasswdItem& item) -> void {
         writer << item.Serialize () << std::endl;
@@ -95,5 +93,5 @@ void PasswdStore::Put (std::vector <PasswdItem> items) const {
 
     writer.close ();
 
-    RemoveBackup (this->path);
+    RemoveBackup (PasswdStore::path);
 }

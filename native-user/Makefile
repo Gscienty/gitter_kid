@@ -3,7 +3,7 @@ BIN_DIR = $(PWD)/bin/
 OBJS_DIR = $(PWD)/objs/
 SOURCES_DIR = $(PWD)/src/
 INCLUDE_DIR = $(PWD)/include/
-CC = gcc
+CC = g++
 FPIC = -fPIC
 SHARE = -shared
 
@@ -12,7 +12,7 @@ $(shell mkdir -p ${OBJS_DIR})
 
 OUT_LIBRARY = libgkiduser.so
 
-SOURCES = $(patsubst %.c, %, $(notdir $(wildcard $(PWD)/src/*.c)))
+SOURCES = $(patsubst %.cpp, %, $(notdir $(wildcard $(PWD)/src/*.cpp)))
 
 all: $(OUT_LIBRARY)
 
@@ -24,10 +24,10 @@ $(OUT_LIBRARY): $(SOURCES)
 	$(CC) $(SOURCES:%=$(OBJS_DIR)%.o) $(SHARE) $(FPIC) -o $(BIN_DIR)$(OUT_LIBRARY) 
 
 comp_test:
-	$(CC) -g -c test/tester.c -I $(INCLUDE_DIR) -o $(OBJS_DIR)tester.o
+	$(CC) -g -c test/tester.cpp -I $(INCLUDE_DIR) -o $(OBJS_DIR)tester.o
 
 $(SOURCES):
-	$(CC) -g $(FPIC) -c $(SOURCES_DIR)$@.c -I $(INCLUDE_DIR) -o $(OBJS_DIR)$@.o
+	$(CC) -g $(FPIC) -c $(SOURCES_DIR)$@.cpp -I $(INCLUDE_DIR) -o $(OBJS_DIR)$@.o
 
 clean:
 	rm -rf $(BIN_DIR) $(OBJS_DIR)

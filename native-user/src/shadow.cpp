@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <random>
 #include <crypt.h>
 
 inline int ParseTime (const std::string& timeStr) {
@@ -44,7 +45,7 @@ inline std::string SerializeTime (const int time) {
 
 std::string ShadowItem::Serialize () const {
     return this->username + ":"
-        + this->passwd + ":"
+        + this->passwd.Get () + ":"
         + SerializeTime (this->last) + ":"
         + SerializeTime (this->minInterval) + ":"
         + SerializeTime (this->maxInterval) + ":"
@@ -79,6 +80,18 @@ void ShadowPasswd::FullingTransfer (const std::string& str) {
     this->id = std::stoi (str.substr (1, saltSplitPos - 1), nullptr, 16);
 }
 
+void ShadowPasswd::GenerateSalt () {
+    std::random_device r;
+    std::default_random_engine eng (r ());
+    std::uniform_int_distribution<int> uniform_dist (0, 63);
+
+    std::stringstream builder;
+
+    for (int i = 0; i < 8; i++) { builder << ShadowPasswd::ALPHA[uniform_dist (eng)]; }
+
+    this->salt = builder.str ();
+}
+
 ShadowPasswd::ShadowPasswd (const std::string& str) {
     int splitCount = 0;
 
@@ -91,15 +104,43 @@ ShadowPasswd::ShadowPasswd (const std::string& str) {
     if (splitCount == 3) {
         FullingTransfer (str);
     }
+    else {
+        this->SetPasswd (str);
+    }
 }
 
+
+ShadowPasswd::ShadowPasswd (const char *str)  : ShadowPasswd (std::string (str)) { }
+
 ShadowPasswd::ShadowPasswd () { }
+
+ShadowPasswd::ShadowPasswd (const ShadowPasswd &passwd) {
+    this->passwd = passwd.passwd;
+    this->id = passwd.id;
+    this->salt = passwd.salt;
+    this->hash = passwd.hash;
+
+}
+
+std::string ShadowPasswd::Get () const { return this->passwd; }
+void ShadowPasswd::SetPasswd (const std::string &str, int id) {
+    this->GenerateSalt ();
+    this->id = id;
+
+    std::stringstream builder;
+    builder << "$" << std::hex << this->id << "$" << this->salt << "$";
+
+    this->FullingTransfer (crypt (str.c_str (), builder.str ().c_str ()));
+}
+
+ShadowPasswd &ShadowPasswd::operator= (ShadowPasswd &&shadowPasswd) {
+    ShadowPasswd &passwd = *(new ShadowPasswd (shadowPasswd));
+    return passwd;
+}
 
 bool ShadowPasswd::operator== (const char *str) {
     std::stringstream builder;
     builder << "$" << std::hex << this->id << "$" << this->salt << "$";
     return this->passwd.compare(std::string (crypt (str, builder.str ().c_str ()))) == 0;
 }
-
 bool ShadowPasswd::operator== (const std::string& str) { return this->operator== (str.c_str ()); }
-bool ShadowPasswd::operator== (const ShadowPasswd& passwd) { return this->passwd.compare (passwd.passwd) == 0; };

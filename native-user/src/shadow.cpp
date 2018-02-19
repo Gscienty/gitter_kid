@@ -1,6 +1,8 @@
 #include "shadow.h"
 #include <iostream>
+#include <sstream>
 #include <algorithm>
+#include <crypt.h>
 
 inline int ParseTime (const std::string& timeStr) {
     if (timeStr.empty ()) {
@@ -68,6 +70,8 @@ ShadowItem::ShadowItem () {
 }
 
 void ShadowPasswd::FullingTransfer (const std::string& str) {
+    this->passwd = str;
+
     off_t hashSplitPos = str.find_last_of ('$');
     this->hash = str.substr (hashSplitPos + 1);
     off_t saltSplitPos = str.find_last_of ('$', hashSplitPos - 1);
@@ -76,9 +80,26 @@ void ShadowPasswd::FullingTransfer (const std::string& str) {
 }
 
 ShadowPasswd::ShadowPasswd (const std::string& str) {
+    int splitCount = 0;
 
+    std::for_each (str.begin (), str.end (), [&] (const char chr) -> void {
+        if (chr == '$') {
+            splitCount++;
+        }
+    });
 
-    FullingTransfer (str);
+    if (splitCount == 3) {
+        FullingTransfer (str);
+    }
 }
 
 ShadowPasswd::ShadowPasswd () { }
+
+bool ShadowPasswd::operator== (const char *str) {
+    std::stringstream builder;
+    builder << "$" << std::hex << this->id << "$" << this->salt << "$";
+    return this->passwd.compare(std::string (crypt (str, builder.str ().c_str ()))) == 0;
+}
+
+bool ShadowPasswd::operator== (const std::string& str) { return this->operator== (str.c_str ()); }
+bool ShadowPasswd::operator== (const ShadowPasswd& passwd) { return this->passwd.compare (passwd.passwd) == 0; };

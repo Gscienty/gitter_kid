@@ -12,14 +12,14 @@ std::string GroupItem::Serialize () const {
 void GroupItem::Parse (const std::string& line) {
     std::vector<std::string> vec;
     off_t offset = 0;
-    off_t itemEnd = line.npos;
+    off_t itemEnd = std::string::npos;
 
-    while ((itemEnd = line.find (':', offset)) != line.npos) {
+    while ((itemEnd = line.find (':', offset)) != std::string::npos) {
         vec.push_back (line.substr (offset, (std::size_t) (itemEnd - offset)));
         offset = itemEnd + 1;
     }
 
-    if (offset < line.npos) {
+    if (offset < std::string::npos) {
         vec.push_back (line.substr (offset));
     }
 

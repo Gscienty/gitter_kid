@@ -13,14 +13,14 @@ inline int ParseTime (const std::string& timeStr) {
 void ShadowItem::Parse (const std::string& line) {
     std::vector<std::string> vec;
     off_t offset = 0;
-    off_t itemEnd = line.npos;
+    off_t itemEnd = std::string::npos;
 
-    while ((itemEnd = line.find (':', offset)) != line.npos) {
+    while ((itemEnd = line.find (':', offset)) != std::string::npos) {
         vec.push_back (line.substr (offset, (std::size_t) (itemEnd - offset)));
         offset = itemEnd + 1;
     }
 
-    if (offset < line.npos) {
+    if (offset < std::string::npos) {
         vec.push_back (line.substr (offset));
     }
 
@@ -66,3 +66,19 @@ ShadowItem::ShadowItem () {
     this->inactive = -1;
     this->invaild = -1;
 }
+
+void ShadowPasswd::FullingTransfer (const std::string& str) {
+    off_t hashSplitPos = str.find_last_of ('$');
+    this->hash = str.substr (hashSplitPos + 1);
+    off_t saltSplitPos = str.find_last_of ('$', hashSplitPos - 1);
+    this->salt = str.substr (saltSplitPos + 1, hashSplitPos - saltSplitPos - 1);
+    this->id = std::stoi (str.substr (1, saltSplitPos - 1), nullptr, 16);
+}
+
+ShadowPasswd::ShadowPasswd (const std::string& str) {
+
+
+    FullingTransfer (str);
+}
+
+ShadowPasswd::ShadowPasswd () { }

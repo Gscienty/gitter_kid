@@ -6,9 +6,14 @@
 #include <crypt.h>
 
 int main () {
-    ShadowPasswd passwd = "aaaaaa";
+    GroupStore store;
+    store.Initialize ();
 
-    std::cout << (passwd == "aaaaaaa") << (passwd == "aaaaaa") << std::endl;
+    std::vector<GroupItem> groups = store.Get();
+
+    std::for_each (groups.begin (), groups.end (), [] (const GroupItem &item) -> void {
+        std::cout << item.Serialize () << std::endl;
+    });
 
     return 0;
 }

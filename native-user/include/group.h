@@ -10,6 +10,7 @@ private:
     std::string name;
     std::string passwd;
     uint32_t gid;
+    std::vector<std::string> users;
 
 public:
     std::string Serialize () const;

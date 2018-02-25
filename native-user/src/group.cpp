@@ -4,9 +4,20 @@
 #include <algorithm>
 
 std::string GroupItem::Serialize () const {
-    return this->name + ":"
+    std::string base = this->name + ":"
         + this->passwd + ":"
         + std::to_string (this->gid);
+    if (this->users.size () == 0) {
+        return base;
+    }
+
+    base += ":" + this->users[0];
+
+    std::for_each (this->users.begin () + 1, this->users.end (), [&] (const std::string &user) -> void {
+        base += "," + user;
+    });
+
+    return base;
 }
 
 void GroupItem::Parse (const std::string& line) {
@@ -26,6 +37,21 @@ void GroupItem::Parse (const std::string& line) {
     this->name = vec[0];
     this->passwd = vec[1];
     this->gid = std::stoi (vec[2], nullptr);
+
+    if (vec.size () == 4) {
+        offset = 0;
+        itemEnd = std::string::npos;
+        std::string users = vec[3];
+
+        while ((itemEnd = users.find (',', offset)) != std::string::npos) {
+            this->users.push_back (users.substr (offset, (std::size_t) (itemEnd - offset)));
+            offset = itemEnd + 1;
+        }
+
+        if (offset < std::string::npos) {
+            this->users.push_back (users.substr (offset));
+        }
+    }
 }
 
 GroupItem::GroupItem (const std::string& line) {

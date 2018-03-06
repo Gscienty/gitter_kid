@@ -1,19 +1,15 @@
 #include "passwd.h"
 #include "group.h"
 #include "shadow.h"
+#include "export_interface.h"
 #include <algorithm>
 #include <iostream>
 #include <crypt.h>
 
 int main () {
-    GroupStore store;
-    store.Initialize ();
 
-    std::vector<GroupItem> groups = store.Get();
+    GroupStore *store = gkid_user_get_group_store ();
 
-    std::for_each (groups.begin (), groups.end (), [] (const GroupItem &item) -> void {
-        std::cout << item.Serialize () << std::endl;
-    });
-
+    std::vector<GroupItem> *items = gkid_user_group_store_get_collection (store);
     return 0;
 }

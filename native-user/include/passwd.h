@@ -47,7 +47,7 @@ private:
 public:
     void Initialize ();
     std::string GetName () const;
-    std::vector<PasswdItem>& Get ();
+    std::vector<PasswdItem> &Get ();
     void Put (std::vector<PasswdItem> items) const;
 };
 

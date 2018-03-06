@@ -64,8 +64,16 @@ GroupItem::GroupItem () {
     this->gid = 0;
 }
 
+void GroupStore::Reloading () {
+    this->items.clear ();
+    this->Initialize ();
+}
+
 
 void GroupStore::Initialize () {
+    if (this->items.empty ()) {
+        return ;
+    }
     std::ifstream groupFile (GroupStore::path);
     if (groupFile.is_open () == false) {
         return;
@@ -75,6 +83,8 @@ void GroupStore::Initialize () {
     while (std::getline (groupFile, line)) {
         this->items.push_back (line);
     }
+
+    groupFile.close ();
 }
 
 std::string GroupStore::GetName () const { return "group"; }

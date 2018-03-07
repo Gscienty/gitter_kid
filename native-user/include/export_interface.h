@@ -13,5 +13,11 @@ struct group_item_eachor {
 GroupStore *gkid_user_get_group_store ();
 void gkid_user_group_store_reload (GroupStore *);
 group_item_eachor *gkid_user_group_collection_generate_eachor (GroupStore *);
+bool gkid_user_group_eachor_hasnext (group_item_eachor *);
+void gkid_user_group_eachor_next (group_item_eachor *);
+
+const char *gkid_user_group_eachor_current_name (group_item_eachor *);
+const char *gkid_user_group_eachor_current_passwd (group_item_eachor *);
+uint32_t gkid_user_group_eachor_current_gid (group_item_eachor *);
 
 #endif

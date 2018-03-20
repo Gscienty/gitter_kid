@@ -86,6 +86,5 @@ public abstract class GitObject {
     protected void finalize () throws Throwable {
     	GitObject.logger.info("dtor gitobj, type: " + this.getObjectType() + " signture: " + this.signture);
         this.lib.gitobj_dtor (this.objHandle);
-        super.finalize ();
     }
 }

@@ -30,7 +30,7 @@ public class MarketTest
     
     public void testQueryable() {
     	Market market = new Market("/home/ant");
-    	
+    	market.forEach(repo -> System.out.println(repo.getName()));
     	market = null;
     	
     	System.gc();

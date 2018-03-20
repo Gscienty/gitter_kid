@@ -1,4 +1,4 @@
-package indi.gscienty.gitterkid.services;
+package indi.gscienty.gitterkid.services.repo;
 
 import indi.gscienty.gitterkid.repo.GitBlob;
 

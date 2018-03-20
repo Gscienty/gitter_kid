@@ -70,3 +70,45 @@ const char *gkid_user_passwd_eachor_current_username (passwd_item_eachor *eachor
     }
     return eachor->iter->GetUserName ().c_str ();
 }
+
+const char *gkid_user_passwd_eachor_current_home (passwd_item_eachor *eachor) {
+    if (eachor == NULL) {
+        return NULL;
+    }
+    return eachor->iter->GetHome ().c_str ();
+}
+
+const char *gkid_user_passwd_eachor_current_gecos (passwd_item_eachor *eachor) {
+    if (eachor == NULL) {
+        return NULL;
+    }
+    return eachor->iter->GetGecos ().c_str ();
+}
+
+const char *gkid_user_passwd_eachor_current_passwd (passwd_item_eachor *eachor) {
+    if (eachor == NULL) {
+        return NULL;
+    }
+    return eachor->iter->GetPasswd ().c_str ();
+}
+
+const char *gkid_user_passwd_eachor_current_shell (passwd_item_eachor *eachor) {
+    if (eachor == NULL) {
+        return NULL;
+    }
+    return eachor->iter->GetShell ().c_str ();
+}
+
+const char *gkid_user_passwd_eachor_current_gid (passwd_item_eachor *eachor) {
+    if (eachor == NULL) {
+        return NULL;
+    }
+    return eachor->iter->GetGID ();
+}
+
+const char *gkid_user_passwd_eachor_current_uid (passwd_item_eachor *eachor) {
+    if (eachor == NULL) {
+        return NULL;
+    }
+    return eachor->iter->GetUID ();
+}

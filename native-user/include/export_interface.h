@@ -53,4 +53,12 @@ bool gkid_user_passwd_eachor_hasnext (passwd_item_eachor *);
 void gkid_user_passwd_eachor_next (passwd_item_eachor *);
 void gkid_user_passwd_eachor_reset (passwd_item_eachor *);
 
+const char *gkid_user_passwd_eachor_current_username (passwd_item_eachor *);
+const char *gkid_user_passwd_eachor_current_home (passwd_item_eachor *);
+const char *gkid_user_passwd_eachor_current_gecos (passwd_item_eachor *);
+const char *gkid_user_passwd_eachor_current_passwd (passwd_item_eachor *);
+const char *gkid_user_passwd_eachor_current_shell (passwd_item_eachor *);
+unsigned int gkid_user_passwd_eachor_current_gid (passwd_item_eachor *);
+unsigned int gkid_user_passwd_eachor_current_uid (passwd_item_eachor *);
+
 #endif

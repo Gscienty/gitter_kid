@@ -13,10 +13,10 @@ private:
     std::vector<std::string> users;
 
 public:
-    std::string GetName () const { return this->name; }
-    std::string GetPasswd () const { return this->passwd; }
+    std::string &GetName () { return this->name; }
+    std::string &GetPasswd () { return this->passwd; }
     uint32_t GetGID () const { return this->gid; }
-    std::vector<std::string> GetUsers () const { return this->users; }
+    std::vector<std::string> &GetUsers () { return this->users; }
 
     std::string Serialize () const;
     void Parse (const std::string& line);
@@ -34,7 +34,7 @@ public:
     void Reloading ();
     void Initialize ();
     std::string GetName () const;
-    std::vector<GroupItem>& Get ();
+    std::vector<GroupItem> &Get ();
     void Put (std::vector<GroupItem> items) const;
 };
 

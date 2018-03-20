@@ -5,19 +5,37 @@
 #include "shadow.h"
 
 struct group_item_eachor {
+    bool first_flag;
     std::vector<GroupItem>::iterator begin;
     std::vector<GroupItem>::iterator iter;
     std::vector<GroupItem>::iterator end;
 };
 
+struct group_item_user_eachor {
+    bool first_flag;
+    std::vector<std::string>::iterator begin;
+    std::vector<std::string>::iterator iter;
+    std::vector<std::string>::iterator end;
+};
+
 GroupStore *gkid_user_get_group_store ();
 void gkid_user_group_store_reload (GroupStore *);
 group_item_eachor *gkid_user_group_collection_generate_eachor (GroupStore *);
+void gkid_user_group_collection_dtor (group_item_eachor *);
 bool gkid_user_group_eachor_hasnext (group_item_eachor *);
 void gkid_user_group_eachor_next (group_item_eachor *);
+void gkid_user_group_eachor_reset (group_item_eachor *);
 
 const char *gkid_user_group_eachor_current_name (group_item_eachor *);
 const char *gkid_user_group_eachor_current_passwd (group_item_eachor *);
 uint32_t gkid_user_group_eachor_current_gid (group_item_eachor *);
+
+group_item_user_eachor *gkid_user_group_item_users_generate_eachor (group_item_eachor *);
+void gkid_user_group_item_users_dtor (group_item_eachor *);
+bool gkid_user_group_users_eachor_hasnext (group_item_user_eachor *);
+void gkid_user_group_users_eachor_next (group_item_user_eachor *);
+void gkid_user_group_users_eachor_reset (group_item_user_eachor *);
+
+const char *gkid_user_group_users_eachor_current_name (group_item_user_eachor *);
 
 #endif

@@ -71,7 +71,7 @@ void GroupStore::Reloading () {
 
 
 void GroupStore::Initialize () {
-    if (this->items.empty ()) {
+    if (this->items.empty () == false) {
         return ;
     }
     std::ifstream groupFile (GroupStore::path);

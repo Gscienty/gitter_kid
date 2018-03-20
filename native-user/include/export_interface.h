@@ -25,6 +25,10 @@ struct passwd_item_eachor {
     std::vector<PasswdItem>::iterator end;
 };
 
+struct shadow_item_eachor {
+    bool first_flag;
+};
+
 GroupStore *gkid_user_get_group_store ();
 void gkid_user_group_store_reload (GroupStore *);
 group_item_eachor *gkid_user_group_collection_generate_eachor (GroupStore *);

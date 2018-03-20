@@ -99,16 +99,16 @@ const char *gkid_user_passwd_eachor_current_shell (passwd_item_eachor *eachor) {
     return eachor->iter->GetShell ().c_str ();
 }
 
-const char *gkid_user_passwd_eachor_current_gid (passwd_item_eachor *eachor) {
+unsigned int gkid_user_passwd_eachor_current_gid (passwd_item_eachor *eachor) {
     if (eachor == NULL) {
-        return NULL;
+        return 0;
     }
     return eachor->iter->GetGID ();
 }
 
-const char *gkid_user_passwd_eachor_current_uid (passwd_item_eachor *eachor) {
+unsigned int gkid_user_passwd_eachor_current_uid (passwd_item_eachor *eachor) {
     if (eachor == NULL) {
-        return NULL;
+        return 0;
     }
     return eachor->iter->GetUID ();
 }

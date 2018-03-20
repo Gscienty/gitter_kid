@@ -33,7 +33,7 @@ private:
 public:
     void Reloading ();
     void Initialize ();
-    std::string GetName () const;
+    std::string GetName () const { return "group"; }
     std::vector<GroupItem> &Get ();
     void Put (std::vector<GroupItem> items) const;
 };

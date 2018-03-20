@@ -50,12 +50,32 @@ private:
     int invaild;
 
 public:
+    std::string &GetUserName () { return this->username; }
+    int GetLast() { return this->last; }
+    int GetMinInterval () { return this->minInterval; }
+    int GetMaxInterval () { return this->maxInterval; }
+    int GetWaring () { return this->waring; }
+    int GetInactive () { return this->inactive; }
+    int GetInvaild () { return this->invaild; }
+
     void Parse (const std::string &line);
     std::string Serialize () const;
 
     ShadowItem (const char *line) : ShadowItem (std::string (line)) { }
     ShadowItem (const std::string &line);
     ShadowItem ();
+};
+
+class ShadowStore : public DataStore<ShadowItem> {
+private:
+    const std::string path = "./test/etc/shadow";
+    std::vector <ShadowItem> items;
+public:
+    void Reloading ();
+    void Initialize ();
+    std::string GetName() const { return "shadow"; }
+    std::vector<ShadowItem> &Get ();
+    void Put (std::vector<ShadowItem> items) const;
 };
 
 #endif

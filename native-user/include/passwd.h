@@ -47,7 +47,7 @@ private:
 public:
     void Reloading ();
     void Initialize ();
-    std::string GetName () const;
+    std::string GetName () const { return "passwd"; }
     std::vector<PasswdItem> &Get ();
     void Put (std::vector<PasswdItem> items) const;
 };

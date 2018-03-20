@@ -27,6 +27,9 @@ struct passwd_item_eachor {
 
 struct shadow_item_eachor {
     bool first_flag;
+    std::vector<ShadowItem>::iterator begin;
+    std::vector<ShadowItem>::iterator iter;
+    std::vector<ShadowItem>::iterator end;
 };
 
 GroupStore *gkid_user_get_group_store ();
@@ -64,5 +67,16 @@ const char *gkid_user_passwd_eachor_current_passwd (passwd_item_eachor *);
 const char *gkid_user_passwd_eachor_current_shell (passwd_item_eachor *);
 unsigned int gkid_user_passwd_eachor_current_gid (passwd_item_eachor *);
 unsigned int gkid_user_passwd_eachor_current_uid (passwd_item_eachor *);
+
+
+ShadowStore *gkid_user_get_shadow_store ();
+void gkid_user_shadow_store_reload (ShadowStore *);
+shadow_item_eachor *gkid_user_shadow_collection_generate_eachor (ShadowStore *);
+void gkid_user_shadow_collection_dtor (shadow_item_eachor *);
+bool gkid_user_shadow_eachor_hasnext (shadow_item_eachor *);
+void gkid_user_shadow_eachor_next (shadow_item_eachor *);
+void gkid_user_shadow_eachor_reset (shadow_item_eachor *);
+
+const char *gkid_user_shadow_eachor_current_username (shadow_item_eachor *);
 
 #endif

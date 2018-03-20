@@ -50,9 +50,6 @@ PasswdItem::PasswdItem () {
     this->shell = "";
 }
 
-
-std::string PasswdStore::GetName () const { return "passwd"; }
-
 void PasswdStore::Reloading () {
     this->items.clear ();
     this->Initialize ();

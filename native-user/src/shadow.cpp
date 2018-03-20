@@ -102,7 +102,7 @@ ShadowPasswd::ShadowPasswd (const std::string& str) {
     });
 
     if (splitCount == 3) {
-        FullingTransfer (str);
+        this->FullingTransfer (str);
     }
     else {
         this->SetPasswd (str);
@@ -144,3 +144,60 @@ bool ShadowPasswd::operator== (const char *str) {
     return this->passwd.compare(std::string (crypt (str, builder.str ().c_str ()))) == 0;
 }
 bool ShadowPasswd::operator== (const std::string& str) { return this->operator== (str.c_str ()); }
+
+
+void Reloading () {
+    this->items.clear ();
+    this->Initialize ();
+}
+
+void ShadowStore::Initialize () {
+    if (this->items.empty () == false) {
+        return;
+    }
+
+    std::ifstream shadowFile (ShadowStore::path);
+    if (shadowFile.is_open() == false) {
+        return;
+    }
+
+    std::string line;
+    while (std::getline (passwdFile, line)) {
+        this->items.push_back (line);
+    }
+
+    shadowFile.close ();
+}
+
+std::vector<ShadowItem> &ShadowStore::Get () { return this->items; }
+
+
+inline void Backup (const std::string& path) {
+    std::ifstream originFile (path);
+    std::ofstream backupFile (path + "_");
+    std::string line;
+    while (std::getline (originFile, line)) {
+        backupFile << line << std::endl;
+    }
+
+    originFile.close ();
+    backupFile.close ();
+}
+
+inline void RemoveBackup (const std::string& path) {
+    std::remove ((path + "_").c_str ());
+}
+
+void Put (std::vector<ShadowItem> items) const {
+    Backup (PasswdStore::path);
+
+    std::ofstream writer (PasswdStore::path);
+
+    std::for_each (items.begin (), items.end (), [&] (const ShadowItem& item) -> void {
+        writer << item.Serialize () << std::endl;
+    });
+
+    writer.close ();
+
+    RemoveBackup (PasswdStore::path);
+}

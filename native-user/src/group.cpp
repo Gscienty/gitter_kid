@@ -87,8 +87,6 @@ void GroupStore::Initialize () {
     groupFile.close ();
 }
 
-std::string GroupStore::GetName () const { return "group"; }
-
 std::vector<GroupItem>& GroupStore::Get () { return this->items; }
 
 inline void Backup (const std::string& path) {

@@ -53,7 +53,16 @@ PasswdItem::PasswdItem () {
 
 std::string PasswdStore::GetName () const { return "passwd"; }
 
+void PasswdStore::Reloading () {
+    this->items.clear ();
+    this->Initialize ();
+}
+
 void PasswdStore::Initialize () {
+    if (this->items.empty () == false) {
+        return;
+    }
+
     std::ifstream passwdFile (PasswdStore::path);
     if (passwdFile.is_open () == false) {
         return;
@@ -62,6 +71,8 @@ void PasswdStore::Initialize () {
     while (std::getline (passwdFile, line)) {
         this->items.push_back (line);
     }
+
+    passwdFile.close ();
 }
 
 std::vector<PasswdItem>& PasswdStore::Get () { return this->items; }

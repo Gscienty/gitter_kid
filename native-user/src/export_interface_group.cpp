@@ -8,6 +8,9 @@ GroupStore *gkid_user_get_group_store () {
 }
 
 void gkid_user_group_store_reload (GroupStore *store) {
+    if (store == NULL) {
+        return;
+    }
     store->Reloading ();
 }
 
@@ -34,8 +37,16 @@ void gkid_user_group_collection_dtor (group_item_eachor *eachor) {
     delete eachor;
 }
 
-bool gkid_user_group_eachor_hasnext (group_item_eachor *eachor) { return eachor->iter != eachor->end && eachor->iter + 1 != eachor->end; }
+bool gkid_user_group_eachor_hasnext (group_item_eachor *eachor) {
+    if (eachor == NULL) {
+        return false;
+    }
+    return eachor->iter != eachor->end && eachor->iter + 1 != eachor->end;
+}
 void gkid_user_group_eachor_next (group_item_eachor *eachor) {
+    if (eachor == NULL) {
+        return;
+    }
     if (eachor->first_flag) {
         eachor->iter = eachor->begin;
         eachor->first_flag = false;
@@ -86,6 +97,9 @@ void gkid_user_group_users_eachor_next (group_item_user_eachor *eachor) {
 const char *gkid_user_group_users_eachor_current_name (group_item_user_eachor *eachor) { return eachor->iter->c_str (); }
 
 void gkid_user_group_users_eachor_reset (group_item_user_eachor *eachor) {
+    if (eachor == NULL) {
+        return;
+    }
     eachor->first_flag = true;
     eachor->iter = eachor->begin;
 }

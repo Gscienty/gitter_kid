@@ -5,22 +5,6 @@
 
 namespace gitterKid {
     namespace fsi {
-        class commitPersonLog {
-            private:
-                std::string name;
-                std::string mail;
-                long timestamp;
-                std::string timeZone;
-            public:
-                commitPersonLog() { }
-                commitPersonLog(std::string name, std::string mail, long timestamp, std::string timeZone)
-                    : name(name), mail(mail), timestamp(timestamp), timeZone(timeZone) { }
-                
-                std::string getName() const { return this->name; }
-                std::string getMail() const { return this->mail; }
-                long getTimestamp() const { return this->timestamp; }
-                std::string getTimeZone() const { return this->timeZone; }
-        };
 
         class commitBody {
             private:
@@ -50,7 +34,6 @@ namespace gitterKid {
             private:
                 commitBody &body;
 
-                commitPersonLog parsePersonLog(std::vector<byte>::iterator begin, std::vector<byte>::iterator end);
             public:
                 objectType getType() const { return objectType::commitType; }
                 commit(commitBody &body, std::vector<byte>::iterator spliter, std::vector<byte>::iterator end);

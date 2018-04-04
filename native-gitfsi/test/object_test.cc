@@ -1,9 +1,9 @@
 #include "object.h"
 #include "blob.h"
 #include "tree.h"
+#include "commit.h"
 #include "gtest/gtest.h"
 #include <string>
-#include <iostream>
 
 namespace gitterKid {
     namespace fsi {
@@ -81,6 +81,45 @@ namespace gitterKid {
             EXPECT_EQ(0, treeObj.get<tree>().get()[0].getName().compare("file1"));
             EXPECT_EQ(0, treeObj.get<tree>().get()[1].getName().compare("file2"));
             EXPECT_EQ(0, treeObj.get<tree>().get()[2].getName().compare("file3"));
+        }
+
+        TEST(gitterKid_fsi_object, commit_test) {
+            repository repo("", "");
+            std::string commitBody = std::string("tree 3a55568a0c2f234f3b0deec2aefcdd45e8e52381\n") + 
+            "parent 8aeed2276c2bf46e5d708c4c06c6b6ed97deb738\n" + 
+            "author gscienty <gaoxiaochuan@hotmail.com> 1521728619 +0800\n" +
+            "committer gscienty <gaoxiaochuan@hotmail.com> 1521728619 +0800\n\n" +
+            "comp slow start unit test";
+
+            std::string head = "commit " + std::to_string(commitBody.size());
+            std::vector<byte> all_content;
+
+            for (char c : head) {
+                all_content.push_back((byte) c);
+            }
+            all_content.push_back((byte) 0);
+            for (char c : commitBody) {
+                all_content.push_back((byte) c);
+            }
+
+            mockObject commitObj((byte *) all_content.data(), all_content.size(), repo, std::string(""));
+            commitObj.initialize();
+
+            EXPECT_EQ(0, commitObj.get<commit>()
+                            .get()
+                            .getTreeSignture()
+                            .compare("3a55568a0c2f234f3b0deec2aefcdd45e8e52381"));
+
+            EXPECT_EQ(0, commitObj.get<commit>()
+                            .get()
+                            .getAuthor()
+                            .getName()
+                            .compare("gscienty"));
+
+            EXPECT_EQ(0, commitObj.get<commit>()
+                            .get()
+                            .getMessage()
+                            .compare("comp slow start unit test"));
         }
     }
 }

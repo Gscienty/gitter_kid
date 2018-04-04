@@ -1,6 +1,7 @@
 #include "object.h"
 #include "blob.h"
 #include "tree.h"
+#include "commit.h"
 #include <algorithm>
 
 namespace gitterKid {
@@ -12,13 +13,15 @@ namespace gitterKid {
         }
         
         object::~object() {
-            if (this->body != NULL) {
-                delete this->body;
-            }
 
             switch (this->type) {
                 case objectType::blobType:
-                    delete (std::vector<byte> *) this->bodyBuffer;
+                    if (this->body != NULL) { delete (blob *) this->body; }
+                    if (this->bodyBuffer != NULL) { delete (std::vector<byte> *) this->bodyBuffer; }
+                    break;
+                case objectType::treeType:
+                    if (this->body != NULL) { delete (blob *) this->body; }
+                    if (this->bodyBuffer != NULL) { delete (std::vector<treeItem> *) this->bodyBuffer; }
                     break;
             }
         }
@@ -59,11 +62,11 @@ namespace gitterKid {
                     break;
                 case objectType::treeType:
                     this->bodyBuffer = new std::vector<treeItem>();
-
-                    std::vector<byte>::iterator bodyBegin = spliter + 1;
-                    std::vector<byte>::iterator bodyEnd = store.end();
-
                     this->body = new tree(*((std::vector<treeItem> *) this->bodyBuffer), spliter + 1, store.end());
+                    break;
+                case objectType::commitType:
+                    this->bodyBuffer = new commitBody();
+                    this->body = new commit(*((commitBody *) this->bodyBuffer), spliter + 1, store.end());
                     break;
             }
         }

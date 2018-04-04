@@ -3,7 +3,6 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-#include <iostream>
 
 namespace gitterKid {
     namespace fsi {

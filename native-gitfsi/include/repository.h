@@ -11,8 +11,8 @@ namespace gitterKid {
                 const std::string name;
             public:
                 repository(std::string name, std::string path);
-                const std::string& getPath() const;
-                const std::string& getName() const;
+                const std::string getPath() const;
+                const std::string getName() const;
         };
     }
 }

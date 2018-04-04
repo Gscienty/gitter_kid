@@ -1,5 +1,4 @@
 #include "blob.h"
-#include <iostream>
 
 namespace gitterKid {
     namespace fsi {

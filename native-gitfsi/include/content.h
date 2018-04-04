@@ -10,19 +10,6 @@ namespace gitterKid {
 
         enum objectType { unknowType, blobType, commitType, treeType, tagType, ofsDeltaType, refDeltaType };
 
-        class treeItem {
-            private:
-                std::string sign;
-                std::string name;
-                objectType type;
-            public:
-                treeItem(std::string sign, std::string name, objectType type)
-                    : sign(sign), name(name), type(type) { }
-                std::string &getSign() { return this->sign; }
-                std::string &getName() { return this->name; }
-                objectType getType() { return this->type; }
-        };
-
         class content {
             public:
                 virtual objectType getType() const = 0;

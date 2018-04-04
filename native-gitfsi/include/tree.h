@@ -8,6 +8,19 @@
 
 namespace gitterKid {
     namespace fsi {
+        
+        class treeItem {
+            private:
+                std::string sign;
+                std::string name;
+                objectType type;
+            public:
+                treeItem(std::string sign, std::string name, objectType type)
+                    : sign(sign), name(name), type(type) { }
+                std::string getSign() const { return this->sign; }
+                std::string getName() const { return this->name; }
+                objectType getType() const { return this->type; }
+        };
 
         class tree : public content {
             private:
@@ -16,7 +29,7 @@ namespace gitterKid {
                 objectType getType() const { return objectType::treeType; }
                 tree(std::vector<treeItem> &items, std::vector<byte>::iterator spliter, std::vector<byte>::iterator end);
                 tree(const content &origin);
-                std::vector<treeItem> &get() { return this->items; }
+                std::vector<treeItem> get() const { return this->items; }
         };
     }
 }

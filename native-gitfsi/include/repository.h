@@ -7,7 +7,7 @@ namespace gitterKid {
     namespace fsi {
         class repository {
             public:
-                
+                repository(std::string path);
         };
     }
 }

@@ -1,4 +1,4 @@
-package indi.gscienty.gitterkid.services;
+package indi.gscienty.gitterkid.services.repo;
 
 import java.util.Hashtable;
 import java.util.LinkedList;

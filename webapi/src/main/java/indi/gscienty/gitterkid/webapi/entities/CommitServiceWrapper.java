@@ -1,6 +1,6 @@
 package indi.gscienty.gitterkid.webapi.entities;
 
-import indi.gscienty.gitterkid.services.GitCommitService;
+import indi.gscienty.gitterkid.services.repo.GitCommitService;
 
 public class CommitServiceWrapper {
 	private GitCommitService service;

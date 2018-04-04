@@ -121,7 +121,6 @@ public class Market
     @Override
     protected void finalize () throws Throwable {
     	logger.info("dtor market: " + this.basePath);
-        super.finalize ();
         
         this.lib.gitmarket_dtor (this.handle);
     }

@@ -11,4 +11,4 @@ target/
 .classpath
 .project
 test_store/
-test/etc/
+native-user/test/etc/

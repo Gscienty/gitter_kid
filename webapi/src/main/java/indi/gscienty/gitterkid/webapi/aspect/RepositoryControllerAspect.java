@@ -14,7 +14,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import indi.gscienty.gitterkid.repo.GitBranch;
 import indi.gscienty.gitterkid.repo.Market;
 import indi.gscienty.gitterkid.repo.Repository;
-import indi.gscienty.gitterkid.services.GitCommitService;
+import indi.gscienty.gitterkid.services.repo.GitCommitService;
 import indi.gscienty.gitterkid.webapi.App;
 import indi.gscienty.gitterkid.webapi.entities.CommitServiceWrapper;
 import indi.gscienty.gitterkid.webapi.entities.MarketWrapper;

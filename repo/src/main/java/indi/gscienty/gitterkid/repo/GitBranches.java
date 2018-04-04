@@ -107,6 +107,5 @@ public class GitBranches
     @Override
     protected void finalize() throws Throwable {
         this.lib.gitbranches_dtor (this.handle);
-        super.finalize();
     }
 }

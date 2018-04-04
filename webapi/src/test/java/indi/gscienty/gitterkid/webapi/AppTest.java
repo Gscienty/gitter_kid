@@ -3,7 +3,7 @@ package indi.gscienty.gitterkid.webapi;
 import indi.gscienty.gitterkid.repo.GitBranch;
 import indi.gscienty.gitterkid.repo.Market;
 import indi.gscienty.gitterkid.repo.Repository;
-import indi.gscienty.gitterkid.services.GitCommitService;
+import indi.gscienty.gitterkid.services.repo.GitCommitService;
 import indi.gscienty.gitterkid.webapi.services.RepositoryService;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -45,6 +45,7 @@ public class AppTest
         	GitCommitService commitService = new GitCommitService(branch.getLastCommit());
         	
         	Object obj = commitService.getTree("/front/scripts");
+        	System.out.println(obj);
         	System.out.println(i);
     	}
     	System.out.println("END");

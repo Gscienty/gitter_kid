@@ -1,55 +1,55 @@
-#ifndef _G_KID_USER_PASSWD_
-#define _G_KID_USER_PASSWD_
-#include "define.h"
+#ifndef _G_USR_PASSWD_
+#define _G_USR_PASSWD_
 
-struct __passwd_record {
-    char *username;
-    char *password;
-    unsigned int user_id;
-    unsigned int group_id;
-    char *description;
-    char *home;
-    char *shell;
+#include <string>
+#include <vector>
+#include "data_store.h"
+
+class PasswdItem : public BaseItem {
+private:
+    std::string username;
+    std::string home;
+    std::string gecos;
+    unsigned int uid;
+    unsigned int gid;
+    std::string passwd;
+    std::string shell;
+public:
+    void SetUserName (const std::string& value) { this->username = value; }
+    void SetHome (const std::string& value) { this->home = value; }
+    void SetGecos (const std::string& value) { this->gecos = value; }
+    void SetUID (unsigned int value) { this->uid = value; }
+    void SetGID (unsigned int value) { this->gid = value; }
+    void SetPasswd (const std::string& value) { this->passwd = value; }
+    void SetShell (const std::string& value) { this->shell = value; }
+
+    std::string &GetUserName () { return this->username; }
+    std::string &GetHome () { return this->home; }
+    std::string &GetGecos () { return this->gecos; }
+    std::string &GetPasswd () { return this->passwd; }
+    std::string &GetShell () { return this->shell; }
+    unsigned int GetGID () { return this->gid; }
+    unsigned int GetUID () { return this->uid; }
+
+    std::string Serialize () const;
+    void Parse (const std::string& line);
+
+    PasswdItem (const char *line) : PasswdItem (std::string (line)) { }
+    PasswdItem (const std::string& line);
+    PasswdItem ();
 };
 
-struct __passwd_item {
-    struct __passwd_record record;
-    unsigned char modify_flag;
-    
-    struct __passwd_item *prev;
-    struct __passwd_item *next;
+class PasswdStore : public DataStore<PasswdItem> {
+private:
+    const std::string path = "./test/etc/passwd";
+    std::vector <PasswdItem> items;
+
+public:
+    void Reloading ();
+    void Initialize ();
+    std::string GetName () const { return "passwd"; }
+    std::vector<PasswdItem> &Get ();
+    void Put (std::vector<PasswdItem> items) const;
 };
-
-G_KID_USER_EXTERN char *passwd_item_get_username (struct __passwd_item *item);
-G_KID_USER_EXTERN char *passwd_item_get_password (struct __passwd_item *item);
-G_KID_USER_EXTERN unsigned int passwd_item_get_user_id (struct __passwd_item *item);
-G_KID_USER_EXTERN unsigned int passwd_item_get_group_id (struct __passwd_item *item);
-G_KID_USER_EXTERN char *passwd_item_get_description (struct __passwd_item *item);
-G_KID_USER_EXTERN char *passwd_item_get_home (struct __passwd_item *item);
-G_KID_USER_EXTERN char *passwd_item_get_shell (struct __passwd_item *item);
-
-G_KID_USER_EXTERN void passwd_item_set_username (struct __passwd_item *item, const char *username);
-G_KID_USER_EXTERN void passwd_item_set_password (struct __passwd_item *item, const char *password);
-G_KID_USER_EXTERN void passwd_item_set_user_id (struct __passwd_item *item, unsigned int user_id);
-G_KID_USER_EXTERN void passwd_item_set_group_id (struct __passwd_item *item, unsigned int group_id);
-G_KID_USER_EXTERN void passwd_item_set_description (struct __passwd_item *item, const char *description);
-G_KID_USER_EXTERN void passwd_item_set_home (struct __passwd_item *item, const char *home);
-G_KID_USER_EXTERN void passwd_item_set_shell (struct __passwd_item *item, const char *shell);
-
-struct __passwd_collection {
-    struct __passwd_item *head;
-    struct __passwd_item *tail;
-    struct __passwd_item *cursor;
-};
-
-static char *__passwd_path = "./test/etc/passwd";
-
-G_KID_USER_EXTERN struct __passwd_collection *passwd_get_collection ();
-G_KID_USER_EXTERN void passwd_save_collection (struct __passwd_collection *collection);
-G_KID_USER_EXTERN void passwd_collection_dtor (struct __passwd_collection *collection);
-G_KID_USER_EXTERN void passwd_collection_reset (struct __passwd_collection *collection);
-G_KID_USER_EXTERN int passwd_collection_has_next (struct __passwd_collection *collection);
-G_KID_USER_EXTERN struct __passwd_item *passwd_collection_next (struct __passwd_collection *collection);
-G_KID_USER_EXTERN struct __passwd_item *passwd_collection_append (struct __passwd_collection *collection);
 
 #endif

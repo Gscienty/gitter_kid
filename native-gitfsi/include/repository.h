@@ -6,8 +6,13 @@
 namespace gitterKid {
     namespace fsi {
         class repository {
+            protected:
+                const std::string path;
+                const std::string name;
             public:
-                repository(std::string path);
+                repository(std::string name, std::string path);
+                const std::string& getPath() const;
+                const std::string& getName() const;
         };
     }
 }

@@ -15,6 +15,8 @@ namespace gitterKid {
             public:
                 objectType getType() const { return objectType::treeType; }
                 tree(std::vector<treeItem> &items, std::vector<byte>::iterator spliter, std::vector<byte>::iterator end);
+                tree(const content &origin);
+                std::vector<treeItem> &get() { return this->items; }
         };
     }
 }

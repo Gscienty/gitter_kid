@@ -1,5 +1,6 @@
 #include "object.h"
 #include "blob.h"
+#include "tree.h"
 #include "gtest/gtest.h"
 #include <string>
 #include <iostream>
@@ -77,6 +78,9 @@ namespace gitterKid {
             mockObject treeObj((byte *) treeContent, 105, repo, std::string(""));
             treeObj.initialize();
 
+            EXPECT_EQ(0, treeObj.get<tree>().get()[0].getName().compare("file1"));
+            EXPECT_EQ(0, treeObj.get<tree>().get()[1].getName().compare("file2"));
+            EXPECT_EQ(0, treeObj.get<tree>().get()[2].getName().compare("file3"));
         }
     }
 }

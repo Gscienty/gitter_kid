@@ -13,7 +13,7 @@ namespace gitterKid {
             public:
                 objectType getType() const { return objectType::blobType; }
                 blob(std::vector<byte> &body);
-                blob(const content &originBody);
+                blob(const content &origin);
 
                 std::vector<byte> &get() { return this->body; }
         };

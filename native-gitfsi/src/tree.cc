@@ -34,11 +34,9 @@ namespace gitterKid {
                     innerType = objectType::treeType;
                 }
                 this->items.push_back(treeItem(signStream.str(), name, innerType));
-
-                std::cout << signStream.str() << std::endl
-                << name << std::endl
-                << type << std::endl;
             }
         }
+
+        tree::tree(const content &origin) : items((*((tree *) &origin)).items) { }
     }
 }

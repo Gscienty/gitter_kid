@@ -7,11 +7,18 @@ namespace gitterKid {
         object::object(const repository& repo, std::string signture)
             : repo(repo), signture(signture), type(objectType::unknow) {
             this->body = NULL;
+            this->bodyBuffer = NULL;
         }
         
         object::~object() {
             if (this->body != NULL) {
                 delete this->body;
+            }
+
+            switch (this->type) {
+                case objectType::blob:
+                    delete (std::vector<byte> *) this->bodyBuffer;
+                    break;
             }
         }
 
@@ -42,10 +49,11 @@ namespace gitterKid {
             if (store.empty()) { return; }
             
             std::vector<byte>::iterator spliter = std::find(store.begin(), store.end(), (byte) 0);
-            std::vector<byte> body(spliter + 1, store.end());
             switch (this->analysisType(store, spliter)) {
                 case objectType::blob:
-                    this->body = new bin(body);
+                    this->bodyBuffer = new std::vector<byte>();
+                    (*((std::vector<byte> *) this->bodyBuffer)).assign(spliter + 1, store.end());
+                    this->body = new bin(*((std::vector<byte> *) this->bodyBuffer));
                     break;
                 default:
                     this->body = NULL;

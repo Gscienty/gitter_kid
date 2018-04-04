@@ -17,6 +17,7 @@ namespace gitterKid {
                 const repository& repo;
                 const std::string signture;
                 objectType type;
+                void *bodyBuffer; //lazy
                 content *body;
 
                 virtual std::vector<byte> getStore() = 0;
@@ -26,7 +27,7 @@ namespace gitterKid {
                 void initialize();
                 objectType getType() const;
 
-                template<class T> T &get() const { return *((T *) this->body); }
+                template<class T> T get() const { return static_cast<T>(*this->body); }
         };
     }
 }

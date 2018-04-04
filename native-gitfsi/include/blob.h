@@ -7,13 +7,13 @@
 
 namespace gitterKid {
     namespace fsi {
-        class bin : public content {
+        class blob : public content {
             private:
                 std::vector<byte> &body;
             public:
-                objectType getType() const { return objectType::blob; }
-                bin(std::vector<byte> &body);
-                bin(const content &originBody);
+                objectType getType() const { return objectType::blobType; }
+                blob(std::vector<byte> &body);
+                blob(const content &originBody);
 
                 std::vector<byte> &get() { return this->body; }
         };

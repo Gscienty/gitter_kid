@@ -1,7 +1,8 @@
 #include "object.h"
-#include "bin.h"
+#include "blob.h"
 #include "gtest/gtest.h"
 #include <string>
+#include <iostream>
 
 namespace gitterKid {
     namespace fsi {
@@ -25,15 +26,15 @@ namespace gitterKid {
             repository repo("", "");
             mockObject blobObj((byte *) "blob 0", 7, repo, std::string(""));
             blobObj.initialize();
-            EXPECT_EQ(blobObj.getType(), objectType::blob);
+            EXPECT_EQ(blobObj.getType(), objectType::blobType);
 
             mockObject commitObj((byte *) "commit 0", 9, repo, std::string(""));
             commitObj.initialize();
-            EXPECT_EQ(commitObj.getType(), objectType::commit);
+            EXPECT_EQ(commitObj.getType(), objectType::commitType);
 
             mockObject treeObj((byte *) "tree 0", 7, repo, std::string(""));
             treeObj.initialize();
-            EXPECT_EQ(treeObj.getType(), objectType::tree);
+            EXPECT_EQ(treeObj.getType(), objectType::treeType);
         }
 
         TEST(gitterKid_fsi_object, blob_test) {
@@ -46,10 +47,36 @@ namespace gitterKid {
             mockObject blobObj((byte *) blobContent, 24, repo, std::string(""));
             blobObj.initialize();
 
-            EXPECT_EQ(16, blobObj.get<bin>().get().size());
+            EXPECT_EQ(16, blobObj.get<blob>().get().size());
             std::string content;
-            content.insert(content.begin(), blobObj.get<bin>().get().begin(), blobObj.get<bin>().get().end());
+            content.insert(content.begin(), blobObj.get<blob>().get().begin(), blobObj.get<blob>().get().end());
             EXPECT_EQ(0, std::string("0123456789abcdef").compare(content));
+        }
+
+        TEST(gitterKid_fsi_object, tree_test) {
+            repository repo("", "");
+            byte treeContent[] = {
+                't', 'r', 'e', 'e', ' ', '1', '5', '3', 0,
+                '1', '0', '0', '0', '0', ' ', 'f', 'i', 'l', 'e', '1',
+                0,
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'j',
+                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
+
+                '1', '0', '0', '0', '1', ' ', 'f', 'i', 'l', 'e', '2',
+                0,
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'j',
+                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
+
+                '1', '0', '0', '0', '2', ' ', 'f', 'i', 'l', 'e', '3',
+                0,
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'j',
+                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
+            };
+
+
+            mockObject treeObj((byte *) treeContent, 105, repo, std::string(""));
+            treeObj.initialize();
+
         }
     }
 }

@@ -3,21 +3,20 @@
 
 #include "define.h"
 #include "content.h"
-#include <vector>
+#include <string>
 
 namespace gitterKid {
-    namespace fsi {
-        class blob : public content {
-            private:
-                std::vector<byte> &body;
-            public:
-                objectType getType() const { return objectType::blobType; }
-                blob(std::vector<byte> &body);
-                blob(const content &origin);
+namespace fsi {
+class blob : public content {
+private:
+    std::basic_string<byte> body;
+public:
+    virtual objectType getType() const override { return objectType::blobType; }
+    blob(std::basic_string<byte> &body);
 
-                std::vector<byte> &get() { return this->body; }
-        };
-    }
+    std::basic_string<byte> &get() { return this->body; }
+};
+}
 }
 
 #endif

@@ -12,3 +12,4 @@ target/
 .project
 test_store/
 native-user/test/etc/
+.ycm_extra_conf.py

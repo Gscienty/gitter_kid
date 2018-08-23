@@ -1,8 +1,18 @@
 #include "blob.h"
 
-namespace gitterKid {
-    namespace fsi {
-        blob::blob(std::vector<byte> &body) : body(body) { }
-        blob::blob(const content &origin) : body((*((blob *) &origin)).body) { }
-    }
+namespace gitter_kid {
+namespace fsi {
+
+blob::blob(std::basic_string<byte> &body)
+    : _body(body) { }
+
+obj_type blob::type() const {
+    return obj_type_blob;
+}
+
+std::basic_string<byte> &blob::body() {
+    return this->_body;
+}
+
+}
 }

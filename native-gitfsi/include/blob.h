@@ -8,16 +8,13 @@
 namespace gitter_kid {
 namespace fsi {
 
-class blob : public gitter_kid::fsi::content {
+class blob : public content {
 private:
     std::basic_string<byte> _body;
 public:
-    virtual gitter_kid::fsi::obj_type type() const override {
-        return gitter_kid::fsi::obj_type::obj_type_blob;
-    }
+    virtual gitter_kid::fsi::obj_type type() const override;
     blob(std::basic_string<byte> &body);
-
-    std::basic_string<byte> &body() { return this->_body; }
+    std::basic_string<byte> &body();
 };
 
 }

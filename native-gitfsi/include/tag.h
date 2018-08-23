@@ -13,29 +13,27 @@ namespace fsi {
 class tag_body {
 private:
     std::string _obj_sign;
-    gitter_kid::fsi::obj_type _type;
+    obj_type _type;
     std::string _name;
-    gitter_kid::fsi::commit_metadata _tagger;
+    commit_metadata _tagger;
     std::string _message;
 public:
-    std::string &obj_sign() { return this->_obj_sign; }
-    gitter_kid::fsi::obj_type &type() { return this->_type; }
-    std::string &name() { return this->_name; }
-    gitter_kid::fsi::commit_metadata &tagger() { return this->_tagger; }
-    std::string &message() { return this->_message; }
+    std::string &obj_sign();
+    obj_type &type();
+    std::string &name();
+    commit_metadata &tagger();
+    std::string &message();
 };
 
-class tag : public gitter_kid::fsi::content {
+class tag : public content {
 private:
     gitter_kid::fsi::tag_body &_body;
 public:
-    virutal gitter_kid::fsi::obj_type type() const override {
-        return gitter_kid::fsi::obj_type::obj_type_tag;
-    }
+    virtual obj_type type() const override;
     tag(gitter_kid::fsi::tag_body &body,
         std::basic_string<byte>::iterator spliter,
         std::basic_string<byte>::iterator end);
-    gitter_kid::fsi::tag_body &get() { return this->_body; }
+    tag_body &get();
 };
 
 }

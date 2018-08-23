@@ -4,71 +4,111 @@
 #include "commit.h"
 #include <algorithm>
 
-namespace gitterKid {
-    namespace fsi {
-        object::object(const repository& repo, std::string signture)
-            : repo(repo), signture(signture), type(objectType::unknowType) {
-            this->body = NULL;
-            this->bodyBuffer = NULL;
-        }
-        
-        object::~object() {
+namespace gitter_kid {
+namespace fsi {
 
-            switch (this->type) {
-                case objectType::blobType:
-                    if (this->body != NULL) { delete (blob *) this->body; }
-                    if (this->bodyBuffer != NULL) { delete (std::vector<byte> *) this->bodyBuffer; }
-                    break;
-                case objectType::treeType:
-                    if (this->body != NULL) { delete (blob *) this->body; }
-                    if (this->bodyBuffer != NULL) { delete (std::vector<treeItem> *) this->bodyBuffer; }
-                    break;
-            }
-        }
+object::object(const repository& repo, std::string signture)
+    : _repo(repo), _sign(signture), _type(obj_type::obj_type_unknow) {
+    this->_body = nullptr;
+    this->_body_buffer = nullptr;
+}
 
-        objectType object::getType() const { return this->type; }
+object::~object() {
+    if (this->_body != nullptr) {
+        delete this->_body;
+    }
 
-        objectType object::analysisType(std::vector<byte>& store, std::vector<byte>::iterator& spliter) {
-            this->type = objectType::unknowType;
-            if (store.empty()) { return objectType::unknowType; }
-            if (spliter == store.end()) { return objectType::unknowType; }
-            std::vector<byte>::iterator spaceIter = std::find(store.begin(), spliter, ' ');
-            if (spaceIter == spliter) { return objectType::unknowType; }
-
-            std::string contentSize;
-            std::string type;
-
-            contentSize.insert(contentSize.begin(), spaceIter + 1, spliter);
-            type.insert(type.begin(), store.begin(), spaceIter);
-            if (type.compare("blob") == 0) { this->type = objectType::blobType; }
-            else if (type.compare("commit") == 0) { this->type = objectType::commitType; }
-            else if (type.compare("tree") == 0) { this->type = objectType::treeType; }
-
-            return this->type;
-        }
-
-        void object::initialize() {
-            this->type = objectType::unknowType;
-            std::vector<byte> store = this->getStore();
-            if (store.empty()) { return; }
-            
-            std::vector<byte>::iterator spliter = std::find(store.begin(), store.end(), (byte) 0);
-            this->body = NULL;
-            switch (this->analysisType(store, spliter)) {
-                case objectType::blobType:
-                    this->bodyBuffer = new std::vector<byte>();
-                    (*((std::vector<byte> *) this->bodyBuffer)).assign(spliter + 1, store.end());
-                    this->body = new blob(*((std::vector<byte> *) this->bodyBuffer));
-                    break;
-                case objectType::treeType:
-                    this->bodyBuffer = new std::vector<treeItem>();
-                    this->body = new tree(*((std::vector<treeItem> *) this->bodyBuffer), spliter + 1, store.end());
-                    break;
-                case objectType::commitType:
-                    this->bodyBuffer = new commitBody();
-                    this->body = new commit(*((commitBody *) this->bodyBuffer), spliter + 1, store.end());
-                    break;
-            }
+    if (this->_body_buffer != nullptr) {
+        switch (this->_type) {
+        case obj_type::obj_type_blob:
+            delete reinterpret_cast<std::basic_string<byte> *>(this->_body_buffer);
+            break;
+        case obj_type::obj_type_commit:
+            delete reinterpret_cast<commit_body *>(this->_body_buffer);
+            break;
+        case obj_type::obj_type_tree:
+            delete reinterpret_cast<std::vector<tree_item> *>(this->_body_buffer);
+            break;
+        default:
+            break;
         }
     }
+}
+
+obj_type object::type() const {
+    return this->_type;
+}
+
+obj_type object::analysis_type(std::basic_string<byte> &store,
+                               std::basic_string<byte>::iterator &spliter) {
+    if (this->_type != obj_type::obj_type_unknow) {
+        return this->_type;
+    }
+
+    if (store.empty()) {
+        return this->_type;
+    }
+    if (spliter == store.end()) {
+        return this->_type;
+    }
+
+    std::basic_string<byte>::iterator space_iter =
+        std::find(store.begin(), spliter, byte(' '));
+    if (spliter == store.end()) {
+        return this->_type;
+    }
+
+    std::string content_size(space_iter + 1, spliter);
+    std::string type(store.begin(), space_iter);
+
+    if (type.compare("blob") == 0) {
+        this->_type = obj_type::obj_type_blob;
+    }
+    else if (type.compare("commit") == 0) {
+        this->_type = obj_type::obj_type_commit;
+    }
+    else if (type.compare("tree") == 0) {
+        this->_type = obj_type::obj_type_tree;
+    }
+
+    return this->_type;
+}
+
+void object::initialize() {
+    this->_type = obj_type::obj_type_unknow;
+    std::basic_string<byte> store = this->store();
+    if (store.empty()) { return; }
+    
+    std::basic_string<byte>::iterator spliter =
+        std::find(store.begin(), store.end(), byte(0));
+    this->_body = nullptr;
+    switch (this->analysis_type(store, spliter)) {
+    case obj_type::obj_type_blob:
+            this->_body_buffer =
+                new std::basic_string<byte>(spliter + 1, store.end());
+            this->_body =
+                new blob(*reinterpret_cast<std::basic_string<byte> *>(this->_body_buffer));
+            break;
+    case obj_type::obj_type_tree:
+            this->_body_buffer =
+                new std::vector<tree_item>();
+            this->_body =
+                new tree(*reinterpret_cast<std::vector<tree_item> *>(this->_body_buffer),
+                         spliter + 1,
+                         store.end());
+            break;
+    case obj_type::obj_type_commit:
+            this->_body_buffer =
+                new commit_body();
+            this->_body =
+                new commit(*reinterpret_cast<commit_body *>(this->_body_buffer),
+                           spliter + 1,
+                           store.end());
+            break;
+    default:
+            break;
+    }
+}
+
+}
 }

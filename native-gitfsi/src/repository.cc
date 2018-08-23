@@ -1,10 +1,14 @@
 #include "repository.h"
 
-namespace gitterKid {
-    namespace fsi {
-        repository::repository(std::string name, std::string path)
-            : name(name), path(path) { }
+namespace gitter_kid {
+namespace fsi {
 
-        const std::string repository::getName() const { return this->name; }
-    }
+repository::repository(std::string name)
+    : _name(name) {}
+
+const std::string &repository::name() {
+    return this->_name;
+}
+
+}
 }

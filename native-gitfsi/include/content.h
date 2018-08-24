@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-namespace gitterKid {
+namespace gitter_kid {
 namespace fsi {
 
 enum obj_type {

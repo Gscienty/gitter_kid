@@ -2,45 +2,61 @@
 #define _GIT_FSI_COMMIT_
 
 #include "content.h"
+#include <cstdint>
 
-namespace gitterKid {
-    namespace fsi {
+namespace gitter_kid {
+namespace fsi {
 
-        class commitBody {
-            private:
-                std::vector<std::string> parents;
-                std::string treeSign;
-                std::string message;
-                commitPersonLog author;
-                commitPersonLog committer;
-            public:
-                commitBody() { }
+class commit_metadata {
+private:
+    std::string _name;
+    std::string _mail;
+    uint64_t _timestamp;
+    std::string _timezone;
+public:
+    commit_metadata() { }
+    commit_metadata(std::string name, std::string mail, uint64_t timestamp, std::string timezone)
+        : _name(name), _mail(mail), _timestamp(timestamp), _timezone(timezone) { }
+    
+    std::string &name() { return this->_name; }
+    std::string &mail() { return this->_mail; }
+    uint64_t &timestamp() { return this->_timestamp; }
+    std::string &timezone() { return this->_timezone; }
+};
+    
+class commit_body {
+private:
+    std::vector<std::string> _parents;
+    std::string _tree_sign;
+    std::string _message;
+    gitter_kid::fsi::commit_metadata _author;
+    gitter_kid::fsi::commit_metadata _committer;
+public:
+    commit_body() { }
 
-                std::vector<std::string> getParents() const { return this->parents; }
-                std::string getTreeSignture() const { return this->treeSign; }
-                std::string getMessage() const { return this->message; }
-                commitPersonLog getAuthor() const { return this->author; }
-                commitPersonLog getCommitter() const { return this->committer; }
+    std::vector<std::string> &parents() { return this->_parents; }
+    std::string &tree_sign() { return this->_tree_sign; }
+    std::string &message() { return this->_message; }
+    gitter_kid::fsi::commit_metadata &author() { return this->_author; }
+    gitter_kid::fsi::commit_metadata &committer() const { return this->_committer; }
 
-                void addParent(std::string parent) { this->parents.push_back(parent); }
-                void setTreeSignture(std::string treeSign) { this->treeSign = treeSign; }
-                void setMessage(std::string message) { this->message = message; }
-                void setAuthor(commitPersonLog author) { this->author = author; }
-                void setCommitter(commitPersonLog committer) { this->committer = committer; }
+};
 
-        };
+class commit : public content {
+private:
+    gitter_kid::fsi::commit_body _body;
 
-        class commit : public content {
-            private:
-                commitBody &body;
-
-            public:
-                objectType getType() const { return objectType::commitType; }
-                commit(commitBody &body, std::vector<byte>::iterator spliter, std::vector<byte>::iterator end);
-                commit(const content &origin);
-                commitBody get() const { return this->body; }
-        };
+public:
+    virtual gitter_kid::fsi::obj_type type() const override {
+        return gitter_kid::fsi::obj_type::obj_type_commit;
     }
+    commit(gitter_kid::fsi::commit_body &body,
+           std::basic_string<byte>::iterator spliter,
+           std::basic_string<byte>::iterator end);
+    gitter_kid::fsi::commit_body &body() { return this->_body; }
+};
+    
+}
 }
 
 #endif

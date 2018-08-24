@@ -19,8 +19,6 @@ enum obj_type {
 };
 
 class content {
-protected:
-    commit_metadata parsePersonLog(std::basic_string<byte>::iterator begin, std::basic_string<byte>::iterator end);
 public:
     virtual obj_type type() const = 0;
 };

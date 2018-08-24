@@ -15,8 +15,14 @@ private:
     std::string _timezone;
 public:
     commit_metadata() { }
-    commit_metadata(std::string name, std::string mail, uint64_t timestamp, std::string timezone)
-        : _name(name), _mail(mail), _timestamp(timestamp), _timezone(timezone) { }
+    commit_metadata(std::string name,
+                    std::string mail,
+                    uint64_t timestamp,
+                    std::string timezone)
+        : _name(name)
+        , _mail(mail)
+        , _timestamp(timestamp)
+        , _timezone(timezone) { }
     
     std::string &name() { return this->_name; }
     std::string &mail() { return this->_mail; }
@@ -42,7 +48,7 @@ public:
 
 };
 
-class commit : public content {
+class commit : public gitter_kid::fsi::content {
 private:
     gitter_kid::fsi::commit_body _body;
 

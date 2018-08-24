@@ -21,6 +21,8 @@ enum obj_type {
 class content {
 public:
     virtual obj_type type() const = 0;
+    
+    virtual ~content() { }
 };
 
 }

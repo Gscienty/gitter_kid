@@ -25,7 +25,7 @@ public:
     std::string &message() { return this->_message; }
 };
 
-class tag : public content {
+class tag : public gitter_kid::fsi::content {
 private:
     gitter_kid::fsi::tag_body &_body;
 public:

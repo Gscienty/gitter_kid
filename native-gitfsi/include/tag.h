@@ -1,31 +1,42 @@
 #ifndef _GIT_FSI_TAG_
 #define _GIT_FSI_TAG_
 
+#include "content.h"
+#include "commit.h"
 #include "define.h"
 #include <string>
 #include <vector>
 
-namespace gitterKid {
-    namespace fsi {
-        class tagBody {
-            private:
-                std::string objectSignture;
-                objectType type;
-                std::string name;
-                commitPersonLog tagger;
-                std::string message;
-        };
+namespace gitter_kid {
+namespace fsi {
+class tag_body {
+private:
+    std::string _obj_sign;
+    gitter_kid::fsi::obj_type _type;
+    std::string _name;
+    gitter_kid::fsi::commit_metadata _tagger;
+    std::string _message;
+public:
+    std::string &obj_sign() { return this->_obj_sign; }
+    gitter_kid::fsi::obj_type &type() { return this->_type; }
+    std::string &name() { return this->_name; }
+    gitter_kid::fsi::commit_metadata &tagger() { return this->_tagger; }
+    std::string &message() { return this->_message; }
+};
 
-        class tag : public content {
-            private:
-                tagBody &body;
-            public:
-                objectType getType() const { return objectType::tagType; }
-                tree(tagBody &body, std::vector<byte>::iterator spliter, std::vector<byte>::iterator end);
-                tree(const content &origin);
-                tagBody get() const { return this->items; }
-        };
+class tag : public content {
+private:
+    gitter_kid::fsi::tag_body &_body;
+public:
+    gitter_kid::fsi::obj_type type() const {
+        return gitter_kid::fsi::obj_type::obj_type_tag;
     }
+    tag(gitter_kid::fsi::tag_body &body,
+         std::basic_string<byte>::iterator spliter,
+         std::basic_string<byte>::iterator end);
+    gitter_kid::fsi::tag_body &get() { return this->_body; }
+};
+}
 }
 
 #endif

@@ -5,17 +5,21 @@
 #include "content.h"
 #include <string>
 
-namespace gitterKid {
+namespace gitter_kid {
 namespace fsi {
-class blob : public content {
+
+class blob : public gitter_kid::fsi::content {
 private:
-    std::basic_string<byte> body;
+    std::basic_string<byte> _body;
 public:
-    virtual objectType getType() const override { return objectType::blobType; }
+    virtual gitter_kid::fsi::obj_type getType() const override {
+        return gitter_kid::fsi::obj_type::obj_type_blob;
+    }
     blob(std::basic_string<byte> &body);
 
-    std::basic_string<byte> &get() { return this->body; }
+    std::basic_string<byte> &body() { return this->_body; }
 };
+
 }
 }
 

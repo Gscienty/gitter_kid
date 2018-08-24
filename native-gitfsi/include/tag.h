@@ -29,7 +29,7 @@ class tag : public content {
 private:
     gitter_kid::fsi::tag_body &_body;
 public:
-    gitter_kid::fsi::obj_type type() const {
+    virutal gitter_kid::fsi::obj_type type() const override {
         return gitter_kid::fsi::obj_type::obj_type_tag;
     }
     tag(gitter_kid::fsi::tag_body &body,

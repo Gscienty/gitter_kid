@@ -3,16 +3,16 @@
 
 #include <string>
 
-namespace gitterKid {
-    namespace fsi {
-        class repository {
-            protected:
-                const std::string name;
-            public:
-                repository(std::string name);
-                const std::string getName() const;
-        };
-    }
+namespace gitter_kid {
+namespace fsi {
+class repository {
+protected:
+    const std::string _name;
+public:
+    repository(std::string name);
+    std::string &name();
+};
+}
 }
 
 #endif

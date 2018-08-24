@@ -9,6 +9,7 @@
 
 namespace gitter_kid {
 namespace fsi {
+
 class tag_body {
 private:
     std::string _obj_sign;
@@ -32,10 +33,11 @@ public:
         return gitter_kid::fsi::obj_type::obj_type_tag;
     }
     tag(gitter_kid::fsi::tag_body &body,
-         std::basic_string<byte>::iterator spliter,
-         std::basic_string<byte>::iterator end);
+        std::basic_string<byte>::iterator spliter,
+        std::basic_string<byte>::iterator end);
     gitter_kid::fsi::tag_body &get() { return this->_body; }
 };
+
 }
 }
 

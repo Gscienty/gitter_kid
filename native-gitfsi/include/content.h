@@ -6,34 +6,18 @@
 #include <string>
 
 namespace gitterKid {
-    namespace fsi {
+namespace fsi {
 
-        enum objectType { unknowType, blobType, commitType, treeType, tagType, ofsDeltaType, refDeltaType };
+enum obj_type { obj_type_unknow, obj_type_blob, obj_type_commit, obj_type_tree, obj_type_tag, obj_type_ofsdelta, obj_type_refdelta };
 
-        class commitPersonLog {
-            private:
-                std::string name;
-                std::string mail;
-                long timestamp;
-                std::string timeZone;
-            public:
-                commitPersonLog() { }
-                commitPersonLog(std::string name, std::string mail, long timestamp, std::string timeZone)
-                    : name(name), mail(mail), timestamp(timestamp), timeZone(timeZone) { }
-                
-                std::string getName() const { return this->name; }
-                std::string getMail() const { return this->mail; }
-                long getTimestamp() const { return this->timestamp; }
-                std::string getTimeZone() const { return this->timeZone; }
-        };
-        
-        class content {
-            protected:
-                commitPersonLog parsePersonLog(std::vector<byte>::iterator begin, std::vector<byte>::iterator end);
-            public:
-                virtual objectType getType() const = 0;
-        };
-    }
+class content {
+protected:
+    commit_metadata parsePersonLog(std::basic_string<byte>::iterator begin, std::basic_string<byte>::iterator end);
+public:
+    virtual obj_type type() const = 0;
+};
+
+}
 }
 
 #endif

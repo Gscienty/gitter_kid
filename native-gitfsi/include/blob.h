@@ -12,7 +12,7 @@ class blob : public gitter_kid::fsi::content {
 private:
     std::basic_string<byte> _body;
 public:
-    virtual gitter_kid::fsi::obj_type getType() const override {
+    virtual gitter_kid::fsi::obj_type type() const override {
         return gitter_kid::fsi::obj_type::obj_type_blob;
     }
     blob(std::basic_string<byte> &body);

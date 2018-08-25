@@ -8,14 +8,14 @@
 namespace gitter_kid {
 namespace fsi {
 
-tree_item::tree_item(std::string sign,
+tree_item::tree_item(sign_t sign,
                      std::string name,
                      obj_type type)
     : _sign(sign)
     , _name(name)
     , _type(type) {}
 
-std::string &tree_item::sign() {
+sign_t &tree_item::sign() {
     return this->_sign;
 }
 
@@ -41,15 +41,9 @@ tree::tree(std::vector<tree_item> &items,
         std::string name(ch, sub_end);
         ch = sub_end + 1;
 
-        std::string sign;
-        sign.resize(40);
-        std::stringstream sign_stream;
-        sign_stream.rdbuf()->pubsetbuf(const_cast<char *>(sign.data()), 40);
+        sign_t sign;
+        sign.bytes_assign(ch, ch + 20);
 
-        for (int i = 0; i < 20; i++) {
-            sign_stream << std::hex << uint16_t((*ch & 0xF0) >> 4) << uint16_t(*ch & 0x0F);
-            ch++;
-        }
         obj_type item_type = obj_type::obj_type_unknow;
         if (type.compare("100644")) {
             item_type = obj_type::obj_type_blob;

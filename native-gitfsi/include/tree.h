@@ -3,6 +3,7 @@
 
 #include "define.h"
 #include "content.h"
+#include "sign.h"
 #include <vector>
 #include <string>
 
@@ -11,12 +12,12 @@ namespace fsi {
 
 class tree_item {
 private:
-    std::string _sign;
+    sign_t _sign;
     std::string _name;
     gitter_kid::fsi::obj_type _type;
 public:
-    tree_item(std::string sign, std::string name, obj_type type);
-    std::string &sign();
+    tree_item(sign_t sign, std::string name, obj_type type);
+    sign_t &sign();
     std::string &name();
     obj_type &type();
 };

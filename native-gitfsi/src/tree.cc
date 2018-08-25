@@ -47,7 +47,7 @@ tree::tree(std::vector<tree_item> &items,
         sign_stream.rdbuf()->pubsetbuf(const_cast<char *>(sign.data()), 40);
 
         for (int i = 0; i < 20; i++) {
-            sign_stream << std::hex << uint8_t((*ch & 0xF0) >> 4) << uint8_t(*ch & 0x0F);
+            sign_stream << std::hex << uint16_t((*ch & 0xF0) >> 4) << uint16_t(*ch & 0x0F);
             ch++;
         }
         obj_type item_type = obj_type::obj_type_unknow;
@@ -61,7 +61,11 @@ tree::tree(std::vector<tree_item> &items,
     }
 }
 
-std::vector<tree_item> &tree::get() {
+obj_type tree::type() const {
+    return obj_type::obj_type_tree;
+}
+
+std::vector<tree_item> &tree::items() {
     return this->_items;
 }
 

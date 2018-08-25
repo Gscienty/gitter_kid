@@ -29,7 +29,7 @@ public:
     tree(std::vector<tree_item> &items,
          std::basic_string<byte>::iterator spliter,
          std::basic_string<byte>::iterator end);
-    std::vector<tree_item> &get();
+    std::vector<tree_item> &items();
 };
 
 }

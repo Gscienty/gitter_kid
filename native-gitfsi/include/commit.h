@@ -48,7 +48,7 @@ public:
 
 class commit : public content {
 private:
-    gitter_kid::fsi::commit_body _body;
+    gitter_kid::fsi::commit_body &_body;
 
 public:
     commit(gitter_kid::fsi::commit_body &body,

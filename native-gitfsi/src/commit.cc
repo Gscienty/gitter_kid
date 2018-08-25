@@ -20,12 +20,13 @@ commit_metadata::commit_metadata(std::basic_string<byte>::iterator begin,
                                  std::basic_string<byte>::iterator end) {
     std::basic_string<byte> fields[4];
     std::basic_string<byte>::iterator ch = begin;
-    for (int i = 0; ch != end && i < 4; i++) {
-        std::basic_string<byte>::iterator item_end =
-            std::find(ch, end, byte(' '));
-        fields[i++].assign(ch, item_end);
-        if (item_end != end) {
-            ch = item_end + 1;
+
+    int i;
+    for (i = 0; ch != end && i < 4; i++) {
+        auto space_itr = std::find(ch, end, byte(' '));
+        if (space_itr != end) {
+            fields[i].assign(ch, space_itr);
+            ch = space_itr + 1;
         }
         else {
             ch = end;
@@ -34,8 +35,7 @@ commit_metadata::commit_metadata(std::basic_string<byte>::iterator begin,
 
     this->_name.assign(fields[0].begin(), fields[0].end());
     this->_mail.assign(fields[1].begin(), fields[1].end());
-    std::string timezone_str(fields[2].begin(), fields[2].end());
-    this->_timestamp = std::stol(timezone_str);
+    this->_timestamp = std::stol(std::string(fields[2].begin(), fields[2].end()));
     this->_timezone.assign(fields[3].begin(), fields[3].end());
 }
 
@@ -82,8 +82,7 @@ commit::commit(commit_body &body,
                std::basic_string<byte>::iterator end)
     : _body(body) {
     for (std::basic_string<byte>::iterator ch = spliter; ch != end; ) {
-        std::basic_string<byte>::iterator end_line_iter =
-            std::find(ch, end, byte('\n'));
+        std::basic_string<byte>::iterator end_line_iter = std::find(ch, end, byte('\n'));
 
         if (end_line_iter == ch) {
             this->_body.message().assign(ch + 1, end);
@@ -110,7 +109,7 @@ commit::commit(commit_body &body,
     }
 }
 
-obj_type commit_type commit::type() const {
+obj_type commit::type() const {
     return obj_type::obj_type_commit;
 }
 

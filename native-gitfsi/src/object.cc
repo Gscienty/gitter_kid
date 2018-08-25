@@ -22,22 +22,20 @@ object::object(std::basic_string<byte> &buffer)
     this->_body = nullptr;
     switch (this->analysis_type(buffer, spliter)) {
     case obj_type::obj_type_blob:
-            this->_body_buffer =
-                new std::basic_string<byte>(spliter + 1, buffer.end());
+            this->_body_buffer = new std::basic_string<byte>(spliter + 1,
+                                                             buffer.end());
             this->_body =
                 new blob(*reinterpret_cast<std::basic_string<byte> *>(this->_body_buffer));
             break;
     case obj_type::obj_type_tree:
-            this->_body_buffer =
-                new std::vector<tree_item>();
+            this->_body_buffer = new std::vector<tree_item>();
             this->_body =
                 new tree(*reinterpret_cast<std::vector<tree_item> *>(this->_body_buffer),
                          spliter + 1,
                          buffer.end());
             break;
     case obj_type::obj_type_commit:
-            this->_body_buffer =
-                new commit_body();
+            this->_body_buffer = new commit_body();
             this->_body =
                 new commit(*reinterpret_cast<commit_body *>(this->_body_buffer),
                            spliter + 1,
@@ -93,6 +91,7 @@ obj_type object::analysis_type(std::basic_string<byte> &store,
     if (spliter == store.end()){
         return this->_type;
     }
+
 
     std::string content_size(space_iter + 1, spliter);
     std::string type(store.begin(), space_iter);

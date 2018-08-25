@@ -2,6 +2,7 @@
 #define _GIT_FSI_COMMIT_
 
 #include "content.h"
+#include "sign.h"
 #include <cstdint>
 
 namespace gitter_kid {
@@ -30,7 +31,7 @@ public:
     
 class commit_body {
 private:
-    std::vector<std::string> _parents;
+    std::vector<sign_t> _parents;
     std::string _tree_sign;
     std::string _message;
     gitter_kid::fsi::commit_metadata _author;
@@ -38,7 +39,7 @@ private:
 public:
     commit_body();
 
-    std::vector<std::string> &parents();
+    std::vector<sign_t> &parents();
     std::string &tree_sign();
     std::string &message();
     commit_metadata &author();

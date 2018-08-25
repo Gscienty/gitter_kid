@@ -57,7 +57,7 @@ std::string &commit_metadata::timezone() {
 
 commit_body::commit_body() {}
 
-std::vector<std::string> &commit_body::parents() {
+std::vector<sign_t> &commit_body::parents() {
     return this->_parents;
 }
 
@@ -102,7 +102,8 @@ commit::commit(commit_body &body,
             this->_body.committer() = commit_metadata(space_iter + 1, end_line_iter);
         }
         else if (tag.compare("parent") == 0) {
-            this->_body.parents().push_back(std::string(space_iter + 1, end_line_iter));
+            this->_body.parents().push_back(sign_t());
+            this->_body.parents().back().str_assign(space_iter + 1, end_line_iter);
         }
 
         ch = end_line_iter + 1;

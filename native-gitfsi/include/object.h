@@ -12,23 +12,17 @@ namespace fsi {
 
 class object {
 private:
-    obj_type analysis_type(std::basic_string<byte>& store,
-                  std::basic_string<byte>::iterator& spliter);
-protected:
-    const repository& _repo;
-    const std::string _sign;
-    obj_type _type;
     void*_body_buffer; //lazy
     content *_body;
-
-    virtual std::basic_string<byte> store() = 0;
+    obj_type _type;
+    obj_type analysis_type(std::basic_string<byte>& store,
+                  std::basic_string<byte>::iterator& spliter);
 public:
-    object(const repository& repo, std::string signture);
-    ~object();
-    void initialize();
-    obj_type type() const;
+    object(std::basic_string<byte> &buffer);
+    virtual ~object();
 
-    template<class T> T get() const { return dynamic_cast<T>(*this->_body); }
+    obj_type type() const;
+    template<class T> T &get() { return *dynamic_cast<T *>(this->_body); }
 };
 
 }

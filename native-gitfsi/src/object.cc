@@ -7,10 +7,45 @@
 namespace gitter_kid {
 namespace fsi {
 
-object::object(const repository& repo, std::string signture)
-    : _repo(repo), _sign(signture), _type(obj_type::obj_type_unknow) {
+object::object(std::basic_string<byte> &buffer)
+    : _body_buffer(nullptr)
+    , _body(nullptr)
+    , _type(obj_type::obj_type_unknow) {
+
+    this->_type = obj_type::obj_type_unknow;
+    if (buffer.empty()) { return; }
+
+    std::basic_string<byte>::iterator spliter = std::find(buffer.begin(),
+                                                          buffer.end(),
+                                                          byte(0));
+
     this->_body = nullptr;
-    this->_body_buffer = nullptr;
+    switch (this->analysis_type(buffer, spliter)) {
+    case obj_type::obj_type_blob:
+            this->_body_buffer =
+                new std::basic_string<byte>(spliter + 1, buffer.end());
+            this->_body =
+                new blob(*reinterpret_cast<std::basic_string<byte> *>(this->_body_buffer));
+            break;
+    case obj_type::obj_type_tree:
+            this->_body_buffer =
+                new std::vector<tree_item>();
+            this->_body =
+                new tree(*reinterpret_cast<std::vector<tree_item> *>(this->_body_buffer),
+                         spliter + 1,
+                         buffer.end());
+            break;
+    case obj_type::obj_type_commit:
+            this->_body_buffer =
+                new commit_body();
+            this->_body =
+                new commit(*reinterpret_cast<commit_body *>(this->_body_buffer),
+                           spliter + 1,
+                           buffer.end());
+            break;
+    default:
+            break;
+    }
 }
 
 object::~object() {
@@ -52,9 +87,10 @@ obj_type object::analysis_type(std::basic_string<byte> &store,
         return this->_type;
     }
 
-    std::basic_string<byte>::iterator space_iter =
-        std::find(store.begin(), spliter, byte(' '));
-    if (spliter == store.end()) {
+    std::basic_string<byte>::iterator space_iter = std::find(store.begin(),
+                                                             spliter,
+                                                             byte(' '));
+    if (spliter == store.end()){
         return this->_type;
     }
 
@@ -72,42 +108,6 @@ obj_type object::analysis_type(std::basic_string<byte> &store,
     }
 
     return this->_type;
-}
-
-void object::initialize() {
-    this->_type = obj_type::obj_type_unknow;
-    std::basic_string<byte> store = this->store();
-    if (store.empty()) { return; }
-    
-    std::basic_string<byte>::iterator spliter =
-        std::find(store.begin(), store.end(), byte(0));
-    this->_body = nullptr;
-    switch (this->analysis_type(store, spliter)) {
-    case obj_type::obj_type_blob:
-            this->_body_buffer =
-                new std::basic_string<byte>(spliter + 1, store.end());
-            this->_body =
-                new blob(*reinterpret_cast<std::basic_string<byte> *>(this->_body_buffer));
-            break;
-    case obj_type::obj_type_tree:
-            this->_body_buffer =
-                new std::vector<tree_item>();
-            this->_body =
-                new tree(*reinterpret_cast<std::vector<tree_item> *>(this->_body_buffer),
-                         spliter + 1,
-                         store.end());
-            break;
-    case obj_type::obj_type_commit:
-            this->_body_buffer =
-                new commit_body();
-            this->_body =
-                new commit(*reinterpret_cast<commit_body *>(this->_body_buffer),
-                           spliter + 1,
-                           store.end());
-            break;
-    default:
-            break;
-    }
 }
 
 }

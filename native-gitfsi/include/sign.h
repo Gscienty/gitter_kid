@@ -8,11 +8,32 @@
 namespace gitter_kid {
 namespace fsi {
 
-template<int _Int_Minus, int _Int_Off, typename _T_Char> _T_Char __hex_val(_T_Char &chr) {
-    return (chr - _Int_Minus) << _Int_Off;
+template <char _T_Base_Chr,
+         char _T_Base_Starter,
+         char _T_Left_Mover,
+         typename _T_Chr_Type>
+_T_Chr_Type __hex_byte(_T_Chr_Type chr) {
+    return (chr - _T_Base_Chr + _T_Base_Starter) << _T_Left_Mover;
 }
 
-byte __to_byte(std::basic_string<byte>::iterator &base);
+template <typename _T_Base_Ptr> byte __to_byte(_T_Base_Ptr &base) {
+    byte result = 0x00;
+    if ('0' <= *base && *base <= '9') {
+        result ^= __hex_byte<'0', 0, 4>(*base);
+    }
+    else {
+        result ^= __hex_byte<'a', 10, 4>(*base);
+    }
+
+    if ('0' <= *(base + 1) && *(base + 1) <= '9') {
+        result ^= __hex_byte<'0', 0, 0>(*(base + 1));
+    }
+    else {
+        result ^= __hex_byte<'a', 10, 0>(*(base + 1));
+    }
+
+    return result;
+}
 
 class sign_t {
 private:
@@ -20,6 +41,8 @@ private:
     std::basic_string<byte> _sign_bytes;
 public:
     sign_t();
+    sign_t(std::string sign);
+    sign_t(char *sign);
     template<typename _T_Iter> void str_assign(_T_Iter begin, _T_Iter end) {
         this->_sign_str.assign(begin, end);
         auto itr = begin;

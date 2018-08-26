@@ -2,16 +2,19 @@
 #define _GIT_FSI_REPOSITORY_
 
 #include <string>
+#include "sign.h"
 
 namespace gitter_kid {
 namespace fsi {
 
 class repository {
-protected:
-    const std::string _name;
+private:
+    const std::string _path;
+
 public:
-    repository(std::string name);
-    const std::string &name();
+    repository(std::string path);
+    const std::string &path();
+    std::string looseobj_path(sign_t sign);
 };
 
 }

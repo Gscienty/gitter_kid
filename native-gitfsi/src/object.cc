@@ -7,6 +7,11 @@
 namespace gitter_kid {
 namespace fsi {
 
+object::object()
+    : _body_buffer(nullptr)
+    , _body(nullptr)
+    , _type(obj_type::obj_type_unknow) {}
+
 object::object(std::basic_string<byte> &buffer)
     : _body_buffer(nullptr)
     , _body(nullptr)

@@ -18,6 +18,7 @@ private:
     obj_type analysis_type(std::basic_string<byte>& store,
                   std::basic_string<byte>::iterator& spliter);
 public:
+    object();
     object(std::basic_string<byte> &buffer);
     virtual ~object();
 

@@ -21,6 +21,18 @@ std::basic_string<byte> &sign_t::bytes() {
     return this->_sign_bytes;
 }
 
+bool sign_t::operator<(const sign_t &other_sign) const {
+    for (int i = 0; i < 20; i++) {
+        if (this->_sign_bytes[i] < other_sign._sign_bytes[i]) {
+            return true;
+        }
+        else if (this->_sign_bytes[i] > other_sign._sign_bytes[i]) {
+            return false;
+        }
+    }
+    return false;
+}
+
 }
 }
 

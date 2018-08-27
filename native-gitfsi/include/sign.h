@@ -63,6 +63,8 @@ public:
     }
     std::string &str();
     std::basic_string<byte> &bytes();
+
+    bool operator< (const sign_t &other_sign) const;
 };
 
 }

@@ -10,24 +10,24 @@
 namespace gitter_kid {
 namespace fsi {
 
-pack::pack(repository &repo, std::string sign) {
+pack::pack(std::string repo_path, std::string sign) {
     std::stringstream path_builder;
 
     // build index file (.idx) path
-    this->_idx_path.resize(repo.path().size() + 63, 0);
+    this->_idx_path.resize(repo_path.size() + 63, 0);
     path_builder.rdbuf()->pubsetbuf(const_cast<char *>(this->_idx_path.data()),
                                     this->_idx_path.size());
 
-    path_builder.write(repo.path().data(), repo.path().size());
+    path_builder.write(repo_path.data(), repo_path.size());
     path_builder.write("/objects/pack/pack-", 19);
     path_builder.write(sign.data(), 40);
     path_builder.write(".idx", 4);
 
     // build pack file (.pack) path
-    this->_pack_path.resize(repo.path().size() + 64, 0);
+    this->_pack_path.resize(repo_path.size() + 64, 0);
     path_builder.rdbuf()->pubsetbuf(const_cast<char *>(this->_pack_path.data()),
                                     this->_pack_path.size());
-    path_builder.write(repo.path().data(), repo.path().size());
+    path_builder.write(repo_path.data(), repo_path.size());
     path_builder.write("/objects/pack/pack-", 19);
     path_builder.write(sign.data(), 40);
     path_builder.write(".pack", 5);

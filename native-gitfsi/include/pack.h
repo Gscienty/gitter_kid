@@ -62,7 +62,7 @@ private:
     __pack_item_s __get_item(__pack_segment_s &seg);
     object __get(std::vector<pack> &repo, const __pack_idx_s &index);
 public:
-    pack(repository &repo, std::string sign);
+    pack(std::string pack_path, std::string sign);
 
     void idx_init();
 

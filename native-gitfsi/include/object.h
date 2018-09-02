@@ -2,7 +2,6 @@
 #define _GIT_FSI_OBJECT_
 
 #include "define.h"
-#include "repository.h"
 #include "content.h"
 #include <string>
 #include <vector>

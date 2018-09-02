@@ -20,6 +20,7 @@ private:
 public:
     object();
     object(std::basic_string<byte> &buffer);
+    object(std::basic_string<byte> &buffer, obj_type type);
     virtual ~object();
 
     obj_type type() const;

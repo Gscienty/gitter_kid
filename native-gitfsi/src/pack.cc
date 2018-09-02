@@ -422,9 +422,11 @@ object pack::__get(std::vector<pack> &pack_collection,
 apply_delta:
     switch (packitem.type) {
     case 0x01:
+        return object(packitem.buf, obj_type::obj_type_commit);
     case 0x02:
+        return object(packitem.buf, obj_type::obj_type_tree);
     case 0x03:
-        return object(packitem.buf);
+        return object(packitem.buf, obj_type::obj_type_blob);
     case 0x06:
         packitem = this->__ofsdelta_patch(pack_collection, *this, packitem);
         goto apply_delta;

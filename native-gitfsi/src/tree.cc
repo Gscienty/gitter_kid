@@ -31,26 +31,24 @@ tree::tree(std::vector<tree_item> &items,
            std::basic_string<byte>::iterator spliter,
            std::basic_string<byte>::iterator end)
     : _items(items) {
-    for(std::basic_string<byte>::iterator ch = spliter; ch != end;) {
-        std::basic_string<byte>::iterator sub_end = std::find(ch, end, byte(' '));
-        std::string type;
-        type.insert(type.begin(), ch, sub_end);
-        ch = sub_end + 1;
-        
-        sub_end = std::find(ch, end, byte(0));
-        std::string name(ch, sub_end);
-        ch = sub_end + 1;
 
-        sign_t sign;
-        sign.bytes_assign(ch, ch + 20);
+    for(std::basic_string<byte>::iterator ch = spliter; ch != end;) {
+        std::basic_string<byte>::iterator space_itr = std::find(ch, end, byte(' '));
 
         obj_type item_type = obj_type::obj_type_unknow;
-        if (type.compare("100644")) {
+        if (std::string(ch, space_itr).compare("100644")) {
             item_type = obj_type::obj_type_blob;
         }
         else {
             item_type = obj_type::obj_type_tree;
         }
+
+        std::basic_string<byte>::iterator end_itr = std::find(space_itr + 1, end, byte(0));
+        std::string name(space_itr + 1, end_itr);
+        sign_t sign;
+        sign.bytes_assign(end_itr + 1, end_itr + 21);
+
+        ch = end_itr + 21;
         this->_items.push_back(tree_item(sign, name, item_type));
     }
 }

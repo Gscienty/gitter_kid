@@ -27,7 +27,6 @@ std::basic_streambuf<uint8_t>::int_type
 http_server::http_buf::
 overflow(http_server::http_buf::int_type c) {
     this->sync();
-
     this->setp(this->_activity_page, this->_activity_page + this->_page_size);
     this->_activity_page[0] = uint8_t(c);
     this->pbump(1);
@@ -51,7 +50,7 @@ xsputn(const http_server::http_buf::char_type* s, std::streamsize n) {
         // get remain _activity_page remain bytes count
         size_t buffer_remain_bytes = this->epptr() - this->pptr();
 
-        if (buffer_remain_bytes == 0) {
+        if (buffer_remain_bytes <= 0) {
             //overflow
             this->overflow(*s_pos);
             s_pos++;

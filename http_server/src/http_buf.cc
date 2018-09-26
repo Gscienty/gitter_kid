@@ -2,6 +2,8 @@
 #include <sys/mman.h>
 #include <iostream>
 #include <algorithm>
+#include <sys/socket.h>
+#include <unistd.h>
 
 http_server::http_buf::http_buf(int fd)
     : _fd(fd)
@@ -17,7 +19,7 @@ http_server::http_buf* http_server::http_buf::setbuf(http_server::http_buf::char
 }
 
 int http_server::http_buf::sync() {
-    // TODO write to tcp stream
+    ::write(this->_fd, this->_activity_page, this->pptr() - this->pbase());
     return 0;
 }
 
@@ -26,8 +28,9 @@ http_server::http_buf::
 overflow(http_server::http_buf::int_type c) {
     this->sync();
 
+    this->setp(this->_activity_page, this->_activity_page + this->_page_size);
     this->_activity_page[0] = uint8_t(c);
-    this->setp(this->_activity_page + 1, this->_activity_page + this->_page_size);
+    this->pbump(1);
 
     return c;
 }
@@ -63,7 +66,7 @@ xsputn(const http_server::http_buf::char_type* s, std::streamsize n) {
 
         s_pos += write_count;
         remain_puts_bytes -= write_count;
-        this->setp(this->pptr() + write_count, this->epptr());
+        this->pbump(write_count);
     }
     return n - remain_puts_bytes;
 }

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <queue>
 #include <utility>
+#include <functional>
 
 namespace http_server {
 

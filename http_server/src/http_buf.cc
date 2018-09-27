@@ -19,6 +19,9 @@ http_server::http_buf* http_server::http_buf::setbuf(http_server::http_buf::char
 }
 
 int http_server::http_buf::sync() {
+    if (this->pptr() == this->pbase()) {
+        return 0;
+    }
     ::write(this->_fd, this->_activity_page, this->pptr() - this->pbase());
     return 0;
 }

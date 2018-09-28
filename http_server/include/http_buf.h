@@ -5,6 +5,8 @@
 #include <queue>
 #include <utility>
 #include <functional>
+#include <sys/select.h>
+#include <sys/types.h>
 
 namespace http_server {
 
@@ -25,6 +27,9 @@ private:
 
     bool _readable;
 
+    ::fd_set _read_fds; // only one
+    ::timeval _read_timeout;
+
 protected:
     virtual int sync() override;
     virtual http_buf* setbuf(char_type* s, std::streamsize n) override;
@@ -42,6 +47,7 @@ protected:
 public:
     http_buf(int fd, http_buf_direction_t direction);
     bool readable() const;
+    void set_read_timeout(const uint64_t timeout);
 };
 
 }

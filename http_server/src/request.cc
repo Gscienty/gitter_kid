@@ -1,4 +1,5 @@
 #include "request.h"
+#include <algorithm>
 
 http_server::request::request(int fd)
     : _fd(fd)
@@ -34,11 +35,57 @@ void http_server::request::read(http_server::request::char_type* s, std::streams
 }
 
 void http_server::request::getline(std::string& line) {
+    line.clear();
     http_server::request::char_type c;
     while ((c = this->rdbuf()->sbumpc()) != '\n') {
         if (this->_http_buf.readable() == false) {
             break;
         }
         line.push_back(c);
+    }
+    this->rdbuf()->sbumpc();
+}
+
+void http_server::request::get_meta() {
+    std::string line;
+    bool firstline_flag = true;
+    while (this->getline(line), line.empty() == false) {
+        if (firstline_flag) {
+            firstline_flag = false;
+
+            std::string::iterator item_begin = line.begin();
+            std::string::iterator item_end = std::find(line.begin(), line.end(), ' ');
+
+            std::string method_str(item_begin, item_end);
+            if (http_server::request_methods.find(method_str) == http_server::request_methods.end()) {
+                this->_method = http_server::request_method_get;
+            }
+            else {
+                this->_method = http_server::request_methods.at(method_str);
+            }
+
+            item_begin = item_end;
+            item_begin++;
+            item_end = std::find(item_begin, line.end(), ' ');
+            this->_uri.assign(item_begin, item_end);
+
+            item_begin = item_end;
+            item_begin++;
+            item_end = line.end();
+
+            std::string version_str(item_begin, item_end);
+            if (http_server::rversions.find(version_str) == http_server::rversions.end()) {
+                this->_version = http_server::version_1_1;
+            }
+            else {
+                this->_version = http_server::rversions.at(version_str);
+            }
+        }
+        else {
+            std::string::iterator delimiter_itr = std::find(line.begin(), line.end(), ':');
+            std::string key(line.begin(), delimiter_itr);
+            std::string val(delimiter_itr + 1, line.end());
+            this->_header_parameters.insert(std::make_pair(key, val));
+        }
     }
 }

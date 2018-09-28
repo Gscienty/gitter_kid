@@ -27,6 +27,7 @@ public:
     std::map<std::string, std::string>& header_parameters();
     void read(http_server::request::char_type* s, std::streamsize n);
     void getline(std::string& line);
+    void get_meta();
 };
 
 }

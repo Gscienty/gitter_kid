@@ -14,4 +14,8 @@ const std::map<http_server::version_t, std::string> versions = {
     { version_1_1, "HTTP/1.1" }
 };
 
+const std::map<std::string, http_server::version_t> rversions = {
+    { "HTTP/1.1", version_1_1 }
+};
+
 }

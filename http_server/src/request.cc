@@ -4,6 +4,7 @@
 http_server::request::request(int fd)
     : _fd(fd)
     , _http_buf(fd, http_server::in_buf)
+    , _flushed_metadata(false)
     , _version(http_server::version_1_1)
     , _method(http_server::request_method_get) {
     
@@ -34,7 +35,15 @@ std::map<std::string, std::string>& http_server::request::header_parameters() {
     return this->_header_parameters;
 }
 
+void http_server::request::flush_metadata() {
+    if (this->_flushed_metadata == false) {
+        this->_flushed_metadata = true;
+        this->read_meta();
+    }
+}
+
 void http_server::request::read(http_server::request::char_type* s, std::streamsize n) {
+    this->flush_metadata();
     this->rdbuf()->sgetn(s, n);
 }
 
@@ -60,7 +69,7 @@ void http_server::request::getline(std::string& line) {
     }
 }
 
-void http_server::request::get_meta() {
+void http_server::request::read_meta() {
     std::string line;
     bool firstline_flag = true;
     while (this->getline(line), this->_http_buf.readable() && line.empty() == false) {

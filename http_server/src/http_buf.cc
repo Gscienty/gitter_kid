@@ -9,7 +9,8 @@ http_server::http_buf::http_buf(int fd, http_server::http_buf_direction_t direct
     : _fd(fd)
     , _direction(direction)
     , _page_size(0)
-    , _activity_page(nullptr) {}
+    , _activity_page(nullptr)
+    , _readable(true) {}
 
 http_server::http_buf* http_server::http_buf::setbuf(http_server::http_buf::char_type* s, std::streamsize n) {
     this->_activity_page = s;
@@ -49,11 +50,15 @@ int http_server::http_buf::__in_sync() {
                                      this->_activity_page + remain_unread_size,
                                      this->_page_size - remain_unread_size);
 
+    size_t readable_size = remain_unread_size + newly_bytes_size;
+
     this->setg(this->_activity_page,
                this->_activity_page,
-               this->_activity_page + remain_unread_size + newly_bytes_size);
+               this->_activity_page + readable_size);
 
-    return 0;
+    this->_readable = readable_size != 0;
+
+    return readable_size == 0 ? -1 : 0;
 }
 
 int http_server::http_buf::sync() {
@@ -151,4 +156,8 @@ xsgetn(http_server::http_buf::char_type* s, std::streamsize n) {
     }
 
     return n - remain_gets_bytes;
+}
+
+bool http_server::http_buf::readable() const {
+    return this->_readable;
 }

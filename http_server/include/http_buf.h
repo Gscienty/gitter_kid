@@ -23,6 +23,8 @@ private:
     int __out_sync();
     int __in_sync();
 
+    bool _readable;
+
 protected:
     virtual int sync() override;
     virtual http_buf* setbuf(char_type* s, std::streamsize n) override;
@@ -39,6 +41,7 @@ protected:
                                    std::streamsize n) override;
 public:
     http_buf(int fd, http_buf_direction_t direction);
+    bool readable() const;
 };
 
 }

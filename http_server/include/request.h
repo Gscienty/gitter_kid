@@ -21,6 +21,7 @@ private:
 public:
     request(int fd);
     void set_cache(const http_server::request::char_type* s, size_t n);
+    void set_timeout(const uint64_t timeout);
     http_server::version_t& version();
     http_server::request_method_t& method();
     std::string& uri();

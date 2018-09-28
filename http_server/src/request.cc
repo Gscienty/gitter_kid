@@ -10,6 +10,10 @@ http_server::request::request(int fd)
     this->rdbuf(&this->_http_buf);
 }
 
+void http_server::request::set_timeout(const uint64_t timeout) {
+    this->_http_buf.set_read_timeout(timeout);
+}
+
 void http_server::request::set_cache(const http_server::request::char_type* s, size_t n) {
     this->rdbuf()->pubsetbuf(const_cast<http_server::request::char_type *>(s), n) ;
 }
@@ -36,20 +40,30 @@ void http_server::request::read(http_server::request::char_type* s, std::streams
 
 void http_server::request::getline(std::string& line) {
     line.clear();
-    http_server::request::char_type c;
-    while ((c = this->rdbuf()->sbumpc()) != '\n') {
-        if (this->_http_buf.readable() == false) {
+    if (this->_http_buf.readable() == false) {
+        return;
+    }
+
+    while (this->_http_buf.readable()) {
+        uint8_t c = this->_http_buf.sbumpc();
+        if (c == '\r' || c == '\n') {
             break;
         }
         line.push_back(c);
     }
-    this->rdbuf()->sbumpc();
+    
+    if (this->_http_buf.readable()) {
+        uint8_t c = this->_http_buf.sgetc();
+        if (c == '\r' || c == '\n') {
+            this->_http_buf.sbumpc();
+        }
+    }
 }
 
 void http_server::request::get_meta() {
     std::string line;
     bool firstline_flag = true;
-    while (this->getline(line), line.empty() == false) {
+    while (this->getline(line), this->_http_buf.readable() && line.empty() == false) {
         if (firstline_flag) {
             firstline_flag = false;
 

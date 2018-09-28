@@ -163,16 +163,17 @@ std::streamsize
 http_server::http_buf::
 xsgetn(http_server::http_buf::char_type* s, std::streamsize n) {
     size_t remain_gets_bytes = n;
-    http_server::http_buf::char_type* s_pos = s; 
+    http_server::http_buf::char_type* s_pos = s;
     
     if (this->gptr() == this->egptr()) {
         this->underflow();
     }
 
-    while (this->_readable && remain_gets_bytes != 0) {
+    while (this->_readable && remain_gets_bytes > 0) {
         size_t buffer_remain_bytes = this->egptr() - this->gptr() ;
         if (buffer_remain_bytes <= 0) {
             this->underflow();
+            buffer_remain_bytes = this->egptr() - this->gptr();
         }
 
         size_t read_count = std::min(buffer_remain_bytes, remain_gets_bytes);

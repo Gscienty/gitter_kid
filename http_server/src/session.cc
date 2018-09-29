@@ -33,7 +33,5 @@ void http_server::session::run(int client_fd, ::sockaddr_in addr) {
     context.request.flush_metadata();
 
     this->_middlewares.execute(context);
-
-    context.response.flush();
 }
 

@@ -1,18 +1,19 @@
 #include "request.h"
 #include <algorithm>
+#include <mutex>
+#include <condition_variable>
+#include <sstream>
+#include <algorithm>
 
 http_server::request::request(int fd)
     : _fd(fd)
-    , _http_buf(fd, http_server::in_buf)
+    , _http_buf(fd)
     , _flushed_metadata(false)
     , _version(http_server::version_1_1)
-    , _method(http_server::request_method_get) {
+    , _method(http_server::request_method_get)
+    , _content_length(0) {
     
     this->rdbuf(&this->_http_buf);
-}
-
-void http_server::request::set_timeout(const uint64_t timeout) {
-    this->_http_buf.set_read_timeout(timeout);
 }
 
 void http_server::request::set_cache(const http_server::request::char_type* s, size_t n) {
@@ -38,77 +39,100 @@ std::map<std::string, std::string>& http_server::request::header_parameters() {
 void http_server::request::flush_metadata() {
     if (this->_flushed_metadata == false) {
         this->_flushed_metadata = true;
-        this->read_meta();
+        this->__flush_metadata_implement();
+
+        auto content_length_findret = this->_header_parameters.find("Content-Length");
+        if (content_length_findret != this->_header_parameters.end()) {
+            this->_content_length = std::stol(content_length_findret->second);
+        }
     }
 }
 
-void http_server::request::read(http_server::request::char_type* s, std::streamsize n) {
+size_t http_server::request::read(http_server::request::char_type* s, std::streamsize n) {
     this->flush_metadata();
-    this->rdbuf()->sgetn(s, n);
+
+    size_t realable_readsize = std::min(static_cast<size_t>(n), this->_content_length);
+    this->rdbuf()->sgetn(s, realable_readsize);
+
+    return realable_readsize;
 }
 
-void http_server::request::getline(std::string& line) {
-    line.clear();
-    if (this->_http_buf.readable() == false) {
-        return;
-    }
+static const char __crlf_status[] = { '\r', '\n', '\r', '\n' };
 
-    while (this->_http_buf.readable()) {
+bool http_server::request::__flush_metadata_implement() {
+    std::unique_lock<std::mutex> locker(this->_http_buf.use_page_mutex());
+    int alpha_status = 0;
+    std::stringstream metadata_stream;
+
+    bool first_line = true;
+    while (alpha_status != 4) {
+        this->wait_readable(locker);
         uint8_t c = this->_http_buf.sbumpc();
-        if (c == '\r' || c == '\n') {
-            break;
-        }
-        line.push_back(c);
-    }
-    
-    if (this->_http_buf.readable()) {
-        uint8_t c = this->_http_buf.sgetc();
-        if (c == '\r' || c == '\n') {
-            this->_http_buf.sbumpc();
-        }
-    }
-}
+        if (c == __crlf_status[alpha_status]) {
+            alpha_status++;
+            if (alpha_status == 1) {
+                std::string line = metadata_stream.str();
+                metadata_stream.str("");
 
-void http_server::request::read_meta() {
-    std::string line;
-    bool firstline_flag = true;
-    while (this->getline(line), this->_http_buf.readable() && line.empty() == false) {
-        if (firstline_flag) {
-            firstline_flag = false;
+                if (first_line) {
+                    first_line = false;
 
-            std::string::iterator item_begin = line.begin();
-            std::string::iterator item_end = std::find(line.begin(), line.end(), ' ');
+                    size_t item_begin = 0;
+                    size_t item_end = line.find(" ", item_begin);
+                    std::string method = line.substr(item_begin, item_end - item_begin);
+                    auto method_findret = http_server::request_methods.find(method);
+                    if (method_findret == http_server::request_methods.end()) {
+                        this->_method = http_server::request_method_get;
+                    }
+                    else {
+                        this->_method = method_findret->second;
+                    }
 
-            std::string method_str(item_begin, item_end);
-            if (http_server::request_methods.find(method_str) == http_server::request_methods.end()) {
-                this->_method = http_server::request_method_get;
-            }
-            else {
-                this->_method = http_server::request_methods.at(method_str);
-            }
+                    item_begin = item_end + 1;
+                    item_end = line.find(" ", item_begin);
+                    this->_uri = line.substr(item_begin, item_end - item_begin);
 
-            item_begin = item_end;
-            item_begin++;
-            item_end = std::find(item_begin, line.end(), ' ');
-            this->_uri.assign(item_begin, item_end);
+                    item_begin = item_end + 1;
+                    std::string version = line.substr(item_begin);
+                    auto version_findret = http_server::rversions.find(version);
+                    if (version_findret == http_server::rversions.end()) {
+                        this->_version = http_server::version_1_1;
+                    }
+                    else {
+                        this->_version = version_findret->second;
+                    }
+                }
+                else {
+                    size_t delimiter_pos = line.find(":");
+                    std::string key = line.substr(0, delimiter_pos);
+                    std::string value = line.substr(delimiter_pos + 1);
 
-            item_begin = item_end;
-            item_begin++;
-            item_end = line.end();
-
-            std::string version_str(item_begin, item_end);
-            if (http_server::rversions.find(version_str) == http_server::rversions.end()) {
-                this->_version = http_server::version_1_1;
-            }
-            else {
-                this->_version = http_server::rversions.at(version_str);
+                    this->_header_parameters.insert(std::make_pair(key, value));
+                }
             }
         }
         else {
-            std::string::iterator delimiter_itr = std::find(line.begin(), line.end(), ':');
-            std::string key(line.begin(), delimiter_itr);
-            std::string val(delimiter_itr + 1, line.end());
-            this->_header_parameters.insert(std::make_pair(key, val));
+            alpha_status = 0;
+            metadata_stream << c;
         }
+
     }
+
+    return true;
+}
+
+void http_server::request::sync() {
+    this->_http_buf.pubsync();
+}
+
+std::mutex& http_server::request::read_mutex() {
+    return this->_http_buf.use_page_mutex();
+}
+
+void http_server::request::wait_readable(std::unique_lock<std::mutex>& locker) {
+    this->_http_buf.wait_readable(locker);
+}
+
+size_t http_server::request::content_length() const {
+    return this->_content_length;
 }

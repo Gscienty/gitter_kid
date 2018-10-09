@@ -9,19 +9,9 @@ http_server::http_buf::http_buf(int fd, http_server::http_buf_direction_t direct
     , _direction(direction)
     , _page_size(0)
     , _activity_page(nullptr)
-    , _readable(true)
-    , _read_timeout({ 0, 0 }) {
-    
-    if (direction == http_server::in_buf) {
-        FD_ZERO(&this->_read_fds);
-        FD_SET(fd, &this->_read_fds);
-    }
+    , _readable(true) {
 }
 
-void http_server::http_buf::set_read_timeout(const uint64_t timeout) {
-    this->_read_timeout.tv_sec = timeout / 1000;
-    this->_read_timeout.tv_usec = timeout % 1000;
-}
 
 http_server::http_buf* http_server::http_buf::setbuf(http_server::http_buf::char_type* s, std::streamsize n) {
     this->_activity_page = s;
@@ -55,23 +45,6 @@ int http_server::http_buf::__in_sync() {
     size_t remain_unread_size = this->egptr() - this->gptr();
     if (remain_unread_size != 0) {
         std::copy(this->gptr(), this->egptr(), this->_activity_page);
-    }
-
-    ::timeval *timeout_ptr = NULL;
-    if (this->_read_timeout.tv_sec != 0 || this->_read_timeout.tv_usec != 0) {
-        timeout_ptr = &this->_read_timeout;
-    }
-    int retval = ::select(this->_fd + 1, &this->_read_fds, NULL, NULL, timeout_ptr);
-
-    if (retval == 0) {
-        this->_readable = false;
-        this->setg(this->_activity_page, this->_activity_page, this->_activity_page + remain_unread_size);
-        return 0;
-    }
-    else if (retval == -1) {
-        this->_readable = false;
-        this->setg(this->_activity_page, this->_activity_page, this->_activity_page);
-        return -1;
     }
 
     size_t newly_bytes_size = ::read(this->_fd,
@@ -150,13 +123,8 @@ xsputn(const http_server::http_buf::char_type* s, std::streamsize n) {
 }
 
 http_server::http_buf::int_type http_server::http_buf::underflow() {
-    this->sync();
-
-    if (this->gptr() == this->egptr()) {
-        return traits_type::eof();
-    }
-
-    return this->_activity_page[0];
+    this->_readable = false;
+    return traits_type::eof();
 }
 
 std::streamsize 

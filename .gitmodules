@@ -1,0 +1,3 @@
+[submodule "rwg_websocket"]
+	path = rwg_websocket
+	url = git@github.com:Gscienty/rwg_websocket.git

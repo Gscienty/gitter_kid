@@ -3,13 +3,5 @@ obj/
 objs/
 lib/
 node_modules/
-.vscode/
 *.so
-tester
-.settings/
-target/
-.classpath
-.project
-test_store/
-native-user/test/etc/
 .ycm_extra_conf.py
